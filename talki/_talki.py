@@ -18,6 +18,7 @@ value or raises the `talki.ApiError` subclass for its error.
 
 from __future__ import annotations
 
+import os
 import ssl
 from collections.abc import Callable
 from types import TracebackType
@@ -27,6 +28,7 @@ import httpx
 
 from ._resource import unwrap
 from ._transport import TalkiTransport
+from ._version import USER_AGENT
 from .api import AsyncResources, Resources
 from .client import AuthenticatedClient
 from .oauth import OAuthApp, TokenRefresh, TokenSet
@@ -35,6 +37,8 @@ __all__ = ["DEFAULT_BASE_URL", "AsyncTalki", "Talki", "unwrap"]
 
 DEFAULT_BASE_URL = "https://api.talki.it"
 VERSION_HEADER = "Talki-Version"
+# Read for `api_key` when no credential is passed.
+API_KEY_ENV = "TALKI_API_KEY"
 
 
 class _Current:
@@ -71,7 +75,8 @@ class _Configured:
 
         Args:
             api_key: A business's API key (`talki_live_…`, or `talki_test_…` for a
-                sandbox).
+                sandbox). With no credential passed at all, it is read from the
+                `TALKI_API_KEY` environment variable.
             access_token: An OAuth installation's access token (`talki_at_…`), when
                 not using an API key.
             tokens: An installation's whole pair (`talki.oauth.TokenSet`), instead of
@@ -101,9 +106,11 @@ class _Configured:
                 (`httpx.MockTransport`); httpx's own by default. It is closed with
                 the client, and must take requests again after that.
         """
+        if api_key is None and access_token is None and tokens is None:
+            api_key = os.environ.get(API_KEY_ENV, "").strip() or None
         given = [value for value in (api_key, access_token, tokens) if value is not None]
         if len(given) != 1:
-            raise ValueError("Pass exactly one of api_key, access_token and tokens.")
+            raise ValueError(f"Pass exactly one of api_key, access_token and tokens, or set {API_KEY_ENV}.")
         if oauth_app is not None and tokens is None:
             raise ValueError("oauth_app renews tokens: pass tokens too.")
         if on_token_refresh is not None and oauth_app is None:
@@ -135,7 +142,7 @@ class _Configured:
         self.client = AuthenticatedClient(
             base_url=self.base_url,
             token=token,
-            headers={VERSION_HEADER: version} if version else {},
+            headers={"User-Agent": USER_AGENT, **({VERSION_HEADER: version} if version else {})},
             timeout=httpx.Timeout(timeout),
             verify_ssl=verify,
             httpx_args={"transport": self.transport, **({"auth": self.auth} if self.auth else {})},

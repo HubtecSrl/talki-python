@@ -81,7 +81,8 @@ APPOINTMENT = AppointmentCreate.from_dict(
 # The client itself.
 
 
-def test_exactly_one_credential():
+def test_exactly_one_credential(monkeypatch):
+    monkeypatch.delenv("TALKI_API_KEY", raising=False)
     with pytest.raises(ValueError):
         Talki()
     with pytest.raises(ValueError):

@@ -4,6 +4,7 @@ endpoints, and a `Talki` whose pair renews itself, over `httpx.MockTransport`.""
 import asyncio
 import base64
 import json
+import logging
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -797,3 +798,26 @@ def test_async_waiters_are_woken_by_a_renewal_in_another_thread():
     renewal.join(5)
     assert server.refreshes == ["talki_rt_1"]
     assert polls == []
+
+
+def test_a_renewal_is_logged_and_no_token_is(caplog):
+    server = Server()
+    with caplog.at_level(logging.INFO, logger="talki"):
+        with talki_with(server, expires_at=0.0) as talki:
+            get_account.sync_detailed(client=talki.client)
+    assert [record.getMessage() for record in caplog.records if record.name == "talki.oauth"] == [
+        "Renewed the access token of installation inst."
+    ]
+    assert "talki_at_" not in caplog.text and "talki_rt_" not in caplog.text and "talki_cs_" not in caplog.text
+
+
+def test_a_refused_renewal_is_logged_as_an_error(caplog):
+    with caplog.at_level(logging.INFO, logger="talki"):
+        with talki_with(Server(fail_refresh=True), expires_at=0.0) as talki:
+            with pytest.raises(OAuthError):
+                get_account.sync_detailed(client=talki.client)
+    (record,) = [record for record in caplog.records if record.name == "talki.oauth"]
+    assert record.levelno == logging.ERROR
+    assert record.getMessage() == (
+        "The API refused the token renewal (invalid_grant): the customer has to reconnect the app"
+    )

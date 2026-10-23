@@ -20,7 +20,7 @@ Python 3.11 or later. Depends on httpx, attrs and anyio.
 from talki import Talki
 from talki.models import AppointmentCreate
 
-with Talki(api_key="talki_test_…") as talki:  # or access_token="talki_at_…"
+with Talki(api_key="talki_test_…") as talki:  # or access_token="talki_at_…"; or set TALKI_API_KEY
     account = talki.account.get()
     print(account.business_name)
 
@@ -38,6 +38,8 @@ with Talki(api_key="talki_test_…") as talki:  # or access_token="talki_at_…"
 - A method returns the operation's model, or None for `204 No Content`, and
   raises for an error (below). Path parameters are positional; the rest,
   `body=` included, are keywords.
+- With no credential passed, `Talki()` reads the API key from the
+  `TALKI_API_KEY` environment variable.
 - `with` closes the client's connections at the end of the block. It is
   optional: a server can keep one `Talki` for the life of the process, reusing
   its connections, and call `talki.close()` when done (`await talki.aclose()`
@@ -124,6 +126,35 @@ It waits as `Retry-After` asks, up to 60 seconds; an answer asking for longer
 is not retried but returned, as `RateLimitError` (with `retry_after`) for a 429.
 Without `Retry-After` it backs off exponentially with jitter. `timeout` applies
 to each attempt. `max_retries=0` turns retries off.
+
+## Logging
+
+The client logs to the `talki` logger (`talki._transport`, `talki.oauth`), and
+is silent until you turn it on:
+
+```python
+import logging
+
+logging.basicConfig()
+logging.getLogger("talki").setLevel(logging.DEBUG)
+```
+
+- DEBUG: every answer, as `POST /v1/appointments: 201, request req_… in 182 ms`
+  (the time until its headers arrived).
+- INFO: every retry, with why and when; and every automatic token renewal.
+- WARNING: an automatic renewal whose outcome is unknown. ERROR: one refused
+  with `invalid_grant` or `invalid_client`, after which the client stops
+  asking.
+
+The `talki` logger writes a request by method and path only. Its query (a
+`phone=` or `q=` filter), headers and body never appear, nor does any key or
+token. httpx's own logger is not as careful: at INFO, `httpx` logs every
+request's full URL, query included. Keep it at WARNING
+(`logging.getLogger("httpx").setLevel(logging.WARNING)`) when your root level
+is INFO or lower. Quote the request ID to Talki when asking about a request.
+
+Every request also carries `User-Agent: talki-python/<version> python/<version>
+httpx/<version>`; `talki.__version__` is this package's.
 
 ## Enums
 
@@ -299,7 +330,8 @@ Most of `talki/` is generated, never edited by hand: `scripts/generate.py`
 runs openapi-python-client (pinned in `pyproject.toml`) over
 `openapi/talki-v1.yaml` with the templates in `codegen/templates/`, and keeps
 the hand-written modules listed in the script (`_resource.py`, `_talki.py`,
-`_transport.py`, `exceptions.py`, `oauth.py`, `pagination.py`, `webhooks.py`).
+`_transport.py`, `_version.py`, `exceptions.py`, `oauth.py`, `pagination.py`,
+`webhooks.py`).
 The resource classes (`talki.calls`, …) are generated too, from the spec's tags
 and operation IDs, by `codegen/templates/endpoint_init.py.jinja`.
 

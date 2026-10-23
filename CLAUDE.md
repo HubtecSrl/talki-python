@@ -18,8 +18,8 @@ or customer names.
   settings. Never hand-edit a generated file. Change a template or the config, then
   regenerate. CI fails on drift (`generate.py --check`).
 - The hand-written modules are listed in `HAND_WRITTEN` in `scripts/generate.py`:
-  `_resource.py`, `_talki.py`, `_transport.py`, `exceptions.py`, `oauth.py`,
-  `pagination.py`, `webhooks.py`, `py.typed`. Edit them in place. A new hand-written module must
+  `_resource.py`, `_talki.py`, `_transport.py`, `_version.py`, `exceptions.py`,
+  `oauth.py`, `pagination.py`, `webhooks.py`, `py.typed`. Edit them in place. A new hand-written module must
   be added to that list, or the next regeneration deletes it.
 - Each template in `codegen/templates/` is a copy of the upstream 0.29.1
   template with one marked change, described in its header comment. On a
@@ -60,7 +60,8 @@ takes fork PRs, so it must never use self-hosted runners.
 ## Releasing
 
 1. Move the `CHANGELOG.md` entry from "unreleased" to the date, bump `version`
-   in `pyproject.toml`, and merge.
+   in `pyproject.toml` and `__version__` in `talki/_version.py` (a test checks
+   they match), and merge.
 2. Tag `v<version>` on `main` and push the tag. `release.yml` checks that the tag
    matches, tests, builds, publishes to PyPI by trusted publishing (the `pypi`
    environment), and creates the GitHub release.

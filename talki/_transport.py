@@ -34,6 +34,7 @@ is returned as is, for the caller to schedule.
 from __future__ import annotations
 
 import json
+import logging
 import random
 import ssl
 import threading
@@ -44,7 +45,12 @@ from collections.abc import Awaitable, Callable
 import anyio
 import httpx
 
-from .exceptions import retry_after_seconds
+from .exceptions import REQUEST_ID_HEADER, retry_after_seconds
+
+# Under the `talki` logger. A request is logged by method and path, never its
+# query (`phone=`, `q=`) or headers, so no credential or caller's data reaches
+# a log.
+logger = logging.getLogger(__name__)
 
 IDEMPOTENCY_HEADER = "Idempotency-Key"
 # A request extension: retry this only when it never left, or was turned away
@@ -227,12 +233,15 @@ class TalkiTransport(httpx.BaseTransport, httpx.AsyncBaseTransport):
         self._prepare(request)
         attempt = 0
         while True:
+            started = time.monotonic()
             try:
                 response = self._sync_transport().handle_request(request)
             except httpx.TransportError as error:
                 delay = self._after_error(request, error, attempt)
                 if delay is None:
+                    _log_failure(request, error, started)
                     raise
+                _log_retry(request, type(error).__name__, delay, attempt, self.max_retries)
             else:
                 body = None
                 if self._needs_body(request, response, attempt):
@@ -244,7 +253,9 @@ class TalkiTransport(httpx.BaseTransport, httpx.AsyncBaseTransport):
                         response, body = self._buffered(response, raw, request)
                 delay = self._delay(request, response, body, attempt)
                 if delay is None:
+                    _log_answer(request, response, started)
                     return response
+                _log_retry(request, _answer(response), delay, attempt, self.max_retries)
                 response.close()
             self._sleep(delay)
             attempt += 1
@@ -273,12 +284,15 @@ class TalkiTransport(httpx.BaseTransport, httpx.AsyncBaseTransport):
         self._prepare(request)
         attempt = 0
         while True:
+            started = time.monotonic()
             try:
                 response = await self._async_transport().handle_async_request(request)
             except httpx.TransportError as error:
                 delay = self._after_error(request, error, attempt)
                 if delay is None:
+                    _log_failure(request, error, started)
                     raise
+                _log_retry(request, type(error).__name__, delay, attempt, self.max_retries)
             else:
                 body = None
                 if self._needs_body(request, response, attempt):
@@ -290,7 +304,9 @@ class TalkiTransport(httpx.BaseTransport, httpx.AsyncBaseTransport):
                         response, body = self._buffered(response, raw, request)
                 delay = self._delay(request, response, body, attempt)
                 if delay is None:
+                    _log_answer(request, response, started)
                     return response
+                _log_retry(request, _answer(response), delay, attempt, self.max_retries)
                 await response.aclose()
             await self._async_sleep(delay)
             attempt += 1
@@ -300,3 +316,33 @@ class TalkiTransport(httpx.BaseTransport, httpx.AsyncBaseTransport):
             closing, self._async = self._async, None
         if closing is not None:
             await closing.aclose()
+
+
+def _answer(response: httpx.Response) -> str:
+    """A status and, when the API gave one, the request ID to quote to Talki."""
+    request_id = response.headers.get(REQUEST_ID_HEADER)
+    return f"{response.status_code}, request {request_id}" if request_id else str(response.status_code)
+
+
+def _log_answer(request: httpx.Request, response: httpx.Response, started: float) -> None:
+    if logger.isEnabledFor(logging.DEBUG):
+        elapsed = (time.monotonic() - started) * 1000
+        logger.debug("%s %s: %s in %.0f ms", request.method, request.url.path, _answer(response), elapsed)
+
+
+def _log_failure(request: httpx.Request, error: Exception, started: float) -> None:
+    if logger.isEnabledFor(logging.DEBUG):
+        elapsed = (time.monotonic() - started) * 1000
+        logger.debug("%s %s: %s after %.0f ms", request.method, request.url.path, type(error).__name__, elapsed)
+
+
+def _log_retry(request: httpx.Request, outcome: str, delay: float, attempt: int, max_retries: int) -> None:
+    logger.info(
+        "%s %s: %s; retry %d of %d in %.1f s",
+        request.method,
+        request.url.path,
+        outcome,
+        attempt + 1,
+        max_retries,
+        delay,
+    )

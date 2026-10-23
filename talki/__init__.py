@@ -6,6 +6,7 @@ API_VERSION = "2026-10-01"
 
 from ._talki import AsyncTalki, Talki, unwrap
 from ._transport import new_idempotency_key
+from ._version import __version__
 from .client import AuthenticatedClient, Client
 from .exceptions import (
     ApiError,
@@ -32,6 +33,7 @@ __all__ = (
     "ServerError",
     "Talki",
     "TalkiError",
+    "__version__",
     "new_idempotency_key",
     "unwrap",
 )
