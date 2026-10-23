@@ -98,7 +98,8 @@ class _Configured:
             proxy: A proxy URL for every request. Proxy environment variables
                 (`HTTPS_PROXY`, …) are not read.
             transport: The httpx transport requests go out on, for tests
-                (`httpx.MockTransport`); httpx's own by default.
+                (`httpx.MockTransport`); httpx's own by default. It is closed with
+                the client, and must take requests again after that.
         """
         given = [value for value in (api_key, access_token, tokens) if value is not None]
         if len(given) != 1:
@@ -152,10 +153,23 @@ class _Configured:
 
 class Talki(_Configured, Resources):
     """A client for Talki's public API, whose methods are sync:
-    `talki.calls.list()`. Use `AsyncTalki` in async code."""
+    `talki.calls.list()`. Use `AsyncTalki` in async code.
+
+    Open it with ``with`` to close its connections at the end of the block, or
+    keep one for the life of the process and call `close` when done.
+    """
+
+    def close(self) -> None:
+        """Close the connections the sync methods opened. The client stays
+        usable: the next request opens new ones. Call it with no request in
+        flight: one running on another thread may fail."""
+        _close(self.client)
+
+    async def aclose(self) -> None:
+        """Close the connections the async operations under `talki.api` opened."""
+        await _aclose(self.client)
 
     def __enter__(self) -> Self:
-        self.client.__enter__()
         return self
 
     def __exit__(
@@ -164,13 +178,12 @@ class Talki(_Configured, Resources):
         exc: BaseException | None,
         traceback: TracebackType | None,
     ) -> None:
-        self.client.__exit__(exc_type, exc, traceback)
+        self.close()
 
     # For the async operations under `talki.api`, sent with `client`: the
     # methods of `talki.calls` and the others are sync here, async on
     # `AsyncTalki`.
     async def __aenter__(self) -> Self:
-        await self.client.__aenter__()
         return self
 
     async def __aexit__(
@@ -179,15 +192,24 @@ class Talki(_Configured, Resources):
         exc: BaseException | None,
         traceback: TracebackType | None,
     ) -> None:
-        await self.client.__aexit__(exc_type, exc, traceback)
+        await self.aclose()
 
 
 class AsyncTalki(_Configured, AsyncResources):
     """A client for Talki's public API, whose methods are awaited:
-    `await talki.calls.list()`. It takes the same arguments as `Talki`."""
+    `await talki.calls.list()`. It takes the same arguments as `Talki`.
+
+    Open it with ``async with`` to close its connections at the end of the
+    block, or keep one for the life of the process and await `aclose` when done.
+    """
+
+    async def aclose(self) -> None:
+        """Close the connections the methods opened. The client stays usable:
+        the next request opens new ones. Call it with no request in flight:
+        one running on another task may fail."""
+        await _aclose(self.client)
 
     async def __aenter__(self) -> Self:
-        await self.client.__aenter__()
         return self
 
     async def __aexit__(
@@ -196,4 +218,19 @@ class AsyncTalki(_Configured, AsyncResources):
         exc: BaseException | None,
         traceback: TracebackType | None,
     ) -> None:
-        await self.client.__aexit__(exc_type, exc, traceback)
+        await self.aclose()
+
+
+# The generated client builds its httpx clients on first use and keeps them in
+# `_client` / `_async_client`. A closed httpx client cannot be opened again, so
+# closing drops it, and the next request builds a new one.
+def _close(client: AuthenticatedClient) -> None:
+    opened, client._client = client._client, None
+    if opened is not None:
+        opened.close()
+
+
+async def _aclose(client: AuthenticatedClient) -> None:
+    opened, client._async_client = client._async_client, None
+    if opened is not None:
+        await opened.aclose()

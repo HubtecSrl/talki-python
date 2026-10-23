@@ -338,3 +338,51 @@ def test_an_async_page_walks_rows_and_pages():
 def test_the_async_repr_never_shows_the_credential():
     assert "talki_test_x" not in repr(AsyncTalki(api_key="talki_test_x"))
     assert repr(AsyncTalki(api_key="talki_test_x")).startswith("AsyncTalki(")
+
+
+# Without `with`, and closing
+
+
+def test_a_client_kept_without_with_works_and_close_lets_it_go_on():
+    server = Server({("/v1/calls/count", None): httpx.Response(200, json={"total": 7})})
+    client = sync_for(server)
+    client.close()  # nothing opened yet: a no-op
+    assert client.calls.count().total == 7
+    opened = client.client.get_httpx_client()
+    client.close()
+    assert opened.is_closed
+    assert (client.client._client, client.transport._sync) == (None, None)
+    # Still usable: the next request opens new connections.
+    assert client.calls.count().total == 7
+    assert client.client.get_httpx_client() is not opened
+
+
+def test_the_same_client_opens_with_with_twice():
+    server = Server({("/v1/calls/count", None): httpx.Response(200, json={"total": 7})})
+    client = sync_for(server)
+    client.calls.count()
+    for _ in range(2):
+        with client as opened:
+            assert opened is client
+            assert client.calls.count().total == 7
+        assert client.client._client is None
+    assert len(server.requests) == 3
+
+
+def test_the_async_client_closes_and_goes_on_too():
+    server = Server({("/v1/calls/count", None): httpx.Response(200, json={"total": 7})})
+
+    async def run() -> list[int]:
+        client = async_for(server)
+        totals = [(await client.calls.count()).total]
+        opened = client.client.get_async_httpx_client()
+        await client.aclose()
+        assert opened.is_closed and client.client._async_client is None
+        totals.append((await client.calls.count()).total)
+        async with client:
+            totals.append((await client.calls.count()).total)
+        async with client:
+            totals.append((await client.calls.count()).total)
+        return totals
+
+    assert asyncio.run(run()) == [7, 7, 7, 7]

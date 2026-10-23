@@ -38,7 +38,11 @@ with Talki(api_key="talki_test_…") as talki:  # or access_token="talki_at_…"
 - A method returns the operation's model, or None for `204 No Content`, and
   raises for an error (below). Path parameters are positional; the rest,
   `body=` included, are keywords.
-- Open `Talki` with `with`, so its connections are closed.
+- `with` closes the client's connections at the end of the block. It is
+  optional: a server can keep one `Talki` for the life of the process, reusing
+  its connections, and call `talki.close()` when done (`await talki.aclose()`
+  on `AsyncTalki`) when done, with no request in flight. A closed client stays
+  usable; the next request opens new connections.
 - `talki.types.UNSET` is a field left out, `None` an explicit `null`. In an
   update body (`AccountUpdate`, `ServiceUpdate`, …) UNSET leaves the field as
   it is and `None` sends `null`, which clears a field that allows it.
