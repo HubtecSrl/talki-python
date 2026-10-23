@@ -1,0 +1,100 @@
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar, cast
+
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
+
+if TYPE_CHECKING:
+    from ..models.resource import Resource
+
+
+T = TypeVar("T", bound="ResourceList")
+
+
+@_attrs_define
+class ResourceList:
+    """A page of the resource change feed, oldest change first.
+
+    Attributes:
+        data (list[Resource]):
+        next_cursor (None | str): Your position in the change feed after this page. Present on every page that returned
+            data, including the last one. Store it and pass it back as `cursor` to receive only what has changed since. Null
+            only when the page was empty. Opaque: do not parse it, and do not use it on another endpoint.
+        has_more (bool): True when another page is available. Default: False.
+    """
+
+    data: list[Resource]
+    next_cursor: None | str
+    has_more: bool = False
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        data = []
+        for data_item_data in self.data:
+            data_item = data_item_data.to_dict()
+            data.append(data_item)
+
+        next_cursor: None | str
+        next_cursor = self.next_cursor
+
+        has_more = self.has_more
+
+        field_dict: dict[str, Any] = {}
+        field_dict.update(self.additional_properties)
+        field_dict.update(
+            {
+                "data": data,
+                "next_cursor": next_cursor,
+                "has_more": has_more,
+            }
+        )
+
+        return field_dict
+
+    @classmethod
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.resource import Resource  # noqa: PLC0415
+
+        d = dict(src_dict)
+        data = []
+        _data = d.pop("data")
+        for data_item_data in _data:
+            data_item = Resource.from_dict(data_item_data)
+
+            data.append(data_item)
+
+        def _parse_next_cursor(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        next_cursor = _parse_next_cursor(d.pop("next_cursor"))
+
+        has_more = d.pop("has_more")
+
+        resource_list = cls(
+            data=data,
+            next_cursor=next_cursor,
+            has_more=has_more,
+        )
+
+        resource_list.additional_properties = d
+        return resource_list
+
+    @property
+    def additional_keys(self) -> list[str]:
+        return list(self.additional_properties.keys())
+
+    def __getitem__(self, key: str) -> Any:
+        return self.additional_properties[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.additional_properties[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self.additional_properties[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.additional_properties

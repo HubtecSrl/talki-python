@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# GitHub-hosted runners only: this repository takes pull requests from forks,
+# and those must never run on a machine of ours.
+jobs:
+  checks:
+    name: Lint, types, generated code
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy
+      # The committed talki/ must be exactly what the pinned generator makes
+      # of the committed spec and templates.
+      - run: uv run scripts/generate.py --check
+
+  test:
+    name: Tests (Python ${{ matrix.python }}${{ matrix.lowest && ', lowest dependencies' || '' }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12", "3.13", "3.14"]
+        lowest: [false]
+        include:
+          # The lower bounds in pyproject.toml are a promise: test them.
+          - python: "3.11"
+            lowest: true
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - if: ${{ !matrix.lowest }}
+        run: uv run --locked --python ${{ matrix.python }} pytest
+      - if: ${{ matrix.lowest }}
+        run: uv run --isolated --resolution lowest-direct --python ${{ matrix.python }} --group dev pytest
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - run: uv build
+      # The wheel installs and imports on its own, without this checkout.
+      - run: uv run --isolated --no-project --with dist/*.whl python -c "import talki, talki.api.account; print(talki.API_VERSION)"

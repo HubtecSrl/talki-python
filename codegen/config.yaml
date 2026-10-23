@@ -1,0 +1,17 @@
+# openapi-python-client settings for talki/. Regenerate with
+# `uv run scripts/generate.py`; never edit a generated file by hand.
+
+# The import name: `from talki.api.calls import list_calls`.
+project_name_override: talki
+package_name_override: talki
+
+# The generator only reads JSON, form, multipart and octet-stream bodies, and
+# drops any other response with a warning. The call-log exports (PDF or XLSX,
+# by `format`) and the voice sample (WAV) are returned as raw bytes instead.
+content_type_overrides:
+  application/pdf: application/octet-stream
+  application/vnd.openxmlformats-officedocument.spreadsheetml.sheet: application/octet-stream
+  audio/wav: application/octet-stream
+
+# scripts/generate.py formats the output itself, with this repo's ruff settings.
+post_hooks: []
