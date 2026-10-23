@@ -1,0 +1,33 @@
+{#- Not a copy: openapi-python-client 0.29.1 renders this file as a bare
+    docstring. Here it holds `Resources` and `AsyncResources`, which `Talki` and
+    `AsyncTalki` mix in: one attribute per tag, built on first use. On a
+    generator upgrade, check that `endpoint_collections_by_tag` is still a
+    template global. -#}
+"""The API's operations, one package per tag, and `Resources` / `AsyncResources`,
+one attribute per tag, which `Talki` and `AsyncTalki` mix in."""
+
+from functools import cached_property
+
+from ..client import AuthenticatedClient
+{% for tag in endpoint_collections_by_tag | sort %}
+from .{{ tag }} import Async{{ class_name(tag) }}Resource, {{ class_name(tag) }}Resource
+{% endfor %}
+
+__all__ = ["AsyncResources", "Resources"]
+
+{% for is_async in [false, true] %}
+{% set prefix = "Async" if is_async else "" %}
+
+
+class {{ prefix }}Resources:
+    """The {{ "async " if is_async }}operations of every tag, on the generated `client`."""
+
+    client: AuthenticatedClient
+{% for tag in endpoint_collections_by_tag | sort %}
+
+    @cached_property
+    def {{ tag }}(self) -> {{ prefix }}{{ class_name(tag) }}Resource:
+        """The `{{ tag }}` operations."""
+        return {{ prefix }}{{ class_name(tag) }}Resource(self.client)
+{% endfor %}
+{% endfor %}

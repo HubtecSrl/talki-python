@@ -249,9 +249,12 @@ class TalkiTransport(httpx.BaseTransport, httpx.AsyncBaseTransport):
             self._sleep(delay)
             attempt += 1
 
+    # Forgotten once closed, so that the next request opens a new pool.
     def close(self) -> None:
-        if self._sync is not None:
-            self._sync.close()
+        with self._lock:
+            closing, self._sync = self._sync, None
+        if closing is not None:
+            closing.close()
 
     # Async.
 
@@ -293,5 +296,7 @@ class TalkiTransport(httpx.BaseTransport, httpx.AsyncBaseTransport):
             attempt += 1
 
     async def aclose(self) -> None:
-        if self._async is not None:
-            await self._async.aclose()
+        with self._lock:
+            closing, self._async = self._async, None
+        if closing is not None:
+            await closing.aclose()

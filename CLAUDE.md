@@ -18,12 +18,19 @@ or customer names.
   settings. Never hand-edit a generated file. Change a template or the config, then
   regenerate. CI fails on drift (`generate.py --check`).
 - The hand-written modules are listed in `HAND_WRITTEN` in `scripts/generate.py`:
-  `_talki.py`, `_transport.py`, `exceptions.py`, `oauth.py`, `pagination.py`,
-  `webhooks.py`, `py.typed`. Edit them in place. A new hand-written module must
+  `_resource.py`, `_talki.py`, `_transport.py`, `exceptions.py`, `oauth.py`,
+  `pagination.py`, `webhooks.py`, `py.typed`. Edit them in place. A new hand-written module must
   be added to that list, or the next regeneration deletes it.
 - Each template in `codegen/templates/` is a copy of the upstream 0.29.1
   template with one marked change, described in its header comment. On a
-  generator upgrade, re-copy them and re-apply the changes.
+  generator upgrade, re-copy them and re-apply the changes. Two are not copies:
+  `endpoint_init.py.jinja` writes each tag's resource classes (`talki.calls`, …)
+  and `api_init.py.jinja` the `Resources` mixins `Talki` and `AsyncTalki` use.
+  Their headers say what to re-check on an upgrade.
+- The resource method names are derived from the operation IDs, so a new
+  operation can rename an existing method (two that would share a name both
+  keep their full ones). `tests/test_resources.py` pins the whole surface in
+  `METHODS`: a change there is a breaking change and needs a changelog line.
 
 ## Who else builds from this repo
 

@@ -1,14 +1,19 @@
-"""`Talki`, the client to start from, and `unwrap`, which turns an answer into
-its value or an exception.
+"""`Talki` and `AsyncTalki`, the clients to start from.
 
-    from talki import Talki, unwrap
-    from talki.api.account import get_account
+    from talki import Talki
 
     with Talki(api_key="talki_test_…") as talki:
-        account = unwrap(get_account.sync_detailed(client=talki.client))
+        account = talki.account.get()
+        for call in talki.calls.list(limit=100):
+            ...
 
-`talki.client` is the generated `AuthenticatedClient`, so every operation under
-`talki.api` takes it, sync or async (`async with Talki(…)`).
+`AsyncTalki` takes the same arguments, and its methods are awaited:
+`account = await talki.account.get()`. Each method returns the operation's
+value or raises the `talki.ApiError` subclass for its error.
+
+`talki.client` is the generated `AuthenticatedClient`, for the operations under
+`talki.api` when the whole `Response` is wanted:
+`get_account.sync_detailed(client=talki.client)`, then `unwrap` it.
 """
 
 from __future__ import annotations
@@ -16,20 +21,17 @@ from __future__ import annotations
 import ssl
 from collections.abc import Callable
 from types import TracebackType
-from typing import Any, TypeVar, cast
+from typing import Self
 
 import httpx
 
+from ._resource import unwrap
 from ._transport import TalkiTransport
+from .api import AsyncResources, Resources
 from .client import AuthenticatedClient
-from .exceptions import ApiError, error_from
-from .models import ErrorEnvelope
 from .oauth import OAuthApp, TokenRefresh, TokenSet
-from .types import Response
 
-__all__ = ["DEFAULT_BASE_URL", "Talki", "unwrap"]
-
-T = TypeVar("T")
+__all__ = ["DEFAULT_BASE_URL", "AsyncTalki", "Talki", "unwrap"]
 
 DEFAULT_BASE_URL = "https://api.talki.it"
 VERSION_HEADER = "Talki-Version"
@@ -44,40 +46,9 @@ class _Current:
 CURRENT = _Current()
 
 
-class Talki:
-    """A configured client for Talki's public API.
-
-    Args:
-        api_key: A business's API key (`talki_live_…`, or `talki_test_…` for a
-            sandbox).
-        access_token: An OAuth installation's access token (`talki_at_…`), when
-            not using an API key.
-        tokens: An installation's whole pair (`talki.oauth.TokenSet`), instead of
-            ``access_token``. With ``oauth_app`` the pair renews itself: before
-            it expires, and when the API answers that it has. Exactly one of
-            ``api_key``, ``access_token`` and ``tokens`` is required.
-        oauth_app: The app's credentials (`talki.oauth.OAuthApp`), to renew
-            ``tokens``.
-        on_token_refresh: Called with each new pair, before it is used: store
-            it there. The previous refresh token stops working. Only with
-            ``oauth_app``.
-        version: The `Talki-Version` sent on every request. Defaults to
-            `talki.API_VERSION`, the contract this package was generated from;
-            None sends none, and the version pinned on the key or app applies.
-        base_url: The API's origin.
-        timeout: Seconds before a request is abandoned.
-        max_retries: How often a failed request is tried again; 0 for never.
-            See `talki._transport` for what is retried. `timeout` applies to
-            each attempt.
-        auto_idempotency: Give every write without an `Idempotency-Key` a new
-            one. Pass `idempotency_key=` to an operation to choose your own,
-            for instance to retry a write across process restarts.
-        verify: TLS verification, as httpx takes it.
-        proxy: A proxy URL for every request. Proxy environment variables
-            (`HTTPS_PROXY`, …) are not read.
-        transport: The httpx transport requests go out on, for tests
-            (`httpx.MockTransport`); httpx's own by default.
-    """
+class _Configured:
+    """What `Talki` and `AsyncTalki` share: the credentials, the transport and
+    the generated `client`."""
 
     def __init__(
         self,
@@ -96,6 +67,40 @@ class Talki:
         proxy: str | None = None,
         transport: httpx.BaseTransport | httpx.AsyncBaseTransport | None = None,
     ) -> None:
+        """A client for Talki's public API.
+
+        Args:
+            api_key: A business's API key (`talki_live_…`, or `talki_test_…` for a
+                sandbox).
+            access_token: An OAuth installation's access token (`talki_at_…`), when
+                not using an API key.
+            tokens: An installation's whole pair (`talki.oauth.TokenSet`), instead of
+                ``access_token``. With ``oauth_app`` the pair renews itself: before
+                it expires, and when the API answers that it has. Exactly one of
+                ``api_key``, ``access_token`` and ``tokens`` is required.
+            oauth_app: The app's credentials (`talki.oauth.OAuthApp`), to renew
+                ``tokens``.
+            on_token_refresh: Called with each new pair, before it is used: store
+                it there. The previous refresh token stops working. Only with
+                ``oauth_app``.
+            version: The `Talki-Version` sent on every request. Defaults to
+                `talki.API_VERSION`, the contract this package was generated from;
+                None sends none, and the version pinned on the key or app applies.
+            base_url: The API's origin.
+            timeout: Seconds before a request is abandoned.
+            max_retries: How often a failed request is tried again; 0 for never.
+                See `talki._transport` for what is retried. `timeout` applies to
+                each attempt.
+            auto_idempotency: Give every write without an `Idempotency-Key` a new
+                one. Pass `idempotency_key=` to an operation to choose your own,
+                for instance to retry a write across process restarts.
+            verify: TLS verification, as httpx takes it.
+            proxy: A proxy URL for every request. Proxy environment variables
+                (`HTTPS_PROXY`, …) are not read.
+            transport: The httpx transport requests go out on, for tests
+                (`httpx.MockTransport`); httpx's own by default. It is closed with
+                the client, and must take requests again after that.
+        """
         given = [value for value in (api_key, access_token, tokens) if value is not None]
         if len(given) != 1:
             raise ValueError("Pass exactly one of api_key, access_token and tokens.")
@@ -143,10 +148,28 @@ class Talki:
 
     def __repr__(self) -> str:
         # Never the credential.
-        return f"Talki(base_url={self.base_url!r}, version={self.version!r})"
+        return f"{type(self).__name__}(base_url={self.base_url!r}, version={self.version!r})"
 
-    def __enter__(self) -> Talki:
-        self.client.__enter__()
+
+class Talki(_Configured, Resources):
+    """A client for Talki's public API, whose methods are sync:
+    `talki.calls.list()`. Use `AsyncTalki` in async code.
+
+    Open it with ``with`` to close its connections at the end of the block, or
+    keep one for the life of the process and call `close` when done.
+    """
+
+    def close(self) -> None:
+        """Close the connections the sync methods opened. The client stays
+        usable: the next request opens new ones. Call it with no request in
+        flight: one running on another thread may fail."""
+        _close(self.client)
+
+    async def aclose(self) -> None:
+        """Close the connections the async operations under `talki.api` opened."""
+        await _aclose(self.client)
+
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(
@@ -155,10 +178,12 @@ class Talki:
         exc: BaseException | None,
         traceback: TracebackType | None,
     ) -> None:
-        self.client.__exit__(exc_type, exc, traceback)
+        self.close()
 
-    async def __aenter__(self) -> Talki:
-        await self.client.__aenter__()
+    # For the async operations under `talki.api`, sent with `client`: the
+    # methods of `talki.calls` and the others are sync here, async on
+    # `AsyncTalki`.
+    async def __aenter__(self) -> Self:
         return self
 
     async def __aexit__(
@@ -167,26 +192,45 @@ class Talki:
         exc: BaseException | None,
         traceback: TracebackType | None,
     ) -> None:
-        await self.client.__aexit__(exc_type, exc, traceback)
+        await self.aclose()
 
 
-def unwrap(response: Response[T | ErrorEnvelope]) -> T:
-    """The value of a `*_detailed` answer, or the `ApiError` subclass for its
-    error.
+class AsyncTalki(_Configured, AsyncResources):
+    """A client for Talki's public API, whose methods are awaited:
+    `await talki.calls.list()`. It takes the same arguments as `Talki`.
 
-    Returns None for a `204 No Content`. Raises for an error envelope, any
-    status of 400 or more, and a success whose body this client could not read
-    (a status the operation does not declare).
+    Open it with ``async with`` to close its connections at the end of the
+    block, or keep one for the life of the process and await `aclose` when done.
     """
-    status = int(response.status_code)
-    parsed: Any = response.parsed
-    if status >= 400 or isinstance(parsed, ErrorEnvelope):
-        raise error_from(status, response.headers, response.content)
-    if parsed is None and response.content:
-        raise ApiError(
-            status=status,
-            message="The answer has a status this operation does not declare.",
-            headers=response.headers,
-            body=response.content,
-        )
-    return cast(T, parsed)
+
+    async def aclose(self) -> None:
+        """Close the connections the methods opened. The client stays usable:
+        the next request opens new ones. Call it with no request in flight:
+        one running on another task may fail."""
+        await _aclose(self.client)
+
+    async def __aenter__(self) -> Self:
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
+        await self.aclose()
+
+
+# The generated client builds its httpx clients on first use and keeps them in
+# `_client` / `_async_client`. A closed httpx client cannot be opened again, so
+# closing drops it, and the next request builds a new one.
+def _close(client: AuthenticatedClient) -> None:
+    opened, client._client = client._client, None
+    if opened is not None:
+        opened.close()
+
+
+async def _aclose(client: AuthenticatedClient) -> None:
+    opened, client._async_client = client._async_client, None
+    if opened is not None:
+        await opened.aclose()
