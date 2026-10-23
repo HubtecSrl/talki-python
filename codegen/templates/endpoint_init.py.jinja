@@ -1,0 +1,211 @@
+{#- Not a copy: openapi-python-client 0.29.1 renders this file, one per tag, as a
+    bare docstring. Here it holds the tag's resource classes, `<Tag>Resource` and
+    `Async<Tag>Resource`, whose methods call the tag's operations and return
+    their value or raise (`talki.unwrap`). `talki.api.Resources`
+    exposes them on `Talki` and `AsyncTalki`.
+
+    A method is named after its operation, less the tag's noun (`list_calls` in
+    `calls` is `list`, `get_call` is `get`), unless the noun is the first word,
+    the verb (`tag_contact` in `tags`). Operations of one tag that would share a
+    name both keep their own, and a keyword gets `_` after it. Methods named
+    after a builtin (`list`) come last in the class. A list that takes `cursor` returns a `Page` of its
+    `data` rows.
+
+    On a generator upgrade, check that `endpoint_collection` still carries the
+    tag's endpoints, and that `get_imports` and `get_lazy_imports` still name
+    what a signature needs. -#}
+{% from "endpoint_macros.py.jinja" import arguments, kwargs %}
+{% from "helpers.jinja" import docstring as _docstring %}
+{% set tag = endpoint_collection.tag %}
+{% set resource = class_name(tag) + "Resource" %}
+
+{#- Python's keywords, which a shortened name gets `_` after (`import_`), as the
+    generator does for a parameter (`from_`). -#}
+{% set keywords = ["False", "None", "True", "and", "as", "assert", "async", "await", "break", "class",
+    "continue", "def", "del", "elif", "else", "except", "finally", "for", "from", "global", "if", "import",
+    "in", "is", "lambda", "nonlocal", "not", "or", "pass", "raise", "return", "try", "while", "with", "yield"] %}
+{#- Builtins a method can be named after. In a class body a method `list` hides
+    the builtin from the annotations after it, so these methods come last. -#}
+{% set builtins = ["bool", "bytes", "dict", "float", "frozenset", "int", "list", "object", "set", "str",
+    "tuple", "type"] %}
+
+{#- The operation's name less the tag's noun, plural or singular. -#}
+{% macro short_name(endpoint) -%}
+{%- set words = python_identifier(endpoint.name).split("_") -%}
+{%- set plural = tag.split("_") -%}
+{%- set last = plural[-1] -%}
+{%- set singular = plural[:-1] + [last[:-1] if last.endswith("s") else last] -%}
+{%- set found = namespace(name=none) -%}
+{%- for noun in [plural, singular] -%}
+{%- for start in range(1, (words | length) - (noun | length) + 1) -%}
+{%- if found.name is none and words[start:start + (noun | length)] == noun -%}
+{%- set found.name = (words[:start] + words[start + (noun | length):]) | join("_") -%}
+{%- endif -%}
+{%- endfor -%}
+{%- endfor -%}
+{%- set name = found.name if found.name is not none else words | join("_") -%}
+{{- name + "_" if name in keywords else name -}}
+{%- endmacro %}
+
+{% set shorts = namespace(names=[]) %}
+{% for endpoint in endpoint_collection.endpoints %}
+{% set shorts.names = shorts.names + [short_name(endpoint)] %}
+{% endfor %}
+
+{#- Each endpoint's method name: its short name, or its own where two share one. -#}
+{% macro method_name(endpoint) -%}
+{%- set short = short_name(endpoint) -%}
+{{- short if shorts.names.count(short) == 1 else python_identifier(endpoint.name) -}}
+{%- endmacro %}
+
+{% macro module(endpoint) -%}
+{{ python_identifier(endpoint.name) }}
+{%- endmacro %}
+
+{% macro success_type(endpoint) -%}
+{%- set types = namespace(names=[]) -%}
+{%- for response in endpoint.responses.patterns if response.status_code.range[0] >= 200 and response.status_code.range[1] < 300 -%}
+{%- set name = "None" if response.status_code.range[0] == 204 else (response.prop.get_type_string() | as_unembedded_code | string) -%}
+{%- if name not in types.names -%}
+{%- set types.names = types.names + [name] -%}
+{%- endif -%}
+{%- endfor -%}
+{{- types.names | join(" | ") -}}
+{%- endmacro %}
+
+{#- The row type of a list that takes `cursor`, or nothing for any other operation. -#}
+{% macro row_type(endpoint) -%}
+{%- set cursor = endpoint.query_parameters | selectattr("python_name", "equalto", "cursor") | list -%}
+{%- if cursor -%}
+{%- for response in endpoint.responses.patterns if response.status_code.range[0] == 200 -%}
+{%- for prop in (response.prop.required_properties or []) if prop.python_name == "data" and prop.inner_property is defined -%}
+{{- prop.inner_property.get_type_string() | as_unembedded_code -}}
+{%- endfor -%}
+{%- endfor -%}
+{%- endif -%}
+{%- endmacro %}
+
+{% macro method_docstring(endpoint, prefix) %}
+{% set content %}
+{% if endpoint.summary %}{{ endpoint.summary | safe_for_docstring | wordwrap(100)}}
+
+{% endif -%}
+{%- if endpoint.description %} {{ endpoint.description | safe_for_docstring | wordwrap(100) }}
+
+{% endif %}
+{% set all_parameters = endpoint.list_all_parameters() %}
+{% if all_parameters %}
+Args:
+    {% for parameter in all_parameters %}
+    {% if parameter.name == "Idempotency-Key" and parameter.required %}
+    {{ (parameter.python_name + " (str | Unset): Required by this operation. Omitted, the request is refused unless the client adds one, as `Talki` and `AsyncTalki` do unless built with `auto_idempotency=False`.") | wordwrap(90) | indent(8) }}
+    {% else %}
+    {{ parameter.to_docstring() | wordwrap(90) | indent(8) }}
+    {% endif %}
+    {% endfor %}
+
+{% endif %}
+Raises:
+    talki.ApiError: The API answered with an error, as the subclass for its `type`.
+    httpx.TimeoutException: If the request takes longer than the client's timeout.
+
+Returns:
+{% if row_type(endpoint) %}
+    {{ prefix }}Page[{{ row_type(endpoint) | safe_for_docstring }}]: This page. Iterating it yields every row from here on,
+    fetching the pages after it as it goes.
+{% else %}
+    {{ success_type(endpoint) | safe_for_docstring }}
+{% endif %}
+{% endset %}
+{{ _docstring(content) }}
+{% endmacro %}
+
+{#- What the signatures and return types name, without what only parsing uses. -#}
+{% set imports = namespace(lines=[]) %}
+{% for endpoint in endpoint_collection.endpoints %}
+{% set used = namespace(props=endpoint.list_all_parameters() + (endpoint.bodies | map(attribute="prop") | list)) %}
+{% for response in endpoint.responses.patterns if response.status_code.range[0] >= 200 and response.status_code.range[1] < 300 and response.status_code.range[0] != 204 %}
+{% set used.props = used.props + [response.prop] %}
+{% for prop in (response.prop.required_properties or []) if row_type(endpoint) and prop.python_name == "data" %}
+{% set used.props = used.props + [prop.inner_property] %}
+{% endfor %}
+{% endfor %}
+{% for prop in used.props %}
+{% for line in prop.get_imports(prefix="...") | list + prop.get_lazy_imports(prefix="...") | list %}
+{% set line = "from ...types import File" if line == "from ...types import File, FileTypes" else line %}
+{% if line not in imports.lines and line not in ["from typing import cast", "from io import BytesIO"] %}
+{% set imports.lines = imports.lines + [line] %}
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% endfor %}
+{% set has_pages = namespace(value=false) %}
+{% for endpoint in endpoint_collection.endpoints if row_type(endpoint) %}
+{% set has_pages.value = true %}
+{% endfor %}
+"""The `{{ tag }}` operations, one module each, and `{{ resource }}` / `Async{{ resource }}`,
+which `Talki` and `AsyncTalki` expose as `{{ tag }}`."""
+
+{% for line in imports.lines | sort %}
+{{ line }}
+{% endfor %}
+{#- Through their modules, so that no model's name can shadow them. -#}
+from ... import _resource
+{% if has_pages.value %}
+from ... import pagination as _pagination
+{% endif %}
+from . import (
+{% for endpoint in endpoint_collection.endpoints | sort(attribute="name") %}
+    {{ module(endpoint) }},
+{% endfor %}
+)
+
+__all__ = ["Async{{ resource }}", "{{ resource }}"]
+
+{% for is_async in [false, true] %}
+{% set prefix = "Async" if is_async else "" %}
+
+
+class {{ prefix }}{{ resource }}(_resource.Resource):
+    """`talki.{{ tag }}`{% if is_async %} on `AsyncTalki`{% endif %}: each method sends one operation and returns its value, or
+    raises the `talki.ApiError` subclass for its error."""
+
+{% set ordered = namespace(plain=[], last=[]) %}
+{% for endpoint in endpoint_collection.endpoints | sort(attribute="name") %}
+{% if method_name(endpoint) in builtins %}
+{% set ordered.last = ordered.last + [endpoint] %}
+{% else %}
+{% set ordered.plain = ordered.plain + [endpoint] %}
+{% endif %}
+{% endfor %}
+{% for endpoint in ordered.plain + ordered.last %}
+{% set returns = success_type(endpoint) %}
+{% set rows = row_type(endpoint) %}
+{% set call = module(endpoint) + (".asyncio_detailed(" if is_async else ".sync_detailed(") %}
+    {{ "async " if is_async }}def {{ method_name(endpoint) }}(
+        self,
+        {{ arguments(endpoint, include_client=False) | indent(8) }}
+    ) -> {% if rows %}_pagination.{{ prefix }}Page[{{ rows }}]{% else %}{{ returns }}{% endif %}:
+        {{ method_docstring(endpoint, prefix) | indent(8) -}}
+{% if rows %}
+        {{ "async " if is_async }}def fetch(cursor: None | str | Unset) -> {{ returns }}:
+            return _resource.unwrap({{ "await " if is_async }}{{ call }}
+                client=self._client,
+                {{ kwargs(endpoint, include_client=False) | indent(16) }}
+            ))
+
+        return {{ "await " if is_async }}_pagination.{{ prefix }}Page.first(fetch, cursor)
+{% elif returns == "None" %}
+        _resource.unwrap({{ "await " if is_async }}{{ call }}
+            client=self._client,
+            {{ kwargs(endpoint, include_client=False) | indent(12) }}
+        ))
+{% else %}
+        return _resource.unwrap({{ "await " if is_async }}{{ call }}
+            client=self._client,
+            {{ kwargs(endpoint, include_client=False) | indent(12) }}
+        ))
+{% endif %}
+
+{% endfor %}
+{% endfor %}

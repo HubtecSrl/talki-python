@@ -17,39 +17,69 @@ Python 3.11 or later. Depends on httpx, attrs and anyio.
 ## Call the API
 
 ```python
-from talki import Talki, unwrap
-from talki.api.account import get_account
-from talki.api.appointments import create_appointment
+from talki import Talki
+from talki.models import AppointmentCreate
 
 with Talki(api_key="talki_test_…") as talki:  # or access_token="talki_at_…"
-    account = unwrap(get_account.sync_detailed(client=talki.client))
+    account = talki.account.get()
     print(account.business_name)
 
-    appointment = unwrap(create_appointment.sync_detailed(client=talki.client, body=...))
+    appointment = talki.appointments.create(body=AppointmentCreate(...))
+    talki.appointments.cancel(appointment.id)
+
+    for call in talki.calls.list(limit=100):  # every call, page after page
+        print(call.id)
 ```
 
-- Every operation is a module under `talki.api.<tag>` (its operation ID in snake
-  case) with four functions: `sync`, `sync_detailed`, `asyncio` and
-  `asyncio_detailed`. Each takes `client=talki.client`. Open `Talki` with
-  `with` for the sync ones and `async with` for the async ones, so its
-  connections are closed.
-- `unwrap(response)` takes a `*_detailed` answer and returns its model, or None
-  for `204 No Content`; it raises for anything else (below). Its return type is
-  the operation's model.
-- The `*_detailed` answer is a `talki.types.Response` with `status_code`,
-  `headers` (`ETag`, `Idempotency-Replayed`, the rate-limit headers,
-  `X-Request-Id`), `content` and `parsed`.
-- `sync` and `asyncio` return the parsed body alone: the model, an
-  `ErrorEnvelope` for a declared error status, or `None` for a status the
-  operation does not declare, for an error that is not JSON, and for a `204`.
-  Prefer `unwrap` over reading these apart.
+- `Talki` has one attribute per tag of the API reference (`talki.account`,
+  `talki.appointments`, `talki.calls`, …), and each has one method per
+  operation, named after it without the tag's noun: `list_calls` is
+  `talki.calls.list`, `get_call_transcript` is `talki.calls.get_transcript`.
+- A method returns the operation's model, or None for `204 No Content`, and
+  raises for an error (below). Path parameters are positional; the rest,
+  `body=` included, are keywords.
+- Open `Talki` with `with`, so its connections are closed.
 - `talki.types.UNSET` is a field left out, `None` an explicit `null`. In an
   update body (`AccountUpdate`, `ServiceUpdate`, …) UNSET leaves the field as
   it is and `None` sends `null`, which clears a field that allows it.
 
+### Async
+
+`AsyncTalki` takes the same arguments and has the same methods, to await:
+
+```python
+from talki import AsyncTalki
+
+async with AsyncTalki(api_key="talki_test_…") as talki:
+    account = await talki.account.get()
+    async for call in await talki.calls.list(limit=100):
+        print(call.id)
+```
+
+### The whole response
+
+When you need the status or the headers (`ETag`, `Idempotency-Replayed`, the
+rate-limit headers, `X-Request-Id`), call the operation itself. Each is a
+module under `talki.api.<tag>`, named after its operation ID, with
+`sync_detailed` and `asyncio_detailed` (and `sync` and `asyncio`, which return
+the parsed body alone). Pass them `client=talki.client`:
+
+```python
+from talki import unwrap
+from talki.api.account import get_account
+
+response = get_account.sync_detailed(client=talki.client)
+etag = response.headers["ETag"]
+account = unwrap(response)  # the model, or the exception a method would raise
+```
+
+`response` is a `talki.types.Response` with `status_code`, `headers`,
+`content` and `parsed`. In async code, use `AsyncTalki` and the operations'
+`asyncio_detailed`: `Talki`'s methods are sync, and would block the event loop.
+
 ## Errors
 
-`unwrap` raises a subclass of `talki.ApiError` (itself a `talki.TalkiError`)
+A method (and `unwrap`) raises a subclass of `talki.ApiError` (itself a `talki.TalkiError`)
 chosen by the envelope's `type`: `InvalidRequestError`, `AuthenticationError`,
 `PermissionDeniedError`, `ConflictError`, `RateLimitError` (with
 `retry_after`), `ServerError`. An error with no envelope, such as a proxy's answer,
@@ -62,7 +92,7 @@ not know raises `ApiError` itself. Each carries `status`, `type`, `code`,
 from talki import ConflictError
 
 try:
-    unwrap(create_appointment.sync_detailed(client=talki.client, body=booking))
+    talki.appointments.create(body=booking)
 except ConflictError as error:
     if error.code == "slot_unavailable":
         ...
@@ -109,12 +139,12 @@ name like a listed member's, so a response is never refused for it.
 
 - `Talki` sends `Talki-Version: talki.API_VERSION`, the contract this package
   was generated from. `Talki(version="…")` pins another, and `version=None`
-  sends none, so the version pinned on the key or app applies. Each operation
+  sends none, so the version pinned on the key or app applies. Each method
   also takes `talki_version=` for one request.
 - `Talki` gives every write without an `Idempotency-Key` a new one, so its own
   retries are never applied twice. To retry a write yourself with the same key,
   pass your own with `idempotency_key=` (`talki.new_idempotency_key()` makes
-  one); after an httpx error the key sent is
+  one), as in `talki.appointments.create(body=…, idempotency_key=key)`; after an httpx error the key sent is
   also in `error.request.headers["Idempotency-Key"]`. `409 request_in_progress`
   means the first request with that key is still running and its outcome is
   unknown: retry later with the same key. `auto_idempotency=False` sends none
@@ -125,28 +155,34 @@ name like a listed member's, so a response is never refused for it.
 
 ## Paging and feeds
 
-Operations that take `cursor=` return `data`, `has_more` and `next_cursor`.
-`talki.pagination` walks them: pass the operation's `sync_detailed` (or
-`asyncio_detailed` to `apages`) and its arguments.
+A method whose operation takes `cursor=` returns a `talki.pagination.Page`
+(`AsyncPage` on `AsyncTalki`): the first page, with `data`, `has_more` and
+`next_cursor`. Iterating it yields every row of it and of the pages after it,
+fetched as the loop reaches them; `iter_pages()` yields the pages.
 
 ```python
-from talki.pagination import pages, position, rows
-from talki.api.calls import list_calls
-from talki.api.appointments import list_appointments
+from talki.pagination import position
 
-for call in rows(pages(list_calls.sync_detailed, client=talki.client, limit=100)):
+page = talki.calls.list(limit=50)
+print(len(page.data), page.has_more)
+
+for call in talki.calls.list(limit=100):
     ...
 
-for page in pages(list_appointments.sync_detailed, client=talki.client, cursor=stored):
+for page in talki.appointments.list(cursor=stored).iter_pages():
     save(page.data)
     stored = position(page, stored)  # store it with the rows
 ```
 
-`pages` stops when `has_more` is false, raises the `ApiError` of a page that
-fails after yielding those before it, and keeps each page's row type. A page
-that says `has_more` but gives no new cursor raises `PaginationError`.
+The call fetches the first page, so a refused cursor raises there. A walk
+stops when `has_more` is false and raises the `ApiError` of a page that fails,
+after yielding those before it. A page that says `has_more` but gives no new
+cursor raises `PaginationError`. Iterating a page again starts from it again.
 `position` is for change feeds: a plain list's last page has no cursor though
 it holds rows.
+
+For the operations themselves, `pages` and `rows` (`apages` and `arows`) do the
+same: `rows(pages(list_calls.sync_detailed, client=talki.client, limit=100))`.
 
 The change feeds (appointments, contacts, services, resources, unresolved
 requests, and calls with `sync=True`) return `next_cursor` on every non-empty
@@ -258,8 +294,10 @@ that moves to a newer API version says so in the changelog.
 Most of `talki/` is generated, never edited by hand: `scripts/generate.py`
 runs openapi-python-client (pinned in `pyproject.toml`) over
 `openapi/talki-v1.yaml` with the templates in `codegen/templates/`, and keeps
-the hand-written modules listed in the script (`_talki.py`, `_transport.py`,
-`exceptions.py`, `oauth.py`, `pagination.py`, `webhooks.py`).
+the hand-written modules listed in the script (`_resource.py`, `_talki.py`,
+`_transport.py`, `exceptions.py`, `oauth.py`, `pagination.py`, `webhooks.py`).
+The resource classes (`talki.calls`, …) are generated too, from the spec's tags
+and operation IDs, by `codegen/templates/endpoint_init.py.jinja`.
 
 ```sh
 uv sync

@@ -29,6 +29,7 @@ SPEC = ROOT / "openapi" / "talki-v1.yaml"
 
 HAND_WRITTEN = frozenset(
     {
+        "_resource.py",
         "_talki.py",
         "_transport.py",
         "exceptions.py",
