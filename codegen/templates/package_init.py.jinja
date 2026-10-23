@@ -9,6 +9,7 @@ API_VERSION = "{{ openapi.version.get_untrusted_value() }}"
 from .client import AuthenticatedClient, Client
 from ._talki import AsyncTalki, Talki, unwrap
 from ._transport import new_idempotency_key
+from ._version import __version__
 from .exceptions import (
     ApiError,
     AuthenticationError,
@@ -34,6 +35,7 @@ __all__ = (
     "ServerError",
     "Talki",
     "TalkiError",
+    "__version__",
     "new_idempotency_key",
     "unwrap",
 )

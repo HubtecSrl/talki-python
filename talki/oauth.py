@@ -37,6 +37,7 @@ from __future__ import annotations
 import asyncio
 import base64
 import hashlib
+import logging
 import secrets
 import threading
 import time
@@ -49,7 +50,11 @@ import anyio
 import httpx
 
 from ._transport import GATEWAY_STATUSES, NOT_SENT, UNSENT_ONLY
+from ._version import USER_AGENT
 from .exceptions import REQUEST_ID_HEADER, TalkiError
+
+# Under the `talki` logger: renewals and their failures, never a token.
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "DEFAULT_AUTHORIZE_URL",
@@ -251,7 +256,7 @@ class OAuthApp:
             "POST",
             f"{self.base_url}{path}",
             data=form,
-            headers={"Authorization": self._basic(), "Accept": "application/json"},
+            headers={"Authorization": self._basic(), "Accept": "application/json", "User-Agent": USER_AGENT},
         )
 
     def _send(self, request: httpx.Request) -> httpx.Response:
@@ -396,11 +401,21 @@ class TokenRefresh(httpx.Auth):
         self._in_doubt_since = now
         if self._doubt_sent is None:
             self._doubt_sent = self._sent_at
+        cause = "a gateway error" if error is None else type(error).__name__
         if error is not None and not isinstance(error, httpx.TransportError):
             # Abandoned (cancelled, interrupted, closed by httpx), or a failure
             # that is not the network's: not one to repeat here.
+            logger.warning(
+                "A token renewal ended in %s, its outcome unknown; the next request presents it again.", cause
+            )
             return False
-        return now + REFRESH_SETTLE <= self._doubt_sent + REFRESH_GRACE - GRACE_MARGIN
+        again = now + REFRESH_SETTLE <= self._doubt_sent + REFRESH_GRACE - GRACE_MARGIN
+        logger.warning(
+            "A token renewal ended in %s, its outcome unknown; %s.",
+            cause,
+            f"presenting it again in {REFRESH_SETTLE:.0f} s" if again else "the next request presents it again",
+        )
+        return again
 
     def _answered(self, response: httpx.Response) -> bool:
         """Apply a refresh's answer, or say (False) to present it again. A
@@ -422,12 +437,20 @@ class TokenRefresh(httpx.Auth):
         if self._on_refresh is not None:
             self._on_refresh(renewed)
         self.tokens, self._pending = renewed, None
+        logger.info("Renewed the access token of installation %s.", renewed.installation_id or "(unnamed)")
 
     def _apply(self, response: httpx.Response) -> None:
         try:
             renewed = _tokens(response, now=self._clock())
         except OAuthError as error:
             if error.error in ("invalid_grant", "invalid_client"):
+                logger.error(
+                    "The API refused the token renewal (%s): %s",
+                    error.error,
+                    "the customer has to reconnect the app"
+                    if error.error == "invalid_grant"
+                    else "check the app's client ID and secret",
+                )
                 self._dead = error
             raise
         self._store(renewed)

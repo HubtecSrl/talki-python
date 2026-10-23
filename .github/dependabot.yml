@@ -1,0 +1,25 @@
+# Keeps the workflows' actions and the lockfile current. The package's own
+# dependencies are ranges in pyproject.toml, tested at both ends by CI, and are
+# widened by hand: `lockfile-only` moves only uv.lock.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: uv
+    directory: /
+    versioning-strategy: lockfile-only
+    schedule:
+      interval: monthly
+    groups:
+      lockfile:
+        patterns: ["*"]
+    ignore:
+      # Pinned exactly: the templates in codegen/templates/ are copies of this
+      # version's, so moving it is a manual upgrade (see CLAUDE.md).
+      - dependency-name: openapi-python-client

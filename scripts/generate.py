@@ -32,6 +32,7 @@ HAND_WRITTEN = frozenset(
         "_resource.py",
         "_talki.py",
         "_transport.py",
+        "_version.py",
         "exceptions.py",
         "oauth.py",
         "pagination.py",

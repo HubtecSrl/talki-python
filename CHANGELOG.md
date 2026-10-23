@@ -3,6 +3,17 @@
 This package follows [semantic versioning](https://semver.org). The API
 version each release targets by default is `talki.API_VERSION`.
 
+## Unreleased
+
+- `talki.__version__`, and a `User-Agent` naming this package's version,
+  Python's and httpx's on every request, token requests included.
+- `Talki()` and `AsyncTalki()` with no credential read the API key from
+  `TALKI_API_KEY`.
+- Logging on the `talki` logger: each answer at DEBUG (method, path, status,
+  request ID, time), each retry and automatic token renewal at INFO, a
+  renewal whose outcome is unknown at WARNING and one refused at ERROR. Never
+  a query string, header, body or token.
+
 ## 0.2.0b1 — 2026-10-23
 
 For API version `2026-10-01`, as 0.1.0b1.
