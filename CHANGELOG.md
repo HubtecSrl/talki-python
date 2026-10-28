@@ -3,7 +3,7 @@
 This package follows [semantic versioning](https://semver.org). The API
 version each release targets by default is `talki.API_VERSION`.
 
-## Unreleased
+## 0.3.0b1 — 2026-10-28
 
 For API version `2026-10-01`, as 0.2.0b1.
 
