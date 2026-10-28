@@ -1,11 +1,13 @@
 """The `contacts` operations, one module each, and `ContactsResource` / `AsyncContactsResource`,
 which `Talki` and `AsyncTalki` expose as `contacts`."""
 
+from functools import cached_property
+
 from ... import _resource
 from ... import pagination as _pagination
 from ...models.contact import Contact
 from ...models.contact_list import ContactList
-from ...models.contact_upsert import ContactUpsert
+from ...models.contact_upsert import ContactUpsert, ContactUpsertDict
 from ...types import UNSET, Unset
 from . import (
     delete_contact,
@@ -14,12 +16,107 @@ from . import (
     upsert_contact,
 )
 
-__all__ = ["AsyncContactsResource", "ContactsResource"]
+__all__ = [
+    "AsyncContactsResource",
+    "AsyncContactsResourceWithRawResponse",
+    "ContactsResource",
+    "ContactsResourceWithRawResponse",
+]
+
+
+class ContactsResourceWithRawResponse(_resource.Resource):
+    """`talki.contacts.with_raw_response`: the methods of `talki.contacts`, each
+    returning the whole answer, a `talki.RawResponse` whose `parse()` is what the
+    method returns. An error raises as it does there."""
+
+    def delete(
+        self,
+        contact_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[None]:
+        """`talki.contacts.delete`, returning the whole answer."""
+        return _resource.raw(
+            delete_contact.sync_detailed(
+                client=self._client,
+                contact_id=contact_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def get(
+        self,
+        contact_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Contact]:
+        """`talki.contacts.get`, returning the whole answer."""
+        return _resource.raw(
+            get_contact.sync_detailed(
+                client=self._client,
+                contact_id=contact_id,
+                talki_version=talki_version,
+            )
+        )
+
+    def upsert(
+        self,
+        *,
+        body: ContactUpsert | ContactUpsertDict,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Contact]:
+        """`talki.contacts.upsert`, returning the whole answer."""
+        body = _resource.as_body(body, ContactUpsert)
+        return _resource.raw(
+            upsert_contact.sync_detailed(
+                client=self._client,
+                body=body,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def list(
+        self,
+        *,
+        limit: int | Unset = 50,
+        cursor: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[_pagination.Page[Contact]]:
+        """`talki.contacts.list`, returning the whole answer."""
+
+        def fetch(cursor: None | str | Unset) -> ContactList:
+            return _resource.unwrap(
+                list_contacts.sync_detailed(
+                    client=self._client,
+                    limit=limit,
+                    cursor=cursor,
+                    talki_version=talki_version,
+                )
+            )
+
+        return _resource.raw(
+            list_contacts.sync_detailed(
+                client=self._client,
+                limit=limit,
+                cursor=cursor,
+                talki_version=talki_version,
+            )
+        ).map(lambda page: _pagination.Page(page, fetch, cursor))
 
 
 class ContactsResource(_resource.Resource):
     """`talki.contacts`: each method sends one operation and returns its value, or
     raises the `talki.ApiError` subclass for its error."""
+
+    @cached_property
+    def with_raw_response(self) -> ContactsResourceWithRawResponse:
+        """The same methods, each returning the whole answer: its status and
+        headers (`ETag`, `X-Request-Id`, the rate limits) with the value."""
+        return ContactsResourceWithRawResponse(self._client)
 
     def delete(
         self,
@@ -47,14 +144,13 @@ class ContactsResource(_resource.Resource):
         Returns:
             None
         """
-        _resource.unwrap(
-            delete_contact.sync_detailed(
-                client=self._client,
+        (
+            self.with_raw_response.delete(
                 contact_id=contact_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def get(
         self,
@@ -78,18 +174,17 @@ class ContactsResource(_resource.Resource):
         Returns:
             Contact
         """
-        return _resource.unwrap(
-            get_contact.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.get(
                 contact_id=contact_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     def upsert(
         self,
         *,
-        body: ContactUpsert,
+        body: ContactUpsert | ContactUpsertDict,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Contact:
@@ -114,14 +209,13 @@ class ContactsResource(_resource.Resource):
         Returns:
             Contact
         """
-        return _resource.unwrap(
-            upsert_contact.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.upsert(
                 body=body,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def list(
         self,
@@ -151,10 +245,82 @@ class ContactsResource(_resource.Resource):
             Page[Contact]: This page. Iterating it yields every row from here on,
             fetching the pages after it as it goes.
         """
+        return (
+            self.with_raw_response.list(
+                limit=limit,
+                cursor=cursor,
+                talki_version=talki_version,
+            )
+        ).parse()
 
-        def fetch(cursor: None | str | Unset) -> ContactList:
+
+class AsyncContactsResourceWithRawResponse(_resource.Resource):
+    """`talki.contacts.with_raw_response` on `AsyncTalki`: the methods of `talki.contacts`, each
+    returning the whole answer, a `talki.RawResponse` whose `parse()` is what the
+    method returns. An error raises as it does there."""
+
+    async def delete(
+        self,
+        contact_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[None]:
+        """`talki.contacts.delete`, returning the whole answer."""
+        return _resource.raw(
+            await delete_contact.asyncio_detailed(
+                client=self._client,
+                contact_id=contact_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def get(
+        self,
+        contact_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Contact]:
+        """`talki.contacts.get`, returning the whole answer."""
+        return _resource.raw(
+            await get_contact.asyncio_detailed(
+                client=self._client,
+                contact_id=contact_id,
+                talki_version=talki_version,
+            )
+        )
+
+    async def upsert(
+        self,
+        *,
+        body: ContactUpsert | ContactUpsertDict,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Contact]:
+        """`talki.contacts.upsert`, returning the whole answer."""
+        body = _resource.as_body(body, ContactUpsert)
+        return _resource.raw(
+            await upsert_contact.asyncio_detailed(
+                client=self._client,
+                body=body,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def list(
+        self,
+        *,
+        limit: int | Unset = 50,
+        cursor: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[_pagination.AsyncPage[Contact]]:
+        """`talki.contacts.list`, returning the whole answer."""
+
+        async def fetch(cursor: None | str | Unset) -> ContactList:
             return _resource.unwrap(
-                list_contacts.sync_detailed(
+                await list_contacts.asyncio_detailed(
                     client=self._client,
                     limit=limit,
                     cursor=cursor,
@@ -162,12 +328,25 @@ class ContactsResource(_resource.Resource):
                 )
             )
 
-        return _pagination.Page.first(fetch, cursor)
+        return _resource.raw(
+            await list_contacts.asyncio_detailed(
+                client=self._client,
+                limit=limit,
+                cursor=cursor,
+                talki_version=talki_version,
+            )
+        ).map(lambda page: _pagination.AsyncPage(page, fetch, cursor))
 
 
 class AsyncContactsResource(_resource.Resource):
     """`talki.contacts` on `AsyncTalki`: each method sends one operation and returns its value, or
     raises the `talki.ApiError` subclass for its error."""
+
+    @cached_property
+    def with_raw_response(self) -> AsyncContactsResourceWithRawResponse:
+        """The same methods, each returning the whole answer: its status and
+        headers (`ETag`, `X-Request-Id`, the rate limits) with the value."""
+        return AsyncContactsResourceWithRawResponse(self._client)
 
     async def delete(
         self,
@@ -195,14 +374,13 @@ class AsyncContactsResource(_resource.Resource):
         Returns:
             None
         """
-        _resource.unwrap(
-            await delete_contact.asyncio_detailed(
-                client=self._client,
+        (
+            await self.with_raw_response.delete(
                 contact_id=contact_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     async def get(
         self,
@@ -226,18 +404,17 @@ class AsyncContactsResource(_resource.Resource):
         Returns:
             Contact
         """
-        return _resource.unwrap(
-            await get_contact.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.get(
                 contact_id=contact_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     async def upsert(
         self,
         *,
-        body: ContactUpsert,
+        body: ContactUpsert | ContactUpsertDict,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Contact:
@@ -262,22 +439,21 @@ class AsyncContactsResource(_resource.Resource):
         Returns:
             Contact
         """
-        return _resource.unwrap(
-            await upsert_contact.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.upsert(
                 body=body,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
-    async def list(
+    def list(
         self,
         *,
         limit: int | Unset = 50,
         cursor: None | str | Unset = UNSET,
         talki_version: str | Unset = UNSET,
-    ) -> _pagination.AsyncPage[Contact]:
+    ) -> _pagination.AsyncPager[Contact]:
         """List contact changes
 
          Walk the curated-contact change feed in commit order. Requires `contacts:read`. Limited to 600
@@ -296,18 +472,17 @@ class AsyncContactsResource(_resource.Resource):
             httpx.TimeoutException: If the request takes longer than the client's timeout.
 
         Returns:
-            AsyncPage[Contact]: This page. Iterating it yields every row from here on,
-            fetching the pages after it as it goes.
+            AsyncPager[Contact]: Awaited, this page (an `AsyncPage`). Iterated with `async for`,
+            every row from here on, fetching the pages as it goes.
         """
 
-        async def fetch(cursor: None | str | Unset) -> ContactList:
-            return _resource.unwrap(
-                await list_contacts.asyncio_detailed(
-                    client=self._client,
+        async def first() -> _pagination.AsyncPage[Contact]:
+            return (
+                await self.with_raw_response.list(
                     limit=limit,
                     cursor=cursor,
                     talki_version=talki_version,
                 )
-            )
+            ).parse()
 
-        return await _pagination.AsyncPage.first(fetch, cursor)
+        return _pagination.AsyncPager(first)

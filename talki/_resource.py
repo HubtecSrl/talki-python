@@ -1,5 +1,6 @@
-"""`unwrap`, which turns an answer into its value or an exception, and
-`Resource`, the base of the generated resource classes (`talki.calls`, …).
+"""`unwrap`, which turns an answer into its value or an exception;
+`RawResponse`, an answer with its value; and `Resource`, the base of the
+generated resource classes (`talki.calls`, …).
 
 It imports nothing from `talki.api`, so the generated packages there can
 import it while `Talki` imports them.
@@ -7,16 +8,22 @@ import it while `Talki` imports them.
 
 from __future__ import annotations
 
-from typing import Any, TypeVar, cast
+import datetime
+import enum
+import uuid
+from collections.abc import Callable, Mapping, MutableMapping
+from typing import Any, Generic, TypeVar, cast
 
 from .client import AuthenticatedClient
-from .exceptions import ApiError, error_from
+from .exceptions import REQUEST_ID_HEADER, ApiError, error_from
 from .models import ErrorEnvelope
-from .types import Response
+from .types import Response, Unset
 
-__all__ = ["Resource", "unwrap"]
+__all__ = ["RawResponse", "Resource", "as_body", "raw", "unwrap"]
 
 T = TypeVar("T")
+U = TypeVar("U")
+M = TypeVar("M")
 
 
 class Resource:
@@ -24,6 +31,41 @@ class Resource:
 
     def __init__(self, client: AuthenticatedClient) -> None:
         self._client = client
+
+
+class RawResponse(Generic[T]):
+    """A successful answer, as `talki.<tag>.with_raw_response.<method>()`
+    returns it: its `status_code`, `headers` and `content`, and `parse()`, the
+    value the method itself returns.
+
+        raw = talki.account.with_raw_response.get()
+        account, etag = raw.parse(), raw.headers["ETag"]
+    """
+
+    def __init__(self, response: Response[Any], value: T) -> None:
+        self._response = response
+        self.status_code = int(response.status_code)
+        # Case-insensitive: `headers["etag"]` finds `ETag`.
+        self.headers: MutableMapping[str, str] = response.headers
+        self.content = response.content
+        self._value = value
+
+    @property
+    def request_id(self) -> str | None:
+        """The `X-Request-Id` to quote to Talki about this request."""
+        return self.headers.get(REQUEST_ID_HEADER)
+
+    def parse(self) -> T:
+        """The value the method returns: the model, a page, or None for
+        `204 No Content`."""
+        return self._value
+
+    def map(self, function: Callable[[T], U]) -> RawResponse[U]:
+        """The same answer with ``function`` of its value."""
+        return RawResponse(self._response, function(self._value))
+
+    def __repr__(self) -> str:
+        return f"RawResponse(status_code={self.status_code}, request_id={self.request_id!r})"
 
 
 def unwrap(response: Response[T | ErrorEnvelope]) -> T:
@@ -46,3 +88,49 @@ def unwrap(response: Response[T | ErrorEnvelope]) -> T:
             body=response.content,
         )
     return cast(T, parsed)
+
+
+def raw(response: Response[T | ErrorEnvelope]) -> RawResponse[T]:
+    """A `*_detailed` answer as a `RawResponse`, or the exception `unwrap` raises."""
+    return RawResponse(response, unwrap(response))
+
+
+class _JsonBody:
+    """A dict passed as `body=`, sent as written: the generated operations only
+    ever call a body's `to_dict()`."""
+
+    def __init__(self, body: Mapping[str, Any]) -> None:
+        self._json = _json(body)
+
+    def to_dict(self) -> Any:
+        return self._json
+
+
+def as_body(body: M | Mapping[str, Any], model: type[M]) -> M:
+    """``body`` as the operation takes it: a ``model`` as it is, a dict (a
+    `<Model>Dict`) wrapped to be sent as written. The API checks it, as it does
+    a model: an unknown key or a wrong type is refused with `400`."""
+    if isinstance(body, Mapping):
+        # Stands in for the model, whose `to_dict()` is all an operation calls.
+        return cast(M, _JsonBody(body))
+    return body
+
+
+def _json(value: Any) -> Any:
+    """``value`` in the JSON form the API reads: a nested model by its
+    `to_dict()`, an enum by its value, a date, datetime or time as ISO 8601, a
+    UUID as text. A key whose value is `UNSET` is left out."""
+    if isinstance(value, Mapping):
+        return {str(key): _json(item) for key, item in value.items() if not isinstance(item, Unset)}
+    if isinstance(value, (list, tuple)):
+        return [_json(item) for item in value]
+    if isinstance(value, enum.Enum):
+        return value.value
+    if isinstance(value, (datetime.date, datetime.time)):  # a datetime is a date
+        return value.isoformat()
+    if isinstance(value, uuid.UUID):
+        return str(value)
+    to_dict = getattr(value, "to_dict", None)
+    if callable(to_dict):
+        return to_dict()
+    return value

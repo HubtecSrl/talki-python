@@ -67,6 +67,21 @@ def test_the_async_client_says_it_too():
     assert recorder.requests[0].headers["User-Agent"].startswith(f"talki-python/{talki.__version__} ")
 
 
+def test_an_integration_adds_its_own_name_after_the_clients():
+    recorder = Recorder(count())
+    with client_for(recorder, user_agent=" acme-crm/2.1 ") as client:
+        client.with_options(timeout=5).calls.count()
+    agent = recorder.requests[0].headers["User-Agent"]
+    assert agent.startswith(f"talki-python/{talki.__version__} python/")
+    assert agent.endswith(f"httpx/{httpx.__version__} acme-crm/2.1")
+
+
+@pytest.mark.parametrize("user_agent", ["", "  ", "acme\r\nX-Injected: 1"])
+def test_a_user_agent_must_be_one_line(user_agent):
+    with pytest.raises(ValueError):
+        Talki(api_key="talki_test_x", user_agent=user_agent)
+
+
 def test_token_requests_say_it_too():
     request = OAuthApp("talki_cid_x", "talki_cs_x").token_request({"grant_type": "refresh_token"})
     assert request.headers["User-Agent"].startswith(f"talki-python/{talki.__version__} ")

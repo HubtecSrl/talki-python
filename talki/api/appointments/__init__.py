@@ -2,13 +2,14 @@
 which `Talki` and `AsyncTalki` expose as `appointments`."""
 
 import datetime
+from functools import cached_property
 
 from ... import _resource
 from ... import pagination as _pagination
 from ...models.appointment import Appointment
-from ...models.appointment_create import AppointmentCreate
+from ...models.appointment_create import AppointmentCreate, AppointmentCreateDict
 from ...models.appointment_list import AppointmentList
-from ...models.appointment_reschedule import AppointmentReschedule
+from ...models.appointment_reschedule import AppointmentReschedule, AppointmentRescheduleDict
 from ...models.appointment_status import AppointmentStatus
 from ...types import UNSET, Unset
 from . import (
@@ -20,12 +21,156 @@ from . import (
     restore_appointment,
 )
 
-__all__ = ["AsyncAppointmentsResource", "AppointmentsResource"]
+__all__ = [
+    "AsyncAppointmentsResource",
+    "AsyncAppointmentsResourceWithRawResponse",
+    "AppointmentsResource",
+    "AppointmentsResourceWithRawResponse",
+]
+
+
+class AppointmentsResourceWithRawResponse(_resource.Resource):
+    """`talki.appointments.with_raw_response`: the methods of `talki.appointments`, each
+    returning the whole answer, a `talki.RawResponse` whose `parse()` is what the
+    method returns. An error raises as it does there."""
+
+    def cancel(
+        self,
+        appointment_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[None]:
+        """`talki.appointments.cancel`, returning the whole answer."""
+        return _resource.raw(
+            cancel_appointment.sync_detailed(
+                client=self._client,
+                appointment_id=appointment_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def create(
+        self,
+        *,
+        body: AppointmentCreate | AppointmentCreateDict,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Appointment]:
+        """`talki.appointments.create`, returning the whole answer."""
+        body = _resource.as_body(body, AppointmentCreate)
+        return _resource.raw(
+            create_appointment.sync_detailed(
+                client=self._client,
+                body=body,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def get(
+        self,
+        appointment_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Appointment]:
+        """`talki.appointments.get`, returning the whole answer."""
+        return _resource.raw(
+            get_appointment.sync_detailed(
+                client=self._client,
+                appointment_id=appointment_id,
+                talki_version=talki_version,
+            )
+        )
+
+    def reschedule(
+        self,
+        appointment_id: str,
+        *,
+        body: AppointmentReschedule | AppointmentRescheduleDict,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Appointment]:
+        """`talki.appointments.reschedule`, returning the whole answer."""
+        body = _resource.as_body(body, AppointmentReschedule)
+        return _resource.raw(
+            reschedule_appointment.sync_detailed(
+                client=self._client,
+                appointment_id=appointment_id,
+                body=body,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def restore(
+        self,
+        appointment_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Appointment]:
+        """`talki.appointments.restore`, returning the whole answer."""
+        return _resource.raw(
+            restore_appointment.sync_detailed(
+                client=self._client,
+                appointment_id=appointment_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def list(
+        self,
+        *,
+        limit: int | Unset = 50,
+        cursor: None | str | Unset = UNSET,
+        status: AppointmentStatus | None | Unset = UNSET,
+        starts_after: datetime.datetime | None | Unset = UNSET,
+        starts_before: datetime.datetime | None | Unset = UNSET,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[_pagination.Page[Appointment]]:
+        """`talki.appointments.list`, returning the whole answer."""
+
+        def fetch(cursor: None | str | Unset) -> AppointmentList:
+            return _resource.unwrap(
+                list_appointments.sync_detailed(
+                    client=self._client,
+                    limit=limit,
+                    cursor=cursor,
+                    status=status,
+                    starts_after=starts_after,
+                    starts_before=starts_before,
+                    location_id=location_id,
+                    talki_version=talki_version,
+                )
+            )
+
+        return _resource.raw(
+            list_appointments.sync_detailed(
+                client=self._client,
+                limit=limit,
+                cursor=cursor,
+                status=status,
+                starts_after=starts_after,
+                starts_before=starts_before,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        ).map(lambda page: _pagination.Page(page, fetch, cursor))
 
 
 class AppointmentsResource(_resource.Resource):
     """`talki.appointments`: each method sends one operation and returns its value, or
     raises the `talki.ApiError` subclass for its error."""
+
+    @cached_property
+    def with_raw_response(self) -> AppointmentsResourceWithRawResponse:
+        """The same methods, each returning the whole answer: its status and
+        headers (`ETag`, `X-Request-Id`, the rate limits) with the value."""
+        return AppointmentsResourceWithRawResponse(self._client)
 
     def cancel(
         self,
@@ -54,19 +199,18 @@ class AppointmentsResource(_resource.Resource):
         Returns:
             None
         """
-        _resource.unwrap(
-            cancel_appointment.sync_detailed(
-                client=self._client,
+        (
+            self.with_raw_response.cancel(
                 appointment_id=appointment_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def create(
         self,
         *,
-        body: AppointmentCreate,
+        body: AppointmentCreate | AppointmentCreateDict,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Appointment:
@@ -92,14 +236,13 @@ class AppointmentsResource(_resource.Resource):
         Returns:
             Appointment
         """
-        return _resource.unwrap(
-            create_appointment.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.create(
                 body=body,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def get(
         self,
@@ -123,19 +266,18 @@ class AppointmentsResource(_resource.Resource):
         Returns:
             Appointment
         """
-        return _resource.unwrap(
-            get_appointment.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.get(
                 appointment_id=appointment_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     def reschedule(
         self,
         appointment_id: str,
         *,
-        body: AppointmentReschedule,
+        body: AppointmentReschedule | AppointmentRescheduleDict,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Appointment:
@@ -164,15 +306,14 @@ class AppointmentsResource(_resource.Resource):
         Returns:
             Appointment
         """
-        return _resource.unwrap(
-            reschedule_appointment.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.reschedule(
                 appointment_id=appointment_id,
                 body=body,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def restore(
         self,
@@ -204,14 +345,13 @@ class AppointmentsResource(_resource.Resource):
         Returns:
             Appointment
         """
-        return _resource.unwrap(
-            restore_appointment.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.restore(
                 appointment_id=appointment_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def list(
         self,
@@ -259,10 +399,127 @@ class AppointmentsResource(_resource.Resource):
             Page[Appointment]: This page. Iterating it yields every row from here on,
             fetching the pages after it as it goes.
         """
+        return (
+            self.with_raw_response.list(
+                limit=limit,
+                cursor=cursor,
+                status=status,
+                starts_after=starts_after,
+                starts_before=starts_before,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        ).parse()
 
-        def fetch(cursor: None | str | Unset) -> AppointmentList:
+
+class AsyncAppointmentsResourceWithRawResponse(_resource.Resource):
+    """`talki.appointments.with_raw_response` on `AsyncTalki`: the methods of `talki.appointments`, each
+    returning the whole answer, a `talki.RawResponse` whose `parse()` is what the
+    method returns. An error raises as it does there."""
+
+    async def cancel(
+        self,
+        appointment_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[None]:
+        """`talki.appointments.cancel`, returning the whole answer."""
+        return _resource.raw(
+            await cancel_appointment.asyncio_detailed(
+                client=self._client,
+                appointment_id=appointment_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def create(
+        self,
+        *,
+        body: AppointmentCreate | AppointmentCreateDict,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Appointment]:
+        """`talki.appointments.create`, returning the whole answer."""
+        body = _resource.as_body(body, AppointmentCreate)
+        return _resource.raw(
+            await create_appointment.asyncio_detailed(
+                client=self._client,
+                body=body,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def get(
+        self,
+        appointment_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Appointment]:
+        """`talki.appointments.get`, returning the whole answer."""
+        return _resource.raw(
+            await get_appointment.asyncio_detailed(
+                client=self._client,
+                appointment_id=appointment_id,
+                talki_version=talki_version,
+            )
+        )
+
+    async def reschedule(
+        self,
+        appointment_id: str,
+        *,
+        body: AppointmentReschedule | AppointmentRescheduleDict,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Appointment]:
+        """`talki.appointments.reschedule`, returning the whole answer."""
+        body = _resource.as_body(body, AppointmentReschedule)
+        return _resource.raw(
+            await reschedule_appointment.asyncio_detailed(
+                client=self._client,
+                appointment_id=appointment_id,
+                body=body,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def restore(
+        self,
+        appointment_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Appointment]:
+        """`talki.appointments.restore`, returning the whole answer."""
+        return _resource.raw(
+            await restore_appointment.asyncio_detailed(
+                client=self._client,
+                appointment_id=appointment_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def list(
+        self,
+        *,
+        limit: int | Unset = 50,
+        cursor: None | str | Unset = UNSET,
+        status: AppointmentStatus | None | Unset = UNSET,
+        starts_after: datetime.datetime | None | Unset = UNSET,
+        starts_before: datetime.datetime | None | Unset = UNSET,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[_pagination.AsyncPage[Appointment]]:
+        """`talki.appointments.list`, returning the whole answer."""
+
+        async def fetch(cursor: None | str | Unset) -> AppointmentList:
             return _resource.unwrap(
-                list_appointments.sync_detailed(
+                await list_appointments.asyncio_detailed(
                     client=self._client,
                     limit=limit,
                     cursor=cursor,
@@ -274,12 +531,29 @@ class AppointmentsResource(_resource.Resource):
                 )
             )
 
-        return _pagination.Page.first(fetch, cursor)
+        return _resource.raw(
+            await list_appointments.asyncio_detailed(
+                client=self._client,
+                limit=limit,
+                cursor=cursor,
+                status=status,
+                starts_after=starts_after,
+                starts_before=starts_before,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        ).map(lambda page: _pagination.AsyncPage(page, fetch, cursor))
 
 
 class AsyncAppointmentsResource(_resource.Resource):
     """`talki.appointments` on `AsyncTalki`: each method sends one operation and returns its value, or
     raises the `talki.ApiError` subclass for its error."""
+
+    @cached_property
+    def with_raw_response(self) -> AsyncAppointmentsResourceWithRawResponse:
+        """The same methods, each returning the whole answer: its status and
+        headers (`ETag`, `X-Request-Id`, the rate limits) with the value."""
+        return AsyncAppointmentsResourceWithRawResponse(self._client)
 
     async def cancel(
         self,
@@ -308,19 +582,18 @@ class AsyncAppointmentsResource(_resource.Resource):
         Returns:
             None
         """
-        _resource.unwrap(
-            await cancel_appointment.asyncio_detailed(
-                client=self._client,
+        (
+            await self.with_raw_response.cancel(
                 appointment_id=appointment_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     async def create(
         self,
         *,
-        body: AppointmentCreate,
+        body: AppointmentCreate | AppointmentCreateDict,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Appointment:
@@ -346,14 +619,13 @@ class AsyncAppointmentsResource(_resource.Resource):
         Returns:
             Appointment
         """
-        return _resource.unwrap(
-            await create_appointment.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.create(
                 body=body,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     async def get(
         self,
@@ -377,19 +649,18 @@ class AsyncAppointmentsResource(_resource.Resource):
         Returns:
             Appointment
         """
-        return _resource.unwrap(
-            await get_appointment.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.get(
                 appointment_id=appointment_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     async def reschedule(
         self,
         appointment_id: str,
         *,
-        body: AppointmentReschedule,
+        body: AppointmentReschedule | AppointmentRescheduleDict,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Appointment:
@@ -418,15 +689,14 @@ class AsyncAppointmentsResource(_resource.Resource):
         Returns:
             Appointment
         """
-        return _resource.unwrap(
-            await reschedule_appointment.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.reschedule(
                 appointment_id=appointment_id,
                 body=body,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     async def restore(
         self,
@@ -458,16 +728,15 @@ class AsyncAppointmentsResource(_resource.Resource):
         Returns:
             Appointment
         """
-        return _resource.unwrap(
-            await restore_appointment.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.restore(
                 appointment_id=appointment_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
-    async def list(
+    def list(
         self,
         *,
         limit: int | Unset = 50,
@@ -477,7 +746,7 @@ class AsyncAppointmentsResource(_resource.Resource):
         starts_before: datetime.datetime | None | Unset = UNSET,
         location_id: None | str | Unset = UNSET,
         talki_version: str | Unset = UNSET,
-    ) -> _pagination.AsyncPage[Appointment]:
+    ) -> _pagination.AsyncPager[Appointment]:
         """List appointment changes
 
          Walk the appointment change feed in commit order. Store `next_cursor` even on the last non-empty
@@ -510,14 +779,13 @@ class AsyncAppointmentsResource(_resource.Resource):
             httpx.TimeoutException: If the request takes longer than the client's timeout.
 
         Returns:
-            AsyncPage[Appointment]: This page. Iterating it yields every row from here on,
-            fetching the pages after it as it goes.
+            AsyncPager[Appointment]: Awaited, this page (an `AsyncPage`). Iterated with `async for`,
+            every row from here on, fetching the pages as it goes.
         """
 
-        async def fetch(cursor: None | str | Unset) -> AppointmentList:
-            return _resource.unwrap(
-                await list_appointments.asyncio_detailed(
-                    client=self._client,
+        async def first() -> _pagination.AsyncPage[Appointment]:
+            return (
+                await self.with_raw_response.list(
                     limit=limit,
                     cursor=cursor,
                     status=status,
@@ -526,6 +794,6 @@ class AsyncAppointmentsResource(_resource.Resource):
                     location_id=location_id,
                     talki_version=talki_version,
                 )
-            )
+            ).parse()
 
-        return await _pagination.AsyncPage.first(fetch, cursor)
+        return _pagination.AsyncPager(first)

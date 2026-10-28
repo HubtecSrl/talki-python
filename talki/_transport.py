@@ -95,6 +95,24 @@ def _envelope_code(response: httpx.Response, body: bytes | None) -> str | None:
     return code if isinstance(code, str) else ""
 
 
+class _Connections:
+    """The httpx transports requests go out on, opened on first use: what a
+    `TalkiTransport` and its `with_retries` copies share."""
+
+    def __init__(
+        self,
+        verify: ssl.SSLContext | str | bool,
+        proxy: str | None,
+        transport: httpx.BaseTransport | httpx.AsyncBaseTransport | None,
+    ) -> None:
+        self.verify = verify
+        self.proxy = proxy
+        self.inner = transport
+        self.sync: httpx.BaseTransport | None = None
+        self.async_: httpx.AsyncBaseTransport | None = None
+        self.lock = threading.Lock()
+
+
 class TalkiTransport(httpx.BaseTransport, httpx.AsyncBaseTransport):
     def __init__(
         self,
@@ -112,15 +130,20 @@ class TalkiTransport(httpx.BaseTransport, httpx.AsyncBaseTransport):
             raise ValueError("max_retries cannot be negative")
         self.max_retries = max_retries
         self.auto_idempotency = auto_idempotency
-        self._verify = verify
-        self._proxy = proxy
-        self._inner = transport
-        self._sync: httpx.BaseTransport | None = None
-        self._async: httpx.AsyncBaseTransport | None = None
-        self._lock = threading.Lock()
+        self._connections = _Connections(verify, proxy, transport)
         self._sleep = sleep
         self._async_sleep = async_sleep
         self._jitter = jitter
+
+    def with_retries(self, max_retries: int) -> TalkiTransport:
+        """A copy that retries ``max_retries`` times, on the same connections.
+        Closing either closes them for both, and the next request reopens them."""
+        if max_retries < 0:
+            raise ValueError("max_retries cannot be negative")
+        copy = TalkiTransport.__new__(TalkiTransport)
+        copy.__dict__.update(self.__dict__)
+        copy.max_retries = max_retries
+        return copy
 
     # The request, before the first attempt.
 
@@ -214,20 +237,22 @@ class TalkiTransport(httpx.BaseTransport, httpx.AsyncBaseTransport):
     def _proxy_config(self) -> httpx.Proxy | None:
         # An `httpx.Proxy`, which every supported httpx takes; a plain URL
         # only from 0.26.
-        return httpx.Proxy(self._proxy) if self._proxy else None
+        proxy = self._connections.proxy
+        return httpx.Proxy(proxy) if proxy else None
 
     # Sync.
 
     def _sync_transport(self) -> httpx.BaseTransport:
-        with self._lock:
-            if self._sync is None:
-                if self._inner is None:
-                    self._sync = httpx.HTTPTransport(verify=self._verify, proxy=self._proxy_config())
-                elif isinstance(self._inner, httpx.BaseTransport):
-                    self._sync = self._inner
+        connections = self._connections
+        with connections.lock:
+            if connections.sync is None:
+                if connections.inner is None:
+                    connections.sync = httpx.HTTPTransport(verify=connections.verify, proxy=self._proxy_config())
+                elif isinstance(connections.inner, httpx.BaseTransport):
+                    connections.sync = connections.inner
                 else:
                     raise TypeError("The transport given is async only; this client was used synchronously.")
-            return self._sync
+            return connections.sync
 
     def handle_request(self, request: httpx.Request) -> httpx.Response:
         self._prepare(request)
@@ -262,23 +287,25 @@ class TalkiTransport(httpx.BaseTransport, httpx.AsyncBaseTransport):
 
     # Forgotten once closed, so that the next request opens a new pool.
     def close(self) -> None:
-        with self._lock:
-            closing, self._sync = self._sync, None
+        connections = self._connections
+        with connections.lock:
+            closing, connections.sync = connections.sync, None
         if closing is not None:
             closing.close()
 
     # Async.
 
     def _async_transport(self) -> httpx.AsyncBaseTransport:
-        with self._lock:
-            if self._async is None:
-                if self._inner is None:
-                    self._async = httpx.AsyncHTTPTransport(verify=self._verify, proxy=self._proxy_config())
-                elif isinstance(self._inner, httpx.AsyncBaseTransport):
-                    self._async = self._inner
+        connections = self._connections
+        with connections.lock:
+            if connections.async_ is None:
+                if connections.inner is None:
+                    connections.async_ = httpx.AsyncHTTPTransport(verify=connections.verify, proxy=self._proxy_config())
+                elif isinstance(connections.inner, httpx.AsyncBaseTransport):
+                    connections.async_ = connections.inner
                 else:
                     raise TypeError("The transport given is sync only; this client was used asynchronously.")
-            return self._async
+            return connections.async_
 
     async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
         self._prepare(request)
@@ -312,8 +339,9 @@ class TalkiTransport(httpx.BaseTransport, httpx.AsyncBaseTransport):
             attempt += 1
 
     async def aclose(self) -> None:
-        with self._lock:
-            closing, self._async = self._async, None
+        connections = self._connections
+        with connections.lock:
+            closing, connections.async_ = connections.async_, None
         if closing is not None:
             await closing.aclose()
 

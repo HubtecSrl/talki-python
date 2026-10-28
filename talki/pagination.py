@@ -11,7 +11,7 @@ first page, fetched by the call, whose iteration fetches the rest.
         save(page.data)
         stored = position(page, stored)
 
-    async for call in await talki.calls.list():  # AsyncTalki
+    async for call in talki.calls.list():        # AsyncTalki
         ...
 
 `pages` and `rows` (`apages` and `arows`) do the same for an operation under
@@ -38,6 +38,7 @@ from collections.abc import (
     Awaitable,
     Callable,
     Coroutine,
+    Generator,
     Iterable,
     Iterator,
     Sequence,
@@ -49,7 +50,7 @@ from .exceptions import TalkiError
 from .models import ErrorEnvelope
 from .types import UNSET, Response, Unset
 
-__all__ = ["AsyncPage", "Page", "PaginationError", "apages", "arows", "pages", "position", "rows"]
+__all__ = ["AsyncPage", "AsyncPager", "Page", "PaginationError", "apages", "arows", "pages", "position", "rows"]
 
 R = TypeVar("R", covariant=True)
 
@@ -225,3 +226,39 @@ class AsyncPage(Generic[T]):
 
     def __repr__(self) -> str:
         return f"AsyncPage(rows={len(self.data)}, has_more={self.has_more}, next_cursor={self.next_cursor!r})"
+
+
+class AsyncPager(Generic[T]):
+    """What a list method of `AsyncTalki` returns, before any request: await it
+    for the first page, an `AsyncPage`, or ``async for`` it for every row.
+
+        page = await talki.calls.list(limit=50)   # the first page
+        async for call in talki.calls.list():     # every row, page after page
+            ...
+
+    Each await, and each walk, sends the first request again. Without an
+    await, an error on the first page raises from the loop, not the call.
+    """
+
+    def __init__(self, first: Callable[[], Awaitable[AsyncPage[T]]]) -> None:
+        self._first = first
+
+    def __await__(self) -> Generator[Any, Any, AsyncPage[T]]:
+        return self._get().__await__()
+
+    async def _get(self) -> AsyncPage[T]:
+        return await self._first()
+
+    async def iter_pages(self) -> AsyncIterator[AsyncPage[T]]:
+        """The first page, then every page after it."""
+        page = await self._first()
+        async for each in page.iter_pages():
+            yield each
+
+    async def __aiter__(self) -> AsyncIterator[T]:
+        page = await self._first()
+        async for row in page:
+            yield row
+
+    def __repr__(self) -> str:
+        return "AsyncPager()"

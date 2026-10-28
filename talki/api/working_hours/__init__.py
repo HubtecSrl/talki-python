@@ -1,21 +1,77 @@
 """The `working_hours` operations, one module each, and `WorkingHoursResource` / `AsyncWorkingHoursResource`,
 which `Talki` and `AsyncTalki` expose as `working_hours`."""
 
+from functools import cached_property
+
 from ... import _resource
 from ...models.working_hours import WorkingHours
-from ...models.working_hours_update import WorkingHoursUpdate
+from ...models.working_hours_update import WorkingHoursUpdate, WorkingHoursUpdateDict
 from ...types import UNSET, Unset
 from . import (
     get_working_hours,
     replace_working_hours,
 )
 
-__all__ = ["AsyncWorkingHoursResource", "WorkingHoursResource"]
+__all__ = [
+    "AsyncWorkingHoursResource",
+    "AsyncWorkingHoursResourceWithRawResponse",
+    "WorkingHoursResource",
+    "WorkingHoursResourceWithRawResponse",
+]
+
+
+class WorkingHoursResourceWithRawResponse(_resource.Resource):
+    """`talki.working_hours.with_raw_response`: the methods of `talki.working_hours`, each
+    returning the whole answer, a `talki.RawResponse` whose `parse()` is what the
+    method returns. An error raises as it does there."""
+
+    def get(
+        self,
+        *,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[WorkingHours]:
+        """`talki.working_hours.get`, returning the whole answer."""
+        return _resource.raw(
+            get_working_hours.sync_detailed(
+                client=self._client,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        )
+
+    def replace(
+        self,
+        *,
+        body: WorkingHoursUpdate | WorkingHoursUpdateDict,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+        if_match: str | Unset = UNSET,
+    ) -> _resource.RawResponse[WorkingHours]:
+        """`talki.working_hours.replace`, returning the whole answer."""
+        body = _resource.as_body(body, WorkingHoursUpdate)
+        return _resource.raw(
+            replace_working_hours.sync_detailed(
+                client=self._client,
+                body=body,
+                location_id=location_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+                if_match=if_match,
+            )
+        )
 
 
 class WorkingHoursResource(_resource.Resource):
     """`talki.working_hours`: each method sends one operation and returns its value, or
     raises the `talki.ApiError` subclass for its error."""
+
+    @cached_property
+    def with_raw_response(self) -> WorkingHoursResourceWithRawResponse:
+        """The same methods, each returning the whole answer: its status and
+        headers (`ETag`, `X-Request-Id`, the rate limits) with the value."""
+        return WorkingHoursResourceWithRawResponse(self._client)
 
     def get(
         self,
@@ -41,18 +97,17 @@ class WorkingHoursResource(_resource.Resource):
         Returns:
             WorkingHours
         """
-        return _resource.unwrap(
-            get_working_hours.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.get(
                 location_id=location_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     def replace(
         self,
         *,
-        body: WorkingHoursUpdate,
+        body: WorkingHoursUpdate | WorkingHoursUpdateDict,
         location_id: None | str | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
@@ -81,8 +136,50 @@ class WorkingHoursResource(_resource.Resource):
         Returns:
             WorkingHours
         """
-        return _resource.unwrap(
-            replace_working_hours.sync_detailed(
+        return (
+            self.with_raw_response.replace(
+                body=body,
+                location_id=location_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+                if_match=if_match,
+            )
+        ).parse()
+
+
+class AsyncWorkingHoursResourceWithRawResponse(_resource.Resource):
+    """`talki.working_hours.with_raw_response` on `AsyncTalki`: the methods of `talki.working_hours`, each
+    returning the whole answer, a `talki.RawResponse` whose `parse()` is what the
+    method returns. An error raises as it does there."""
+
+    async def get(
+        self,
+        *,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[WorkingHours]:
+        """`talki.working_hours.get`, returning the whole answer."""
+        return _resource.raw(
+            await get_working_hours.asyncio_detailed(
+                client=self._client,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        )
+
+    async def replace(
+        self,
+        *,
+        body: WorkingHoursUpdate | WorkingHoursUpdateDict,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+        if_match: str | Unset = UNSET,
+    ) -> _resource.RawResponse[WorkingHours]:
+        """`talki.working_hours.replace`, returning the whole answer."""
+        body = _resource.as_body(body, WorkingHoursUpdate)
+        return _resource.raw(
+            await replace_working_hours.asyncio_detailed(
                 client=self._client,
                 body=body,
                 location_id=location_id,
@@ -96,6 +193,12 @@ class WorkingHoursResource(_resource.Resource):
 class AsyncWorkingHoursResource(_resource.Resource):
     """`talki.working_hours` on `AsyncTalki`: each method sends one operation and returns its value, or
     raises the `talki.ApiError` subclass for its error."""
+
+    @cached_property
+    def with_raw_response(self) -> AsyncWorkingHoursResourceWithRawResponse:
+        """The same methods, each returning the whole answer: its status and
+        headers (`ETag`, `X-Request-Id`, the rate limits) with the value."""
+        return AsyncWorkingHoursResourceWithRawResponse(self._client)
 
     async def get(
         self,
@@ -121,18 +224,17 @@ class AsyncWorkingHoursResource(_resource.Resource):
         Returns:
             WorkingHours
         """
-        return _resource.unwrap(
-            await get_working_hours.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.get(
                 location_id=location_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     async def replace(
         self,
         *,
-        body: WorkingHoursUpdate,
+        body: WorkingHoursUpdate | WorkingHoursUpdateDict,
         location_id: None | str | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
@@ -161,13 +263,12 @@ class AsyncWorkingHoursResource(_resource.Resource):
         Returns:
             WorkingHours
         """
-        return _resource.unwrap(
-            await replace_working_hours.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.replace(
                 body=body,
                 location_id=location_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
                 if_match=if_match,
             )
-        )
+        ).parse()

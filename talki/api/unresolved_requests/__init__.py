@@ -1,14 +1,16 @@
 """The `unresolved_requests` operations, one module each, and `UnresolvedRequestsResource` / `AsyncUnresolvedRequestsResource`,
 which `Talki` and `AsyncTalki` expose as `unresolved_requests`."""
 
+from functools import cached_property
+
 from ... import _resource
 from ... import pagination as _pagination
 from ...models.unresolved_request import UnresolvedRequest
 from ...models.unresolved_request_list import UnresolvedRequestList
 from ...models.unresolved_request_status import UnresolvedRequestStatus
-from ...models.unresolved_request_teach import UnresolvedRequestTeach
+from ...models.unresolved_request_teach import UnresolvedRequestTeach, UnresolvedRequestTeachDict
 from ...models.unresolved_request_teaching import UnresolvedRequestTeaching
-from ...models.unresolved_request_update import UnresolvedRequestUpdate
+from ...models.unresolved_request_update import UnresolvedRequestUpdate, UnresolvedRequestUpdateDict
 from ...types import UNSET, Unset
 from . import (
     get_unresolved_request,
@@ -17,12 +19,118 @@ from . import (
     update_unresolved_request,
 )
 
-__all__ = ["AsyncUnresolvedRequestsResource", "UnresolvedRequestsResource"]
+__all__ = [
+    "AsyncUnresolvedRequestsResource",
+    "AsyncUnresolvedRequestsResourceWithRawResponse",
+    "UnresolvedRequestsResource",
+    "UnresolvedRequestsResourceWithRawResponse",
+]
+
+
+class UnresolvedRequestsResourceWithRawResponse(_resource.Resource):
+    """`talki.unresolved_requests.with_raw_response`: the methods of `talki.unresolved_requests`, each
+    returning the whole answer, a `talki.RawResponse` whose `parse()` is what the
+    method returns. An error raises as it does there."""
+
+    def get(
+        self,
+        request_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[UnresolvedRequest]:
+        """`talki.unresolved_requests.get`, returning the whole answer."""
+        return _resource.raw(
+            get_unresolved_request.sync_detailed(
+                client=self._client,
+                request_id=request_id,
+                talki_version=talki_version,
+            )
+        )
+
+    def teach(
+        self,
+        request_id: str,
+        *,
+        body: UnresolvedRequestTeach | UnresolvedRequestTeachDict,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[UnresolvedRequestTeaching]:
+        """`talki.unresolved_requests.teach`, returning the whole answer."""
+        body = _resource.as_body(body, UnresolvedRequestTeach)
+        return _resource.raw(
+            teach_unresolved_request.sync_detailed(
+                client=self._client,
+                request_id=request_id,
+                body=body,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def update(
+        self,
+        request_id: str,
+        *,
+        body: UnresolvedRequestUpdate | UnresolvedRequestUpdateDict,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[UnresolvedRequest]:
+        """`talki.unresolved_requests.update`, returning the whole answer."""
+        body = _resource.as_body(body, UnresolvedRequestUpdate)
+        return _resource.raw(
+            update_unresolved_request.sync_detailed(
+                client=self._client,
+                request_id=request_id,
+                body=body,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def list(
+        self,
+        *,
+        limit: int | Unset = 50,
+        cursor: None | str | Unset = UNSET,
+        status: None | UnresolvedRequestStatus | Unset = UNSET,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[_pagination.Page[UnresolvedRequest]]:
+        """`talki.unresolved_requests.list`, returning the whole answer."""
+
+        def fetch(cursor: None | str | Unset) -> UnresolvedRequestList:
+            return _resource.unwrap(
+                list_unresolved_requests.sync_detailed(
+                    client=self._client,
+                    limit=limit,
+                    cursor=cursor,
+                    status=status,
+                    location_id=location_id,
+                    talki_version=talki_version,
+                )
+            )
+
+        return _resource.raw(
+            list_unresolved_requests.sync_detailed(
+                client=self._client,
+                limit=limit,
+                cursor=cursor,
+                status=status,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        ).map(lambda page: _pagination.Page(page, fetch, cursor))
 
 
 class UnresolvedRequestsResource(_resource.Resource):
     """`talki.unresolved_requests`: each method sends one operation and returns its value, or
     raises the `talki.ApiError` subclass for its error."""
+
+    @cached_property
+    def with_raw_response(self) -> UnresolvedRequestsResourceWithRawResponse:
+        """The same methods, each returning the whole answer: its status and
+        headers (`ETag`, `X-Request-Id`, the rate limits) with the value."""
+        return UnresolvedRequestsResourceWithRawResponse(self._client)
 
     def get(
         self,
@@ -46,19 +154,18 @@ class UnresolvedRequestsResource(_resource.Resource):
         Returns:
             UnresolvedRequest
         """
-        return _resource.unwrap(
-            get_unresolved_request.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.get(
                 request_id=request_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     def teach(
         self,
         request_id: str,
         *,
-        body: UnresolvedRequestTeach,
+        body: UnresolvedRequestTeach | UnresolvedRequestTeachDict,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> UnresolvedRequestTeaching:
@@ -92,21 +199,20 @@ class UnresolvedRequestsResource(_resource.Resource):
         Returns:
             UnresolvedRequestTeaching
         """
-        return _resource.unwrap(
-            teach_unresolved_request.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.teach(
                 request_id=request_id,
                 body=body,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def update(
         self,
         request_id: str,
         *,
-        body: UnresolvedRequestUpdate,
+        body: UnresolvedRequestUpdate | UnresolvedRequestUpdateDict,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> UnresolvedRequest:
@@ -130,15 +236,14 @@ class UnresolvedRequestsResource(_resource.Resource):
         Returns:
             UnresolvedRequest
         """
-        return _resource.unwrap(
-            update_unresolved_request.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.update(
                 request_id=request_id,
                 body=body,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def list(
         self,
@@ -179,10 +284,91 @@ class UnresolvedRequestsResource(_resource.Resource):
             Page[UnresolvedRequest]: This page. Iterating it yields every row from here on,
             fetching the pages after it as it goes.
         """
+        return (
+            self.with_raw_response.list(
+                limit=limit,
+                cursor=cursor,
+                status=status,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        ).parse()
 
-        def fetch(cursor: None | str | Unset) -> UnresolvedRequestList:
+
+class AsyncUnresolvedRequestsResourceWithRawResponse(_resource.Resource):
+    """`talki.unresolved_requests.with_raw_response` on `AsyncTalki`: the methods of `talki.unresolved_requests`, each
+    returning the whole answer, a `talki.RawResponse` whose `parse()` is what the
+    method returns. An error raises as it does there."""
+
+    async def get(
+        self,
+        request_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[UnresolvedRequest]:
+        """`talki.unresolved_requests.get`, returning the whole answer."""
+        return _resource.raw(
+            await get_unresolved_request.asyncio_detailed(
+                client=self._client,
+                request_id=request_id,
+                talki_version=talki_version,
+            )
+        )
+
+    async def teach(
+        self,
+        request_id: str,
+        *,
+        body: UnresolvedRequestTeach | UnresolvedRequestTeachDict,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[UnresolvedRequestTeaching]:
+        """`talki.unresolved_requests.teach`, returning the whole answer."""
+        body = _resource.as_body(body, UnresolvedRequestTeach)
+        return _resource.raw(
+            await teach_unresolved_request.asyncio_detailed(
+                client=self._client,
+                request_id=request_id,
+                body=body,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def update(
+        self,
+        request_id: str,
+        *,
+        body: UnresolvedRequestUpdate | UnresolvedRequestUpdateDict,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[UnresolvedRequest]:
+        """`talki.unresolved_requests.update`, returning the whole answer."""
+        body = _resource.as_body(body, UnresolvedRequestUpdate)
+        return _resource.raw(
+            await update_unresolved_request.asyncio_detailed(
+                client=self._client,
+                request_id=request_id,
+                body=body,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def list(
+        self,
+        *,
+        limit: int | Unset = 50,
+        cursor: None | str | Unset = UNSET,
+        status: None | UnresolvedRequestStatus | Unset = UNSET,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[_pagination.AsyncPage[UnresolvedRequest]]:
+        """`talki.unresolved_requests.list`, returning the whole answer."""
+
+        async def fetch(cursor: None | str | Unset) -> UnresolvedRequestList:
             return _resource.unwrap(
-                list_unresolved_requests.sync_detailed(
+                await list_unresolved_requests.asyncio_detailed(
                     client=self._client,
                     limit=limit,
                     cursor=cursor,
@@ -192,12 +378,27 @@ class UnresolvedRequestsResource(_resource.Resource):
                 )
             )
 
-        return _pagination.Page.first(fetch, cursor)
+        return _resource.raw(
+            await list_unresolved_requests.asyncio_detailed(
+                client=self._client,
+                limit=limit,
+                cursor=cursor,
+                status=status,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        ).map(lambda page: _pagination.AsyncPage(page, fetch, cursor))
 
 
 class AsyncUnresolvedRequestsResource(_resource.Resource):
     """`talki.unresolved_requests` on `AsyncTalki`: each method sends one operation and returns its value, or
     raises the `talki.ApiError` subclass for its error."""
+
+    @cached_property
+    def with_raw_response(self) -> AsyncUnresolvedRequestsResourceWithRawResponse:
+        """The same methods, each returning the whole answer: its status and
+        headers (`ETag`, `X-Request-Id`, the rate limits) with the value."""
+        return AsyncUnresolvedRequestsResourceWithRawResponse(self._client)
 
     async def get(
         self,
@@ -221,19 +422,18 @@ class AsyncUnresolvedRequestsResource(_resource.Resource):
         Returns:
             UnresolvedRequest
         """
-        return _resource.unwrap(
-            await get_unresolved_request.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.get(
                 request_id=request_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     async def teach(
         self,
         request_id: str,
         *,
-        body: UnresolvedRequestTeach,
+        body: UnresolvedRequestTeach | UnresolvedRequestTeachDict,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> UnresolvedRequestTeaching:
@@ -267,21 +467,20 @@ class AsyncUnresolvedRequestsResource(_resource.Resource):
         Returns:
             UnresolvedRequestTeaching
         """
-        return _resource.unwrap(
-            await teach_unresolved_request.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.teach(
                 request_id=request_id,
                 body=body,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     async def update(
         self,
         request_id: str,
         *,
-        body: UnresolvedRequestUpdate,
+        body: UnresolvedRequestUpdate | UnresolvedRequestUpdateDict,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> UnresolvedRequest:
@@ -305,17 +504,16 @@ class AsyncUnresolvedRequestsResource(_resource.Resource):
         Returns:
             UnresolvedRequest
         """
-        return _resource.unwrap(
-            await update_unresolved_request.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.update(
                 request_id=request_id,
                 body=body,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
-    async def list(
+    def list(
         self,
         *,
         limit: int | Unset = 50,
@@ -323,7 +521,7 @@ class AsyncUnresolvedRequestsResource(_resource.Resource):
         status: None | UnresolvedRequestStatus | Unset = UNSET,
         location_id: None | str | Unset = UNSET,
         talki_version: str | Unset = UNSET,
-    ) -> _pagination.AsyncPage[UnresolvedRequest]:
+    ) -> _pagination.AsyncPager[UnresolvedRequest]:
         """List unresolved-request changes
 
          Walk the feed of questions the assistant could not answer. A request moves again when it is closed.
@@ -351,20 +549,19 @@ class AsyncUnresolvedRequestsResource(_resource.Resource):
             httpx.TimeoutException: If the request takes longer than the client's timeout.
 
         Returns:
-            AsyncPage[UnresolvedRequest]: This page. Iterating it yields every row from here on,
-            fetching the pages after it as it goes.
+            AsyncPager[UnresolvedRequest]: Awaited, this page (an `AsyncPage`). Iterated with `async for`,
+            every row from here on, fetching the pages as it goes.
         """
 
-        async def fetch(cursor: None | str | Unset) -> UnresolvedRequestList:
-            return _resource.unwrap(
-                await list_unresolved_requests.asyncio_detailed(
-                    client=self._client,
+        async def first() -> _pagination.AsyncPage[UnresolvedRequest]:
+            return (
+                await self.with_raw_response.list(
                     limit=limit,
                     cursor=cursor,
                     status=status,
                     location_id=location_id,
                     talki_version=talki_version,
                 )
-            )
+            ).parse()
 
-        return await _pagination.AsyncPage.first(fetch, cursor)
+        return _pagination.AsyncPager(first)

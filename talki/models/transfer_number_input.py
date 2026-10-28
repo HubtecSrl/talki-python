@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar
+from typing import Any, Required, TypedDict, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -70,3 +70,11 @@ class TransferNumberInput:
 
     def __contains__(self, key: str) -> bool:
         return key in self.additional_properties
+
+
+# `TransferNumberInput` as a dict, which a method's `body=` takes in its place: a key
+# left out is a field left out. A date, datetime or UUID can be its ISO string,
+# an enum its value.
+class TransferNumberInputDict(TypedDict, total=False):
+    label: Required[str]
+    phone: Required[str]

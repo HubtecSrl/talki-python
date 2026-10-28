@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar, cast
+from typing import Any, TypedDict, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -93,3 +93,11 @@ class ResourceUpdate:
 
     def __contains__(self, key: str) -> bool:
         return key in self.additional_properties
+
+
+# `ResourceUpdate` as a dict, which a method's `body=` takes in its place: a key
+# left out is a field left out. A date, datetime or UUID can be its ISO string,
+# an enum its value.
+class ResourceUpdateDict(TypedDict, total=False):
+    name: str | None
+    capacity: int | None

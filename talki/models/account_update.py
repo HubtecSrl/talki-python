@@ -12,6 +12,12 @@ from ..types import UNSET, Unset
 if TYPE_CHECKING:
     from ..models.transfer_number_input import TransferNumberInput
 
+from collections.abc import Sequence
+from typing import Literal, TypedDict
+
+if TYPE_CHECKING:
+    from ..models.transfer_number_input import TransferNumberInputDict
+
 
 T = TypeVar("T", bound="AccountUpdate")
 
@@ -446,3 +452,26 @@ class AccountUpdate:
 
     def __contains__(self, key: str) -> bool:
         return key in self.additional_properties
+
+
+# `AccountUpdate` as a dict, which a method's `body=` takes in its place: a key
+# left out is a field left out. A date, datetime or UUID can be its ISO string,
+# an enum its value.
+class AccountUpdateDict(TypedDict, total=False):
+    business_name: str | None
+    business_information: str | None
+    instructions: str | None
+    voice: str | None
+    answers_as: AnswersAs | Literal["business", "owner"] | None
+    greeting: str | None
+    call_opening: str | None
+    multilingual_enabled: bool | None
+    service_area: str | None
+    transfer_numbers: Sequence[TransferNumberInputDict | TransferNumberInput] | None
+    bookings_enabled: bool | None
+    unresolved_requests_enabled: bool | None
+    remember_callers: bool | None
+    notify_on_every_call: bool | None
+    notify_on_incoming_call: bool | None
+    store_transcripts: bool | None
+    forwarding_number: str | None

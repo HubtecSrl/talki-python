@@ -18,13 +18,14 @@ Python 3.11 or later. Depends on httpx, attrs and anyio.
 
 ```python
 from talki import Talki
-from talki.models import AppointmentCreate
 
 with Talki(api_key="talki_test_…") as talki:  # or access_token="talki_at_…"; or set TALKI_API_KEY
     account = talki.account.get()
     print(account.business_name)
 
-    appointment = talki.appointments.create(body=AppointmentCreate(...))
+    appointment = talki.appointments.create(
+        body={"client_name": "Ada", "client_surname": "Lovelace", "start_at": "2026-11-02T09:30:00+01:00"}
+    )
     talki.appointments.cancel(appointment.id)
 
     for call in talki.calls.list(limit=100):  # every call, page after page
@@ -38,6 +39,11 @@ with Talki(api_key="talki_test_…") as talki:  # or access_token="talki_at_…"
 - A method returns the operation's model, or None for `204 No Content`, and
   raises for an error (below). Path parameters are positional; the rest,
   `body=` included, are keywords.
+- `body=` takes the request model (`talki.models.AppointmentCreate(...)`) or a
+  dict with the API's keys, typed as `talki.models.AppointmentCreateDict` so a
+  type checker catches a wrong key or value. A dict is sent as written, with a
+  date, datetime or UUID as its ISO string, an enum as its value and a model in
+  it by its `to_dict()`; the API checks it, and refuses a wrong one with `400`.
 - With no credential passed, `Talki()` reads the API key from the
   `TALKI_API_KEY` environment variable.
 - `with` closes the client's connections at the end of the block. It is
@@ -47,7 +53,8 @@ with Talki(api_key="talki_test_…") as talki:  # or access_token="talki_at_…"
   usable; the next request opens new connections.
 - `talki.types.UNSET` is a field left out, `None` an explicit `null`. In an
   update body (`AccountUpdate`, `ServiceUpdate`, …) UNSET leaves the field as
-  it is and `None` sends `null`, which clears a field that allows it.
+  it is and `None` sends `null`, which clears a field that allows it. In a
+  dict, a key left out (or set to UNSET) is a field left out.
 
 ### Async
 
@@ -58,30 +65,46 @@ from talki import AsyncTalki
 
 async with AsyncTalki(api_key="talki_test_…") as talki:
     account = await talki.account.get()
-    async for call in await talki.calls.list(limit=100):
+    async for call in talki.calls.list(limit=100):
         print(call.id)
 ```
+
+A list that pages returns an `AsyncPager`: `async for` it for every row, or
+await it for the first page (below).
 
 ### The whole response
 
 When you need the status or the headers (`ETag`, `Idempotency-Replayed`, the
-rate-limit headers, `X-Request-Id`), call the operation itself. Each is a
-module under `talki.api.<tag>`, named after its operation ID, with
-`sync_detailed` and `asyncio_detailed` (and `sync` and `asyncio`, which return
-the parsed body alone). Pass them `client=talki.client`:
+rate-limit headers, `X-Request-Id`), call the same method on
+`with_raw_response`. It returns a `talki.RawResponse` with `status_code`,
+`headers` (case-insensitive), `content` and `request_id`, and `parse()`, the
+value the method returns. An error raises as it does from the method.
 
 ```python
-from talki import unwrap
-from talki.api.account import get_account
+raw = talki.account.with_raw_response.get()
+account, etag = raw.parse(), raw.headers["ETag"]
 
-response = get_account.sync_detailed(client=talki.client)
-etag = response.headers["ETag"]
-account = unwrap(response)  # the model, or the exception a method would raise
+# Refused with `412` if the account changed since that read.
+talki.account.update(body={"greeting": "Buongiorno"}, if_match=etag)
 ```
 
-`response` is a `talki.types.Response` with `status_code`, `headers`,
-`content` and `parsed`. In async code, use `AsyncTalki` and the operations'
-`asyncio_detailed`: `Talki`'s methods are sync, and would block the event loop.
+On `AsyncTalki`, await it: `raw = await talki.account.with_raw_response.get()`.
+
+Below the methods, each operation is a module under `talki.api.<tag>`, named
+after its operation ID, with `sync_detailed` and `asyncio_detailed` (and `sync`
+and `asyncio`, which return the parsed body alone). Pass them
+`client=talki.client`, and `talki.unwrap(response)` turns the
+`talki.types.Response` into the model, or the exception a method would raise.
+
+### Other settings for some calls
+
+`with_options` returns the same client with another `timeout` or
+`max_retries`, for the calls made on it. It shares the client's connections and
+its token renewal, so it is cheap to make for one call:
+
+```python
+talki.with_options(timeout=5, max_retries=0).calls.get(call_id)
+```
 
 ## Errors
 
@@ -154,7 +177,9 @@ request's full URL, query included. Keep it at WARNING
 is INFO or lower. Quote the request ID to Talki when asking about a request.
 
 Every request also carries `User-Agent: talki-python/<version> python/<version>
-httpx/<version>`; `talki.__version__` is this package's.
+httpx/<version>`; `talki.__version__` is this package's. An integration can add
+its own name and version after it, which helps Talki tell its requests apart:
+`Talki(…, user_agent="acme-crm/2.1")`.
 
 ## Enums
 
@@ -190,10 +215,10 @@ name like a listed member's, so a response is never refused for it.
 
 ## Paging and feeds
 
-A method whose operation takes `cursor=` returns a `talki.pagination.Page`
-(`AsyncPage` on `AsyncTalki`): the first page, with `data`, `has_more` and
-`next_cursor`. Iterating it yields every row of it and of the pages after it,
-fetched as the loop reaches them; `iter_pages()` yields the pages.
+A method whose operation takes `cursor=` returns a `talki.pagination.Page`:
+the first page, with `data`, `has_more` and `next_cursor`. Iterating it yields
+every row of it and of the pages after it, fetched as the loop reaches them;
+`iter_pages()` yields the pages.
 
 ```python
 from talki.pagination import position
@@ -215,6 +240,21 @@ after yielding those before it. A page that says `has_more` but gives no new
 cursor raises `PaginationError`. Iterating a page again starts from it again.
 `position` is for change feeds: a plain list's last page has no cursor though
 it holds rows.
+
+On `AsyncTalki` the method returns an `AsyncPager`, which sends nothing
+until it is used. Await it for the first page, an `AsyncPage` with the same
+`data`, `has_more` and `next_cursor`, iterated with `async for`; or `async for`
+the pager itself, or its `iter_pages()`, to walk from the first page. Used that
+way, a refused first page raises from the loop. Each await or walk sends the
+first request again.
+
+```python
+page = await talki.calls.list(limit=50)
+async for call in talki.calls.list(limit=100):
+    ...
+async for page in talki.appointments.list(cursor=stored).iter_pages():
+    ...
+```
 
 For the operations themselves, `pages` and `rows` (`apages` and `arows`) do the
 same: `rows(pages(list_calls.sync_detailed, client=talki.client, limit=100))`.

@@ -1,9 +1,11 @@
 """The `account` operations, one module each, and `AccountResource` / `AsyncAccountResource`,
 which `Talki` and `AsyncTalki` expose as `account`."""
 
+from functools import cached_property
+
 from ... import _resource
 from ...models.account import Account
-from ...models.account_update import AccountUpdate
+from ...models.account_update import AccountUpdate, AccountUpdateDict
 from ...models.forwarding_check import ForwardingCheck
 from ...types import UNSET, Unset
 from . import (
@@ -14,12 +16,113 @@ from . import (
     update_account,
 )
 
-__all__ = ["AsyncAccountResource", "AccountResource"]
+__all__ = [
+    "AsyncAccountResource",
+    "AsyncAccountResourceWithRawResponse",
+    "AccountResource",
+    "AccountResourceWithRawResponse",
+]
+
+
+class AccountResourceWithRawResponse(_resource.Resource):
+    """`talki.account.with_raw_response`: the methods of `talki.account`, each
+    returning the whole answer, a `talki.RawResponse` whose `parse()` is what the
+    method returns. An error raises as it does there."""
+
+    def complete_onboarding(
+        self,
+        *,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Account]:
+        """`talki.account.complete_onboarding`, returning the whole answer."""
+        return _resource.raw(
+            complete_onboarding.sync_detailed(
+                client=self._client,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def get(
+        self,
+        *,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Account]:
+        """`talki.account.get`, returning the whole answer."""
+        return _resource.raw(
+            get_account.sync_detailed(
+                client=self._client,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        )
+
+    def get_forwarding_check(
+        self,
+        *,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[ForwardingCheck]:
+        """`talki.account.get_forwarding_check`, returning the whole answer."""
+        return _resource.raw(
+            get_forwarding_check.sync_detailed(
+                client=self._client,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        )
+
+    def start_forwarding_check(
+        self,
+        *,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[ForwardingCheck]:
+        """`talki.account.start_forwarding_check`, returning the whole answer."""
+        return _resource.raw(
+            start_forwarding_check.sync_detailed(
+                client=self._client,
+                location_id=location_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def update(
+        self,
+        *,
+        body: AccountUpdate | AccountUpdateDict,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+        if_match: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Account]:
+        """`talki.account.update`, returning the whole answer."""
+        body = _resource.as_body(body, AccountUpdate)
+        return _resource.raw(
+            update_account.sync_detailed(
+                client=self._client,
+                body=body,
+                location_id=location_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+                if_match=if_match,
+            )
+        )
 
 
 class AccountResource(_resource.Resource):
     """`talki.account`: each method sends one operation and returns its value, or
     raises the `talki.ApiError` subclass for its error."""
+
+    @cached_property
+    def with_raw_response(self) -> AccountResourceWithRawResponse:
+        """The same methods, each returning the whole answer: its status and
+        headers (`ETag`, `X-Request-Id`, the rate limits) with the value."""
+        return AccountResourceWithRawResponse(self._client)
 
     def complete_onboarding(
         self,
@@ -44,13 +147,12 @@ class AccountResource(_resource.Resource):
         Returns:
             Account
         """
-        return _resource.unwrap(
-            complete_onboarding.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.complete_onboarding(
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def get(
         self,
@@ -76,13 +178,12 @@ class AccountResource(_resource.Resource):
         Returns:
             Account
         """
-        return _resource.unwrap(
-            get_account.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.get(
                 location_id=location_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     def get_forwarding_check(
         self,
@@ -108,13 +209,12 @@ class AccountResource(_resource.Resource):
         Returns:
             ForwardingCheck
         """
-        return _resource.unwrap(
-            get_forwarding_check.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.get_forwarding_check(
                 location_id=location_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     def start_forwarding_check(
         self,
@@ -146,19 +246,18 @@ class AccountResource(_resource.Resource):
         Returns:
             ForwardingCheck
         """
-        return _resource.unwrap(
-            start_forwarding_check.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.start_forwarding_check(
                 location_id=location_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def update(
         self,
         *,
-        body: AccountUpdate,
+        body: AccountUpdate | AccountUpdateDict,
         location_id: None | str | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
@@ -191,8 +290,97 @@ class AccountResource(_resource.Resource):
         Returns:
             Account
         """
-        return _resource.unwrap(
-            update_account.sync_detailed(
+        return (
+            self.with_raw_response.update(
+                body=body,
+                location_id=location_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+                if_match=if_match,
+            )
+        ).parse()
+
+
+class AsyncAccountResourceWithRawResponse(_resource.Resource):
+    """`talki.account.with_raw_response` on `AsyncTalki`: the methods of `talki.account`, each
+    returning the whole answer, a `talki.RawResponse` whose `parse()` is what the
+    method returns. An error raises as it does there."""
+
+    async def complete_onboarding(
+        self,
+        *,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Account]:
+        """`talki.account.complete_onboarding`, returning the whole answer."""
+        return _resource.raw(
+            await complete_onboarding.asyncio_detailed(
+                client=self._client,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def get(
+        self,
+        *,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Account]:
+        """`talki.account.get`, returning the whole answer."""
+        return _resource.raw(
+            await get_account.asyncio_detailed(
+                client=self._client,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        )
+
+    async def get_forwarding_check(
+        self,
+        *,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[ForwardingCheck]:
+        """`talki.account.get_forwarding_check`, returning the whole answer."""
+        return _resource.raw(
+            await get_forwarding_check.asyncio_detailed(
+                client=self._client,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        )
+
+    async def start_forwarding_check(
+        self,
+        *,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[ForwardingCheck]:
+        """`talki.account.start_forwarding_check`, returning the whole answer."""
+        return _resource.raw(
+            await start_forwarding_check.asyncio_detailed(
+                client=self._client,
+                location_id=location_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def update(
+        self,
+        *,
+        body: AccountUpdate | AccountUpdateDict,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+        if_match: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Account]:
+        """`talki.account.update`, returning the whole answer."""
+        body = _resource.as_body(body, AccountUpdate)
+        return _resource.raw(
+            await update_account.asyncio_detailed(
                 client=self._client,
                 body=body,
                 location_id=location_id,
@@ -206,6 +394,12 @@ class AccountResource(_resource.Resource):
 class AsyncAccountResource(_resource.Resource):
     """`talki.account` on `AsyncTalki`: each method sends one operation and returns its value, or
     raises the `talki.ApiError` subclass for its error."""
+
+    @cached_property
+    def with_raw_response(self) -> AsyncAccountResourceWithRawResponse:
+        """The same methods, each returning the whole answer: its status and
+        headers (`ETag`, `X-Request-Id`, the rate limits) with the value."""
+        return AsyncAccountResourceWithRawResponse(self._client)
 
     async def complete_onboarding(
         self,
@@ -230,13 +424,12 @@ class AsyncAccountResource(_resource.Resource):
         Returns:
             Account
         """
-        return _resource.unwrap(
-            await complete_onboarding.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.complete_onboarding(
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     async def get(
         self,
@@ -262,13 +455,12 @@ class AsyncAccountResource(_resource.Resource):
         Returns:
             Account
         """
-        return _resource.unwrap(
-            await get_account.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.get(
                 location_id=location_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     async def get_forwarding_check(
         self,
@@ -294,13 +486,12 @@ class AsyncAccountResource(_resource.Resource):
         Returns:
             ForwardingCheck
         """
-        return _resource.unwrap(
-            await get_forwarding_check.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.get_forwarding_check(
                 location_id=location_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     async def start_forwarding_check(
         self,
@@ -332,19 +523,18 @@ class AsyncAccountResource(_resource.Resource):
         Returns:
             ForwardingCheck
         """
-        return _resource.unwrap(
-            await start_forwarding_check.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.start_forwarding_check(
                 location_id=location_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     async def update(
         self,
         *,
-        body: AccountUpdate,
+        body: AccountUpdate | AccountUpdateDict,
         location_id: None | str | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
@@ -377,13 +567,12 @@ class AsyncAccountResource(_resource.Resource):
         Returns:
             Account
         """
-        return _resource.unwrap(
-            await update_account.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.update(
                 body=body,
                 location_id=location_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
                 if_match=if_match,
             )
-        )
+        ).parse()

@@ -4,6 +4,7 @@
 # `Talki` unless told otherwise.
 API_VERSION = "2026-10-01"
 
+from ._resource import RawResponse
 from ._talki import AsyncTalki, Talki, unwrap
 from ._transport import new_idempotency_key
 from ._version import __version__
@@ -30,6 +31,7 @@ __all__ = (
     "InvalidRequestError",
     "PermissionDeniedError",
     "RateLimitError",
+    "RawResponse",
     "ServerError",
     "Talki",
     "TalkiError",

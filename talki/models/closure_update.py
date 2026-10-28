@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 from collections.abc import Mapping
-from typing import Any, TypeVar, cast
+from typing import Any, Literal, TypedDict, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -248,3 +248,17 @@ class ClosureUpdate:
 
     def __contains__(self, key: str) -> bool:
         return key in self.additional_properties
+
+
+# `ClosureUpdate` as a dict, which a method's `body=` takes in its place: a key
+# left out is a field left out. A date, datetime or UUID can be its ISO string,
+# an enum its value.
+class ClosureUpdateDict(TypedDict, total=False):
+    kind: ClosureKind | Literal["closed", "open"] | None
+    all_day: bool | None
+    start_date: str | None
+    end_date: str | None
+    start_at: datetime.datetime | str | None
+    end_at: datetime.datetime | str | None
+    reason: str | None
+    location_id: str | None

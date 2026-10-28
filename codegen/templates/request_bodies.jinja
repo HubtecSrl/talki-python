@@ -1,0 +1,81 @@
+{#- Not a copy: macros for `<Model>Dict`, the TypedDict a resource method's
+    `body=` takes in place of the model. `model.py.jinja` writes one beside each
+    model a JSON request body is or holds, `models_init.py.jinja` exports them and
+    `endpoint_init.py.jinja` names them in the signatures.
+
+    A field has the dict's own key (the JSON name) and takes what the model's
+    attribute does, plus the JSON form: a date, datetime or UUID as `str`, an
+    enum as its value, a nested model as its own `Dict`. Lists take any
+    sequence.
+
+    On a generator upgrade, check that each property class still names the
+    `template` compared below, and that `endpoint_collections_by_tag` is still a
+    template global. -#}
+
+{#- Adds to ``found.entries`` every model in ``prop``, as `Name:module`. -#}
+{% macro _walk(prop, found) -%}
+{%- if prop.template == "model_property.py.jinja" -%}
+{%- set entry = prop.class_info.name ~ ":" ~ prop.class_info.module_name -%}
+{%- if entry not in found.entries -%}
+{%- set found.entries = found.entries + [entry] -%}
+{%- for inner in (prop.required_properties or []) + (prop.optional_properties or []) -%}
+{{- _walk(inner, found) -}}
+{%- endfor -%}
+{%- endif -%}
+{%- elif prop.template == "list_property.py.jinja" -%}
+{{- _walk(prop.inner_property, found) -}}
+{%- elif prop.template == "union_property.py.jinja" -%}
+{%- for inner in prop.inner_properties -%}
+{{- _walk(inner, found) -}}
+{%- endfor -%}
+{%- endif -%}
+{%- endmacro %}
+
+{#- Every model a JSON request body is or holds, as `Name:module`, comma-separated. -#}
+{% macro input_models() -%}
+{%- set found = namespace(entries=[]) -%}
+{%- for collection in endpoint_collections_by_tag.values() -%}
+{%- for endpoint in collection.endpoints -%}
+{%- for body in endpoint.bodies if body.body_type == "json" -%}
+{{- _walk(body.prop, found) -}}
+{%- endfor -%}
+{%- endfor -%}
+{%- endfor -%}
+{{- found.entries | sort | join(",") -}}
+{%- endmacro %}
+
+{#- The models in ``prop`` other than ``own``, as `Name:module`, comma-separated:
+    the `Dict`s its field type names. -#}
+{% macro nested_models(prop, own) -%}
+{%- set found = namespace(entries=[own]) -%}
+{{- _walk(prop, found) -}}
+{{- found.entries[1:] | join(",") -}}
+{%- endmacro %}
+
+{#- The type of ``prop``'s field in a `Dict`. -#}
+{% macro dict_type(prop) -%}
+{%- set template = prop.template -%}
+{%- if template == "model_property.py.jinja" -%}
+{{ prop.class_info.name }}Dict | {{ prop.class_info.name }}
+{%- elif template == "list_property.py.jinja" -%}
+Sequence[{{ dict_type(prop.inner_property) }}]
+{%- elif template == "union_property.py.jinja" -%}
+{%- for inner in prop.inner_properties -%}
+{{ dict_type(inner) }}{{ " | " if not loop.last }}
+{%- endfor -%}
+{%- elif template == "enum_property.py.jinja" -%}
+{{ prop.class_info.name }} | Literal[{% for value in prop.values.values() %}"{{ value | in_double_quote_literal }}"{{ ", " if not loop.last }}{% endfor %}]
+{%- elif template in ["date_property.py.jinja", "datetime_property.py.jinja", "uuid_property.py.jinja"] -%}
+{{ prop.get_base_type_string() | as_unembedded_code }} | str
+{%- else -%}
+{{ prop.get_base_type_string() | as_unembedded_code }}
+{%- endif -%}
+{%- endmacro %}
+
+{#- Whether this endpoint's resource method takes a `Dict` for `body=`: the
+    model's name when it does, else nothing. -#}
+{% macro dict_body(endpoint) -%}
+{%- if endpoint.bodies | length == 1 and endpoint.bodies[0].body_type == "json" and endpoint.bodies[0].prop.template == "model_property.py.jinja" -%}
+{{- endpoint.bodies[0].prop.class_info.name -}}
+{%- endif -%}
+{%- endmacro %}

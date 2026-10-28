@@ -1,11 +1,13 @@
 """The `tags` operations, one module each, and `TagsResource` / `AsyncTagsResource`,
 which `Talki` and `AsyncTalki` expose as `tags`."""
 
+from functools import cached_property
+
 from ... import _resource
 from ...models.tag import Tag
-from ...models.tag_create import TagCreate
+from ...models.tag_create import TagCreate, TagCreateDict
 from ...models.tag_list import TagList
-from ...models.tag_update import TagUpdate
+from ...models.tag_update import TagUpdate, TagUpdateDict
 from ...types import UNSET, Unset
 from . import (
     create_tag,
@@ -16,17 +18,140 @@ from . import (
     update_tag,
 )
 
-__all__ = ["AsyncTagsResource", "TagsResource"]
+__all__ = [
+    "AsyncTagsResource",
+    "AsyncTagsResourceWithRawResponse",
+    "TagsResource",
+    "TagsResourceWithRawResponse",
+]
+
+
+class TagsResourceWithRawResponse(_resource.Resource):
+    """`talki.tags.with_raw_response`: the methods of `talki.tags`, each
+    returning the whole answer, a `talki.RawResponse` whose `parse()` is what the
+    method returns. An error raises as it does there."""
+
+    def create(
+        self,
+        *,
+        body: TagCreate | TagCreateDict,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Tag]:
+        """`talki.tags.create`, returning the whole answer."""
+        body = _resource.as_body(body, TagCreate)
+        return _resource.raw(
+            create_tag.sync_detailed(
+                client=self._client,
+                body=body,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def delete(
+        self,
+        tag_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[None]:
+        """`talki.tags.delete`, returning the whole answer."""
+        return _resource.raw(
+            delete_tag.sync_detailed(
+                client=self._client,
+                tag_id=tag_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def tag_contact(
+        self,
+        tag_id: str,
+        contact_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Tag]:
+        """`talki.tags.tag_contact`, returning the whole answer."""
+        return _resource.raw(
+            tag_contact.sync_detailed(
+                client=self._client,
+                tag_id=tag_id,
+                contact_id=contact_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def untag_contact(
+        self,
+        tag_id: str,
+        contact_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Tag]:
+        """`talki.tags.untag_contact`, returning the whole answer."""
+        return _resource.raw(
+            untag_contact.sync_detailed(
+                client=self._client,
+                tag_id=tag_id,
+                contact_id=contact_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def update(
+        self,
+        tag_id: str,
+        *,
+        body: TagUpdate | TagUpdateDict,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Tag]:
+        """`talki.tags.update`, returning the whole answer."""
+        body = _resource.as_body(body, TagUpdate)
+        return _resource.raw(
+            update_tag.sync_detailed(
+                client=self._client,
+                tag_id=tag_id,
+                body=body,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def list(
+        self,
+        *,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[TagList]:
+        """`talki.tags.list`, returning the whole answer."""
+        return _resource.raw(
+            list_tags.sync_detailed(
+                client=self._client,
+                talki_version=talki_version,
+            )
+        )
 
 
 class TagsResource(_resource.Resource):
     """`talki.tags`: each method sends one operation and returns its value, or
     raises the `talki.ApiError` subclass for its error."""
 
+    @cached_property
+    def with_raw_response(self) -> TagsResourceWithRawResponse:
+        """The same methods, each returning the whole answer: its status and
+        headers (`ETag`, `X-Request-Id`, the rate limits) with the value."""
+        return TagsResourceWithRawResponse(self._client)
+
     def create(
         self,
         *,
-        body: TagCreate,
+        body: TagCreate | TagCreateDict,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Tag:
@@ -50,14 +175,13 @@ class TagsResource(_resource.Resource):
         Returns:
             Tag
         """
-        return _resource.unwrap(
-            create_tag.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.create(
                 body=body,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def delete(
         self,
@@ -83,14 +207,13 @@ class TagsResource(_resource.Resource):
         Returns:
             None
         """
-        _resource.unwrap(
-            delete_tag.sync_detailed(
-                client=self._client,
+        (
+            self.with_raw_response.delete(
                 tag_id=tag_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def tag_contact(
         self,
@@ -118,15 +241,14 @@ class TagsResource(_resource.Resource):
         Returns:
             Tag
         """
-        return _resource.unwrap(
-            tag_contact.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.tag_contact(
                 tag_id=tag_id,
                 contact_id=contact_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def untag_contact(
         self,
@@ -154,21 +276,20 @@ class TagsResource(_resource.Resource):
         Returns:
             Tag
         """
-        return _resource.unwrap(
-            untag_contact.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.untag_contact(
                 tag_id=tag_id,
                 contact_id=contact_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def update(
         self,
         tag_id: str,
         *,
-        body: TagUpdate,
+        body: TagUpdate | TagUpdateDict,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Tag:
@@ -190,15 +311,14 @@ class TagsResource(_resource.Resource):
         Returns:
             Tag
         """
-        return _resource.unwrap(
-            update_tag.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.update(
                 tag_id=tag_id,
                 body=body,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def list(
         self,
@@ -220,8 +340,119 @@ class TagsResource(_resource.Resource):
         Returns:
             TagList
         """
-        return _resource.unwrap(
-            list_tags.sync_detailed(
+        return (
+            self.with_raw_response.list(
+                talki_version=talki_version,
+            )
+        ).parse()
+
+
+class AsyncTagsResourceWithRawResponse(_resource.Resource):
+    """`talki.tags.with_raw_response` on `AsyncTalki`: the methods of `talki.tags`, each
+    returning the whole answer, a `talki.RawResponse` whose `parse()` is what the
+    method returns. An error raises as it does there."""
+
+    async def create(
+        self,
+        *,
+        body: TagCreate | TagCreateDict,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Tag]:
+        """`talki.tags.create`, returning the whole answer."""
+        body = _resource.as_body(body, TagCreate)
+        return _resource.raw(
+            await create_tag.asyncio_detailed(
+                client=self._client,
+                body=body,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def delete(
+        self,
+        tag_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[None]:
+        """`talki.tags.delete`, returning the whole answer."""
+        return _resource.raw(
+            await delete_tag.asyncio_detailed(
+                client=self._client,
+                tag_id=tag_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def tag_contact(
+        self,
+        tag_id: str,
+        contact_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Tag]:
+        """`talki.tags.tag_contact`, returning the whole answer."""
+        return _resource.raw(
+            await tag_contact.asyncio_detailed(
+                client=self._client,
+                tag_id=tag_id,
+                contact_id=contact_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def untag_contact(
+        self,
+        tag_id: str,
+        contact_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Tag]:
+        """`talki.tags.untag_contact`, returning the whole answer."""
+        return _resource.raw(
+            await untag_contact.asyncio_detailed(
+                client=self._client,
+                tag_id=tag_id,
+                contact_id=contact_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def update(
+        self,
+        tag_id: str,
+        *,
+        body: TagUpdate | TagUpdateDict,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Tag]:
+        """`talki.tags.update`, returning the whole answer."""
+        body = _resource.as_body(body, TagUpdate)
+        return _resource.raw(
+            await update_tag.asyncio_detailed(
+                client=self._client,
+                tag_id=tag_id,
+                body=body,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def list(
+        self,
+        *,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[TagList]:
+        """`talki.tags.list`, returning the whole answer."""
+        return _resource.raw(
+            await list_tags.asyncio_detailed(
                 client=self._client,
                 talki_version=talki_version,
             )
@@ -232,10 +463,16 @@ class AsyncTagsResource(_resource.Resource):
     """`talki.tags` on `AsyncTalki`: each method sends one operation and returns its value, or
     raises the `talki.ApiError` subclass for its error."""
 
+    @cached_property
+    def with_raw_response(self) -> AsyncTagsResourceWithRawResponse:
+        """The same methods, each returning the whole answer: its status and
+        headers (`ETag`, `X-Request-Id`, the rate limits) with the value."""
+        return AsyncTagsResourceWithRawResponse(self._client)
+
     async def create(
         self,
         *,
-        body: TagCreate,
+        body: TagCreate | TagCreateDict,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Tag:
@@ -259,14 +496,13 @@ class AsyncTagsResource(_resource.Resource):
         Returns:
             Tag
         """
-        return _resource.unwrap(
-            await create_tag.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.create(
                 body=body,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     async def delete(
         self,
@@ -292,14 +528,13 @@ class AsyncTagsResource(_resource.Resource):
         Returns:
             None
         """
-        _resource.unwrap(
-            await delete_tag.asyncio_detailed(
-                client=self._client,
+        (
+            await self.with_raw_response.delete(
                 tag_id=tag_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     async def tag_contact(
         self,
@@ -327,15 +562,14 @@ class AsyncTagsResource(_resource.Resource):
         Returns:
             Tag
         """
-        return _resource.unwrap(
-            await tag_contact.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.tag_contact(
                 tag_id=tag_id,
                 contact_id=contact_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     async def untag_contact(
         self,
@@ -363,21 +597,20 @@ class AsyncTagsResource(_resource.Resource):
         Returns:
             Tag
         """
-        return _resource.unwrap(
-            await untag_contact.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.untag_contact(
                 tag_id=tag_id,
                 contact_id=contact_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     async def update(
         self,
         tag_id: str,
         *,
-        body: TagUpdate,
+        body: TagUpdate | TagUpdateDict,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Tag:
@@ -399,15 +632,14 @@ class AsyncTagsResource(_resource.Resource):
         Returns:
             Tag
         """
-        return _resource.unwrap(
-            await update_tag.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.update(
                 tag_id=tag_id,
                 body=body,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     async def list(
         self,
@@ -429,9 +661,8 @@ class AsyncTagsResource(_resource.Resource):
         Returns:
             TagList
         """
-        return _resource.unwrap(
-            await list_tags.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.list(
                 talki_version=talki_version,
             )
-        )
+        ).parse()

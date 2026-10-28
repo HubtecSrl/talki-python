@@ -2,6 +2,7 @@
 which `Talki` and `AsyncTalki` expose as `calls`."""
 
 import datetime
+from functools import cached_property
 
 from ... import _resource
 from ... import pagination as _pagination
@@ -11,7 +12,7 @@ from ...models.call_list import CallList
 from ...models.call_outcome import CallOutcome
 from ...models.call_stats import CallStats
 from ...models.call_transcript import CallTranscript
-from ...models.call_update import CallUpdate
+from ...models.call_update import CallUpdate, CallUpdateDict
 from ...models.export_format import ExportFormat
 from ...models.inbox_status import InboxStatus
 from ...models.mark_all_read_result import MarkAllReadResult
@@ -35,12 +36,317 @@ from . import (
     update_call,
 )
 
-__all__ = ["AsyncCallsResource", "CallsResource"]
+__all__ = [
+    "AsyncCallsResource",
+    "AsyncCallsResourceWithRawResponse",
+    "CallsResource",
+    "CallsResourceWithRawResponse",
+]
+
+
+class CallsResourceWithRawResponse(_resource.Resource):
+    """`talki.calls.with_raw_response`: the methods of `talki.calls`, each
+    returning the whole answer, a `talki.RawResponse` whose `parse()` is what the
+    method returns. An error raises as it does there."""
+
+    def count(
+        self,
+        *,
+        status: InboxStatus | Unset = InboxStatus.ALL,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[CallCount]:
+        """`talki.calls.count`, returning the whole answer."""
+        return _resource.raw(
+            count_calls.sync_detailed(
+                client=self._client,
+                status=status,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        )
+
+    def count_refused(
+        self,
+        *,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[CallCount]:
+        """`talki.calls.count_refused`, returning the whole answer."""
+        return _resource.raw(
+            count_refused_calls.sync_detailed(
+                client=self._client,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        )
+
+    def delete(
+        self,
+        call_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[None]:
+        """`talki.calls.delete`, returning the whole answer."""
+        return _resource.raw(
+            delete_call.sync_detailed(
+                client=self._client,
+                call_id=call_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def export_call(
+        self,
+        call_id: str,
+        *,
+        format_: ExportFormat | Unset = ExportFormat.PDF,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[File]:
+        """`talki.calls.export_call`, returning the whole answer."""
+        return _resource.raw(
+            export_call.sync_detailed(
+                client=self._client,
+                call_id=call_id,
+                format_=format_,
+                talki_version=talki_version,
+            )
+        )
+
+    def export_calls(
+        self,
+        *,
+        from_: datetime.date,
+        to: datetime.date,
+        format_: ExportFormat | Unset = ExportFormat.PDF,
+        status: InboxStatus | Unset = InboxStatus.ALL,
+        q: None | str | Unset = UNSET,
+        outcome: CallOutcome | None | Unset = UNSET,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[File]:
+        """`talki.calls.export_calls`, returning the whole answer."""
+        return _resource.raw(
+            export_calls.sync_detailed(
+                client=self._client,
+                from_=from_,
+                to=to,
+                format_=format_,
+                status=status,
+                q=q,
+                outcome=outcome,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        )
+
+    def get(
+        self,
+        call_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Call]:
+        """`talki.calls.get`, returning the whole answer."""
+        return _resource.raw(
+            get_call.sync_detailed(
+                client=self._client,
+                call_id=call_id,
+                talki_version=talki_version,
+            )
+        )
+
+    def get_stats(
+        self,
+        *,
+        days: int | None | Unset = UNSET,
+        from_: datetime.date | None | Unset = UNSET,
+        to: datetime.date | None | Unset = UNSET,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[CallStats]:
+        """`talki.calls.get_stats`, returning the whole answer."""
+        return _resource.raw(
+            get_call_stats.sync_detailed(
+                client=self._client,
+                days=days,
+                from_=from_,
+                to=to,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        )
+
+    def get_transcript(
+        self,
+        call_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[CallTranscript]:
+        """`talki.calls.get_transcript`, returning the whole answer."""
+        return _resource.raw(
+            get_call_transcript.sync_detailed(
+                client=self._client,
+                call_id=call_id,
+                talki_version=talki_version,
+            )
+        )
+
+    def get_refused_summary(
+        self,
+        *,
+        days: int | None | Unset = UNSET,
+        from_: datetime.date | None | Unset = UNSET,
+        to: datetime.date | None | Unset = UNSET,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[RefusedCallSummary]:
+        """`talki.calls.get_refused_summary`, returning the whole answer."""
+        return _resource.raw(
+            get_refused_call_summary.sync_detailed(
+                client=self._client,
+                days=days,
+                from_=from_,
+                to=to,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        )
+
+    def list_refused(
+        self,
+        *,
+        limit: int | Unset = 50,
+        cursor: None | str | Unset = UNSET,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[_pagination.Page[RefusedCall]]:
+        """`talki.calls.list_refused`, returning the whole answer."""
+
+        def fetch(cursor: None | str | Unset) -> RefusedCallList:
+            return _resource.unwrap(
+                list_refused_calls.sync_detailed(
+                    client=self._client,
+                    limit=limit,
+                    cursor=cursor,
+                    location_id=location_id,
+                    talki_version=talki_version,
+                )
+            )
+
+        return _resource.raw(
+            list_refused_calls.sync_detailed(
+                client=self._client,
+                limit=limit,
+                cursor=cursor,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        ).map(lambda page: _pagination.Page(page, fetch, cursor))
+
+    def mark_all_read(
+        self,
+        *,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[MarkAllReadResult]:
+        """`talki.calls.mark_all_read`, returning the whole answer."""
+        return _resource.raw(
+            mark_all_calls_read.sync_detailed(
+                client=self._client,
+                location_id=location_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def update(
+        self,
+        call_id: str,
+        *,
+        body: CallUpdate | CallUpdateDict,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Call]:
+        """`talki.calls.update`, returning the whole answer."""
+        body = _resource.as_body(body, CallUpdate)
+        return _resource.raw(
+            update_call.sync_detailed(
+                client=self._client,
+                call_id=call_id,
+                body=body,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def list(
+        self,
+        *,
+        limit: int | Unset = 50,
+        cursor: None | str | Unset = UNSET,
+        sync: bool | Unset = False,
+        created_after: datetime.datetime | None | Unset = UNSET,
+        created_before: datetime.datetime | None | Unset = UNSET,
+        status: InboxStatus | Unset = InboxStatus.ALL,
+        phone: None | str | Unset = UNSET,
+        contact_id: None | str | Unset = UNSET,
+        q: None | str | Unset = UNSET,
+        outcome: CallOutcome | None | Unset = UNSET,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[_pagination.Page[Call]]:
+        """`talki.calls.list`, returning the whole answer."""
+
+        def fetch(cursor: None | str | Unset) -> CallList:
+            return _resource.unwrap(
+                list_calls.sync_detailed(
+                    client=self._client,
+                    limit=limit,
+                    cursor=cursor,
+                    sync=sync,
+                    created_after=created_after,
+                    created_before=created_before,
+                    status=status,
+                    phone=phone,
+                    contact_id=contact_id,
+                    q=q,
+                    outcome=outcome,
+                    location_id=location_id,
+                    talki_version=talki_version,
+                )
+            )
+
+        return _resource.raw(
+            list_calls.sync_detailed(
+                client=self._client,
+                limit=limit,
+                cursor=cursor,
+                sync=sync,
+                created_after=created_after,
+                created_before=created_before,
+                status=status,
+                phone=phone,
+                contact_id=contact_id,
+                q=q,
+                outcome=outcome,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        ).map(lambda page: _pagination.Page(page, fetch, cursor))
 
 
 class CallsResource(_resource.Resource):
     """`talki.calls`: each method sends one operation and returns its value, or
     raises the `talki.ApiError` subclass for its error."""
+
+    @cached_property
+    def with_raw_response(self) -> CallsResourceWithRawResponse:
+        """The same methods, each returning the whole answer: its status and
+        headers (`ETag`, `X-Request-Id`, the rate limits) with the value."""
+        return CallsResourceWithRawResponse(self._client)
 
     def count(
         self,
@@ -69,14 +375,13 @@ class CallsResource(_resource.Resource):
         Returns:
             CallCount
         """
-        return _resource.unwrap(
-            count_calls.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.count(
                 status=status,
                 location_id=location_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     def count_refused(
         self,
@@ -101,13 +406,12 @@ class CallsResource(_resource.Resource):
         Returns:
             CallCount
         """
-        return _resource.unwrap(
-            count_refused_calls.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.count_refused(
                 location_id=location_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     def delete(
         self,
@@ -137,14 +441,13 @@ class CallsResource(_resource.Resource):
         Returns:
             None
         """
-        _resource.unwrap(
-            delete_call.sync_detailed(
-                client=self._client,
+        (
+            self.with_raw_response.delete(
                 call_id=call_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def export_call(
         self,
@@ -173,14 +476,13 @@ class CallsResource(_resource.Resource):
         Returns:
             File
         """
-        return _resource.unwrap(
-            export_call.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.export_call(
                 call_id=call_id,
                 format_=format_,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     def export_calls(
         self,
@@ -227,9 +529,8 @@ class CallsResource(_resource.Resource):
         Returns:
             File
         """
-        return _resource.unwrap(
-            export_calls.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.export_calls(
                 from_=from_,
                 to=to,
                 format_=format_,
@@ -239,7 +540,7 @@ class CallsResource(_resource.Resource):
                 location_id=location_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     def get(
         self,
@@ -263,13 +564,12 @@ class CallsResource(_resource.Resource):
         Returns:
             Call
         """
-        return _resource.unwrap(
-            get_call.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.get(
                 call_id=call_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     def get_stats(
         self,
@@ -304,16 +604,15 @@ class CallsResource(_resource.Resource):
         Returns:
             CallStats
         """
-        return _resource.unwrap(
-            get_call_stats.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.get_stats(
                 days=days,
                 from_=from_,
                 to=to,
                 location_id=location_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     def get_transcript(
         self,
@@ -338,13 +637,12 @@ class CallsResource(_resource.Resource):
         Returns:
             CallTranscript
         """
-        return _resource.unwrap(
-            get_call_transcript.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.get_transcript(
                 call_id=call_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     def get_refused_summary(
         self,
@@ -379,16 +677,15 @@ class CallsResource(_resource.Resource):
         Returns:
             RefusedCallSummary
         """
-        return _resource.unwrap(
-            get_refused_call_summary.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.get_refused_summary(
                 days=days,
                 from_=from_,
                 to=to,
                 location_id=location_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     def list_refused(
         self,
@@ -419,19 +716,14 @@ class CallsResource(_resource.Resource):
             Page[RefusedCall]: This page. Iterating it yields every row from here on,
             fetching the pages after it as it goes.
         """
-
-        def fetch(cursor: None | str | Unset) -> RefusedCallList:
-            return _resource.unwrap(
-                list_refused_calls.sync_detailed(
-                    client=self._client,
-                    limit=limit,
-                    cursor=cursor,
-                    location_id=location_id,
-                    talki_version=talki_version,
-                )
+        return (
+            self.with_raw_response.list_refused(
+                limit=limit,
+                cursor=cursor,
+                location_id=location_id,
+                talki_version=talki_version,
             )
-
-        return _pagination.Page.first(fetch, cursor)
+        ).parse()
 
     def mark_all_read(
         self,
@@ -458,20 +750,19 @@ class CallsResource(_resource.Resource):
         Returns:
             MarkAllReadResult
         """
-        return _resource.unwrap(
-            mark_all_calls_read.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.mark_all_read(
                 location_id=location_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def update(
         self,
         call_id: str,
         *,
-        body: CallUpdate,
+        body: CallUpdate | CallUpdateDict,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Call:
@@ -493,15 +784,14 @@ class CallsResource(_resource.Resource):
         Returns:
             Call
         """
-        return _resource.unwrap(
-            update_call.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.update(
                 call_id=call_id,
                 body=body,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def list(
         self,
@@ -570,10 +860,283 @@ class CallsResource(_resource.Resource):
             Page[Call]: This page. Iterating it yields every row from here on,
             fetching the pages after it as it goes.
         """
+        return (
+            self.with_raw_response.list(
+                limit=limit,
+                cursor=cursor,
+                sync=sync,
+                created_after=created_after,
+                created_before=created_before,
+                status=status,
+                phone=phone,
+                contact_id=contact_id,
+                q=q,
+                outcome=outcome,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        ).parse()
 
-        def fetch(cursor: None | str | Unset) -> CallList:
+
+class AsyncCallsResourceWithRawResponse(_resource.Resource):
+    """`talki.calls.with_raw_response` on `AsyncTalki`: the methods of `talki.calls`, each
+    returning the whole answer, a `talki.RawResponse` whose `parse()` is what the
+    method returns. An error raises as it does there."""
+
+    async def count(
+        self,
+        *,
+        status: InboxStatus | Unset = InboxStatus.ALL,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[CallCount]:
+        """`talki.calls.count`, returning the whole answer."""
+        return _resource.raw(
+            await count_calls.asyncio_detailed(
+                client=self._client,
+                status=status,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        )
+
+    async def count_refused(
+        self,
+        *,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[CallCount]:
+        """`talki.calls.count_refused`, returning the whole answer."""
+        return _resource.raw(
+            await count_refused_calls.asyncio_detailed(
+                client=self._client,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        )
+
+    async def delete(
+        self,
+        call_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[None]:
+        """`talki.calls.delete`, returning the whole answer."""
+        return _resource.raw(
+            await delete_call.asyncio_detailed(
+                client=self._client,
+                call_id=call_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def export_call(
+        self,
+        call_id: str,
+        *,
+        format_: ExportFormat | Unset = ExportFormat.PDF,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[File]:
+        """`talki.calls.export_call`, returning the whole answer."""
+        return _resource.raw(
+            await export_call.asyncio_detailed(
+                client=self._client,
+                call_id=call_id,
+                format_=format_,
+                talki_version=talki_version,
+            )
+        )
+
+    async def export_calls(
+        self,
+        *,
+        from_: datetime.date,
+        to: datetime.date,
+        format_: ExportFormat | Unset = ExportFormat.PDF,
+        status: InboxStatus | Unset = InboxStatus.ALL,
+        q: None | str | Unset = UNSET,
+        outcome: CallOutcome | None | Unset = UNSET,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[File]:
+        """`talki.calls.export_calls`, returning the whole answer."""
+        return _resource.raw(
+            await export_calls.asyncio_detailed(
+                client=self._client,
+                from_=from_,
+                to=to,
+                format_=format_,
+                status=status,
+                q=q,
+                outcome=outcome,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        )
+
+    async def get(
+        self,
+        call_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Call]:
+        """`talki.calls.get`, returning the whole answer."""
+        return _resource.raw(
+            await get_call.asyncio_detailed(
+                client=self._client,
+                call_id=call_id,
+                talki_version=talki_version,
+            )
+        )
+
+    async def get_stats(
+        self,
+        *,
+        days: int | None | Unset = UNSET,
+        from_: datetime.date | None | Unset = UNSET,
+        to: datetime.date | None | Unset = UNSET,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[CallStats]:
+        """`talki.calls.get_stats`, returning the whole answer."""
+        return _resource.raw(
+            await get_call_stats.asyncio_detailed(
+                client=self._client,
+                days=days,
+                from_=from_,
+                to=to,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        )
+
+    async def get_transcript(
+        self,
+        call_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[CallTranscript]:
+        """`talki.calls.get_transcript`, returning the whole answer."""
+        return _resource.raw(
+            await get_call_transcript.asyncio_detailed(
+                client=self._client,
+                call_id=call_id,
+                talki_version=talki_version,
+            )
+        )
+
+    async def get_refused_summary(
+        self,
+        *,
+        days: int | None | Unset = UNSET,
+        from_: datetime.date | None | Unset = UNSET,
+        to: datetime.date | None | Unset = UNSET,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[RefusedCallSummary]:
+        """`talki.calls.get_refused_summary`, returning the whole answer."""
+        return _resource.raw(
+            await get_refused_call_summary.asyncio_detailed(
+                client=self._client,
+                days=days,
+                from_=from_,
+                to=to,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        )
+
+    async def list_refused(
+        self,
+        *,
+        limit: int | Unset = 50,
+        cursor: None | str | Unset = UNSET,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[_pagination.AsyncPage[RefusedCall]]:
+        """`talki.calls.list_refused`, returning the whole answer."""
+
+        async def fetch(cursor: None | str | Unset) -> RefusedCallList:
             return _resource.unwrap(
-                list_calls.sync_detailed(
+                await list_refused_calls.asyncio_detailed(
+                    client=self._client,
+                    limit=limit,
+                    cursor=cursor,
+                    location_id=location_id,
+                    talki_version=talki_version,
+                )
+            )
+
+        return _resource.raw(
+            await list_refused_calls.asyncio_detailed(
+                client=self._client,
+                limit=limit,
+                cursor=cursor,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        ).map(lambda page: _pagination.AsyncPage(page, fetch, cursor))
+
+    async def mark_all_read(
+        self,
+        *,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[MarkAllReadResult]:
+        """`talki.calls.mark_all_read`, returning the whole answer."""
+        return _resource.raw(
+            await mark_all_calls_read.asyncio_detailed(
+                client=self._client,
+                location_id=location_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def update(
+        self,
+        call_id: str,
+        *,
+        body: CallUpdate | CallUpdateDict,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Call]:
+        """`talki.calls.update`, returning the whole answer."""
+        body = _resource.as_body(body, CallUpdate)
+        return _resource.raw(
+            await update_call.asyncio_detailed(
+                client=self._client,
+                call_id=call_id,
+                body=body,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def list(
+        self,
+        *,
+        limit: int | Unset = 50,
+        cursor: None | str | Unset = UNSET,
+        sync: bool | Unset = False,
+        created_after: datetime.datetime | None | Unset = UNSET,
+        created_before: datetime.datetime | None | Unset = UNSET,
+        status: InboxStatus | Unset = InboxStatus.ALL,
+        phone: None | str | Unset = UNSET,
+        contact_id: None | str | Unset = UNSET,
+        q: None | str | Unset = UNSET,
+        outcome: CallOutcome | None | Unset = UNSET,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[_pagination.AsyncPage[Call]]:
+        """`talki.calls.list`, returning the whole answer."""
+
+        async def fetch(cursor: None | str | Unset) -> CallList:
+            return _resource.unwrap(
+                await list_calls.asyncio_detailed(
                     client=self._client,
                     limit=limit,
                     cursor=cursor,
@@ -590,12 +1153,34 @@ class CallsResource(_resource.Resource):
                 )
             )
 
-        return _pagination.Page.first(fetch, cursor)
+        return _resource.raw(
+            await list_calls.asyncio_detailed(
+                client=self._client,
+                limit=limit,
+                cursor=cursor,
+                sync=sync,
+                created_after=created_after,
+                created_before=created_before,
+                status=status,
+                phone=phone,
+                contact_id=contact_id,
+                q=q,
+                outcome=outcome,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        ).map(lambda page: _pagination.AsyncPage(page, fetch, cursor))
 
 
 class AsyncCallsResource(_resource.Resource):
     """`talki.calls` on `AsyncTalki`: each method sends one operation and returns its value, or
     raises the `talki.ApiError` subclass for its error."""
+
+    @cached_property
+    def with_raw_response(self) -> AsyncCallsResourceWithRawResponse:
+        """The same methods, each returning the whole answer: its status and
+        headers (`ETag`, `X-Request-Id`, the rate limits) with the value."""
+        return AsyncCallsResourceWithRawResponse(self._client)
 
     async def count(
         self,
@@ -624,14 +1209,13 @@ class AsyncCallsResource(_resource.Resource):
         Returns:
             CallCount
         """
-        return _resource.unwrap(
-            await count_calls.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.count(
                 status=status,
                 location_id=location_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     async def count_refused(
         self,
@@ -656,13 +1240,12 @@ class AsyncCallsResource(_resource.Resource):
         Returns:
             CallCount
         """
-        return _resource.unwrap(
-            await count_refused_calls.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.count_refused(
                 location_id=location_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     async def delete(
         self,
@@ -692,14 +1275,13 @@ class AsyncCallsResource(_resource.Resource):
         Returns:
             None
         """
-        _resource.unwrap(
-            await delete_call.asyncio_detailed(
-                client=self._client,
+        (
+            await self.with_raw_response.delete(
                 call_id=call_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     async def export_call(
         self,
@@ -728,14 +1310,13 @@ class AsyncCallsResource(_resource.Resource):
         Returns:
             File
         """
-        return _resource.unwrap(
-            await export_call.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.export_call(
                 call_id=call_id,
                 format_=format_,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     async def export_calls(
         self,
@@ -782,9 +1363,8 @@ class AsyncCallsResource(_resource.Resource):
         Returns:
             File
         """
-        return _resource.unwrap(
-            await export_calls.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.export_calls(
                 from_=from_,
                 to=to,
                 format_=format_,
@@ -794,7 +1374,7 @@ class AsyncCallsResource(_resource.Resource):
                 location_id=location_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     async def get(
         self,
@@ -818,13 +1398,12 @@ class AsyncCallsResource(_resource.Resource):
         Returns:
             Call
         """
-        return _resource.unwrap(
-            await get_call.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.get(
                 call_id=call_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     async def get_stats(
         self,
@@ -859,16 +1438,15 @@ class AsyncCallsResource(_resource.Resource):
         Returns:
             CallStats
         """
-        return _resource.unwrap(
-            await get_call_stats.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.get_stats(
                 days=days,
                 from_=from_,
                 to=to,
                 location_id=location_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     async def get_transcript(
         self,
@@ -893,13 +1471,12 @@ class AsyncCallsResource(_resource.Resource):
         Returns:
             CallTranscript
         """
-        return _resource.unwrap(
-            await get_call_transcript.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.get_transcript(
                 call_id=call_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     async def get_refused_summary(
         self,
@@ -934,25 +1511,24 @@ class AsyncCallsResource(_resource.Resource):
         Returns:
             RefusedCallSummary
         """
-        return _resource.unwrap(
-            await get_refused_call_summary.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.get_refused_summary(
                 days=days,
                 from_=from_,
                 to=to,
                 location_id=location_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
-    async def list_refused(
+    def list_refused(
         self,
         *,
         limit: int | Unset = 50,
         cursor: None | str | Unset = UNSET,
         location_id: None | str | Unset = UNSET,
         talki_version: str | Unset = UNSET,
-    ) -> _pagination.AsyncPage[RefusedCall]:
+    ) -> _pagination.AsyncPager[RefusedCall]:
         """List refused calls
 
          Return the calls Talki refused before answering, newest first. Requires `calls:read`. Limited to 600
@@ -971,22 +1547,21 @@ class AsyncCallsResource(_resource.Resource):
             httpx.TimeoutException: If the request takes longer than the client's timeout.
 
         Returns:
-            AsyncPage[RefusedCall]: This page. Iterating it yields every row from here on,
-            fetching the pages after it as it goes.
+            AsyncPager[RefusedCall]: Awaited, this page (an `AsyncPage`). Iterated with `async for`,
+            every row from here on, fetching the pages as it goes.
         """
 
-        async def fetch(cursor: None | str | Unset) -> RefusedCallList:
-            return _resource.unwrap(
-                await list_refused_calls.asyncio_detailed(
-                    client=self._client,
+        async def first() -> _pagination.AsyncPage[RefusedCall]:
+            return (
+                await self.with_raw_response.list_refused(
                     limit=limit,
                     cursor=cursor,
                     location_id=location_id,
                     talki_version=talki_version,
                 )
-            )
+            ).parse()
 
-        return await _pagination.AsyncPage.first(fetch, cursor)
+        return _pagination.AsyncPager(first)
 
     async def mark_all_read(
         self,
@@ -1013,20 +1588,19 @@ class AsyncCallsResource(_resource.Resource):
         Returns:
             MarkAllReadResult
         """
-        return _resource.unwrap(
-            await mark_all_calls_read.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.mark_all_read(
                 location_id=location_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     async def update(
         self,
         call_id: str,
         *,
-        body: CallUpdate,
+        body: CallUpdate | CallUpdateDict,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Call:
@@ -1048,17 +1622,16 @@ class AsyncCallsResource(_resource.Resource):
         Returns:
             Call
         """
-        return _resource.unwrap(
-            await update_call.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.update(
                 call_id=call_id,
                 body=body,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
-    async def list(
+    def list(
         self,
         *,
         limit: int | Unset = 50,
@@ -1073,7 +1646,7 @@ class AsyncCallsResource(_resource.Resource):
         outcome: CallOutcome | None | Unset = UNSET,
         location_id: None | str | Unset = UNSET,
         talki_version: str | Unset = UNSET,
-    ) -> _pagination.AsyncPage[Call]:
+    ) -> _pagination.AsyncPager[Call]:
         """List calls
 
          Read the newest-first call log, or set `sync=true` for a resumable change feed. Search the log with
@@ -1122,14 +1695,13 @@ class AsyncCallsResource(_resource.Resource):
             httpx.TimeoutException: If the request takes longer than the client's timeout.
 
         Returns:
-            AsyncPage[Call]: This page. Iterating it yields every row from here on,
-            fetching the pages after it as it goes.
+            AsyncPager[Call]: Awaited, this page (an `AsyncPage`). Iterated with `async for`,
+            every row from here on, fetching the pages as it goes.
         """
 
-        async def fetch(cursor: None | str | Unset) -> CallList:
-            return _resource.unwrap(
-                await list_calls.asyncio_detailed(
-                    client=self._client,
+        async def first() -> _pagination.AsyncPage[Call]:
+            return (
+                await self.with_raw_response.list(
                     limit=limit,
                     cursor=cursor,
                     sync=sync,
@@ -1143,6 +1715,6 @@ class AsyncCallsResource(_resource.Resource):
                     location_id=location_id,
                     talki_version=talki_version,
                 )
-            )
+            ).parse()
 
-        return await _pagination.AsyncPage.first(fetch, cursor)
+        return _pagination.AsyncPager(first)
