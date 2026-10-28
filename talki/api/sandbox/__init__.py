@@ -101,7 +101,7 @@ class SandboxResource(_resource.Resource):
         Args:
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
-            body (FakeCallRequest): The call a sandbox should pretend it had.
+            body (FakeCallRequest | FakeCallRequestDict): The call a sandbox should pretend it had.
 
         Raises:
             talki.ApiError: The API answered with an error, as the subclass for its `type`.
@@ -254,7 +254,7 @@ class AsyncSandboxResource(_resource.Resource):
         Args:
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
-            body (FakeCallRequest): The call a sandbox should pretend it had.
+            body (FakeCallRequest | FakeCallRequestDict): The call a sandbox should pretend it had.
 
         Raises:
             talki.ApiError: The API answered with an error, as the subclass for its `type`.

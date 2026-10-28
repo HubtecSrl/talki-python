@@ -138,7 +138,7 @@ class ClosuresResource(_resource.Resource):
             idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
                 unless the client adds one, as `Talki` and `AsyncTalki` do unless built with
                 `auto_idempotency=False`.
-            body (ClosureCreate): A new closure or special opening: `all_day: true` with `start_date`
+            body (ClosureCreate | ClosureCreateDict): A new closure or special opening: `all_day: true` with `start_date`
                 and `end_date` (closures only), or an exact range with `start_at` and `end_at`. Sending
                 fields of both forms is refused, and so is a special opening that does not start and end
                 on the same day in the account's `timezone`. Without `location_id`, it applies at every
@@ -211,7 +211,7 @@ class ClosuresResource(_resource.Resource):
             closure_id (str):
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
-            body (ClosureUpdate): A partial edit of a closure or special opening. To move it, send the
+            body (ClosureUpdate | ClosureUpdateDict): A partial edit of a closure or special opening. To move it, send the
                 whole new window in one of the two forms. It stays at the location it was created for.
 
         Raises:
@@ -387,7 +387,7 @@ class AsyncClosuresResource(_resource.Resource):
             idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
                 unless the client adds one, as `Talki` and `AsyncTalki` do unless built with
                 `auto_idempotency=False`.
-            body (ClosureCreate): A new closure or special opening: `all_day: true` with `start_date`
+            body (ClosureCreate | ClosureCreateDict): A new closure or special opening: `all_day: true` with `start_date`
                 and `end_date` (closures only), or an exact range with `start_at` and `end_at`. Sending
                 fields of both forms is refused, and so is a special opening that does not start and end
                 on the same day in the account's `timezone`. Without `location_id`, it applies at every
@@ -460,7 +460,7 @@ class AsyncClosuresResource(_resource.Resource):
             closure_id (str):
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
-            body (ClosureUpdate): A partial edit of a closure or special opening. To move it, send the
+            body (ClosureUpdate | ClosureUpdateDict): A partial edit of a closure or special opening. To move it, send the
                 whole new window in one of the two forms. It stays at the location it was created for.
 
         Raises:

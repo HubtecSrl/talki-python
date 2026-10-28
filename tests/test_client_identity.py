@@ -76,7 +76,7 @@ def test_an_integration_adds_its_own_name_after_the_clients():
     assert agent.endswith(f"httpx/{httpx.__version__} acme-crm/2.1")
 
 
-@pytest.mark.parametrize("user_agent", ["", "  ", "acme\r\nX-Injected: 1"])
+@pytest.mark.parametrize("user_agent", ["", "  ", "acme\r\nX-Injected: 1", "café/1"])
 def test_a_user_agent_must_be_one_line(user_agent):
     with pytest.raises(ValueError):
         Talki(api_key="talki_test_x", user_agent=user_agent)

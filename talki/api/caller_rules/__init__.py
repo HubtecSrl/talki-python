@@ -190,7 +190,7 @@ class CallerRulesResource(_resource.Resource):
             idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
                 unless the client adds one, as `Talki` and `AsyncTalki` do unless built with
                 `auto_idempotency=False`.
-            body (CallerRuleCreate): A number to add. `201` creates a rule; `200` means the number
+            body (CallerRuleCreate | CallerRuleCreateDict): A number to add. `201` creates a rule; `200` means the number
                 already had one, which was moved or relabelled as the request asks, or returned unchanged.
 
         Raises:
@@ -297,7 +297,7 @@ class CallerRulesResource(_resource.Resource):
             rule_id (str):
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
-            body (CallerRuleUpdate): A partial edit of a caller rule.
+            body (CallerRuleUpdate | CallerRuleUpdateDict): A partial edit of a caller rule.
 
         Raises:
             talki.ApiError: The API answered with an error, as the subclass for its `type`.
@@ -519,7 +519,7 @@ class AsyncCallerRulesResource(_resource.Resource):
             idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
                 unless the client adds one, as `Talki` and `AsyncTalki` do unless built with
                 `auto_idempotency=False`.
-            body (CallerRuleCreate): A number to add. `201` creates a rule; `200` means the number
+            body (CallerRuleCreate | CallerRuleCreateDict): A number to add. `201` creates a rule; `200` means the number
                 already had one, which was moved or relabelled as the request asks, or returned unchanged.
 
         Raises:
@@ -630,7 +630,7 @@ class AsyncCallerRulesResource(_resource.Resource):
             rule_id (str):
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
-            body (CallerRuleUpdate): A partial edit of a caller rule.
+            body (CallerRuleUpdate | CallerRuleUpdateDict): A partial edit of a caller rule.
 
         Raises:
             talki.ApiError: The API answered with an error, as the subclass for its `type`.

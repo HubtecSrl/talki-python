@@ -166,7 +166,7 @@ class TagsResource(_resource.Resource):
             idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
                 unless the client adds one, as `Talki` and `AsyncTalki` do unless built with
                 `auto_idempotency=False`.
-            body (TagCreate): A new tag. An account holds at most 50.
+            body (TagCreate | TagCreateDict): A new tag. An account holds at most 50.
 
         Raises:
             talki.ApiError: The API answered with an error, as the subclass for its `type`.
@@ -302,7 +302,7 @@ class TagsResource(_resource.Resource):
             tag_id (str):
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
-            body (TagUpdate): A partial edit of a tag.
+            body (TagUpdate | TagUpdateDict): A partial edit of a tag.
 
         Raises:
             talki.ApiError: The API answered with an error, as the subclass for its `type`.
@@ -487,7 +487,7 @@ class AsyncTagsResource(_resource.Resource):
             idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
                 unless the client adds one, as `Talki` and `AsyncTalki` do unless built with
                 `auto_idempotency=False`.
-            body (TagCreate): A new tag. An account holds at most 50.
+            body (TagCreate | TagCreateDict): A new tag. An account holds at most 50.
 
         Raises:
             talki.ApiError: The API answered with an error, as the subclass for its `type`.
@@ -623,7 +623,7 @@ class AsyncTagsResource(_resource.Resource):
             tag_id (str):
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
-            body (TagUpdate): A partial edit of a tag.
+            body (TagUpdate | TagUpdateDict): A partial edit of a tag.
 
         Raises:
             talki.ApiError: The API answered with an error, as the subclass for its `type`.

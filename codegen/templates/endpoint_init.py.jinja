@@ -135,7 +135,8 @@ Returns:
     {{ success_type(endpoint) | safe_for_docstring }}
 {% endif %}
 {% endset %}
-{{ _docstring(content) }}
+{% set model = dict_body(endpoint) %}
+{{ _docstring(content | replace("body (" ~ model ~ ")", "body (" ~ model ~ " | " ~ model ~ "Dict)", 1) if model else content) }}
 {% endmacro %}
 
 {#- What the signatures and return types name, without what only parsing uses. -#}

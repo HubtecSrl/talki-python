@@ -168,7 +168,7 @@ class ResourcesResource(_resource.Resource):
             idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
                 unless the client adds one, as `Talki` and `AsyncTalki` do unless built with
                 `auto_idempotency=False`.
-            body (ResourceCreate): A new `shared` resource at one location: a count of interchangeable
+            body (ResourceCreate | ResourceCreateDict): A new `shared` resource at one location: a count of interchangeable
                 units, optionally drawn on by existing services of that location. With no `service_ids` it
                 limits nothing until a service is linked to it, for example by `POST /v1/services` with
                 `resource_ids`. Resources made of sized units are set up in Talki.
@@ -274,7 +274,7 @@ class ResourcesResource(_resource.Resource):
             resource_id (str):
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
-            body (ResourceUpdate): The two fields you can change on a resource. A capacity below what
+            body (ResourceUpdate | ResourceUpdateDict): The two fields you can change on a resource. A capacity below what
                 is already booked is refused.
 
         Raises:
@@ -481,7 +481,7 @@ class AsyncResourcesResource(_resource.Resource):
             idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
                 unless the client adds one, as `Talki` and `AsyncTalki` do unless built with
                 `auto_idempotency=False`.
-            body (ResourceCreate): A new `shared` resource at one location: a count of interchangeable
+            body (ResourceCreate | ResourceCreateDict): A new `shared` resource at one location: a count of interchangeable
                 units, optionally drawn on by existing services of that location. With no `service_ids` it
                 limits nothing until a service is linked to it, for example by `POST /v1/services` with
                 `resource_ids`. Resources made of sized units are set up in Talki.
@@ -587,7 +587,7 @@ class AsyncResourcesResource(_resource.Resource):
             resource_id (str):
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
-            body (ResourceUpdate): The two fields you can change on a resource. A capacity below what
+            body (ResourceUpdate | ResourceUpdateDict): The two fields you can change on a resource. A capacity below what
                 is already booked is refused.
 
         Raises:

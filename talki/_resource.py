@@ -119,11 +119,11 @@ def as_body(body: M | Mapping[str, Any], model: type[M]) -> M:
 def _json(value: Any) -> Any:
     """``value`` in the JSON form the API reads: a nested model by its
     `to_dict()`, an enum by its value, a date, datetime or time as ISO 8601, a
-    UUID as text. A key whose value is `UNSET` is left out."""
+    UUID as text, a set as a list. `UNSET`, as a value or an item, is left out."""
     if isinstance(value, Mapping):
         return {str(key): _json(item) for key, item in value.items() if not isinstance(item, Unset)}
-    if isinstance(value, (list, tuple)):
-        return [_json(item) for item in value]
+    if isinstance(value, (list, tuple, set, frozenset)):
+        return [_json(item) for item in value if not isinstance(item, Unset)]
     if isinstance(value, enum.Enum):
         return value.value
     if isinstance(value, (datetime.date, datetime.time)):  # a datetime is a date

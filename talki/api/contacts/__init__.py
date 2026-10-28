@@ -196,7 +196,7 @@ class ContactsResource(_resource.Resource):
         Args:
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
-            body (ContactUpsert): Create or update the contact with this phone number: the number is
+            body (ContactUpsert | ContactUpsertDict): Create or update the contact with this phone number: the number is
                 the identity, and `external_id` is your cross-reference for finding it again after a
                 number changes. A name written here is not overwritten by what the assistant hears on
                 later calls. On a contact whose name was only guessed from a call, sending either name
@@ -426,7 +426,7 @@ class AsyncContactsResource(_resource.Resource):
         Args:
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
-            body (ContactUpsert): Create or update the contact with this phone number: the number is
+            body (ContactUpsert | ContactUpsertDict): Create or update the contact with this phone number: the number is
                 the identity, and `external_id` is your cross-reference for finding it again after a
                 number changes. A name written here is not overwritten by what the assistant hears on
                 later calls. On a contact whose name was only guessed from a call, sending either name

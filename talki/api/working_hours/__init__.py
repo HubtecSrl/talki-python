@@ -126,7 +126,7 @@ class WorkingHoursResource(_resource.Resource):
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
             if_match (str | Unset):
-            body (WorkingHoursUpdate): The whole week, replacing the current schedule. A slot you
+            body (WorkingHoursUpdate | WorkingHoursUpdateDict): The whole week, replacing the current schedule. A slot you
                 leave out is an opening removed, so read the hours first and send them back changed.
 
         Raises:
@@ -253,7 +253,7 @@ class AsyncWorkingHoursResource(_resource.Resource):
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
             if_match (str | Unset):
-            body (WorkingHoursUpdate): The whole week, replacing the current schedule. A slot you
+            body (WorkingHoursUpdate | WorkingHoursUpdateDict): The whole week, replacing the current schedule. A slot you
                 leave out is an opening removed, so read the hours first and send them back changed.
 
         Raises:

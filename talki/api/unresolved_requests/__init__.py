@@ -187,7 +187,7 @@ class UnresolvedRequestsResource(_resource.Resource):
             idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
                 unless the client adds one, as `Talki` and `AsyncTalki` do unless built with
                 `auto_idempotency=False`.
-            body (UnresolvedRequestTeach): The general answer to a resolved request's question,
+            body (UnresolvedRequestTeach | UnresolvedRequestTeachDict): The general answer to a resolved request's question,
                 written as the business would say it to any caller. It is added to a FAQ note the business
                 sees and edits in Talki. It is not the request's `answer`, which records what one caller
                 was told, and does not change it.
@@ -226,7 +226,7 @@ class UnresolvedRequestsResource(_resource.Resource):
             request_id (str):
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
-            body (UnresolvedRequestUpdate): A new status for an unresolved request, the answer given
+            body (UnresolvedRequestUpdate | UnresolvedRequestUpdateDict): A new status for an unresolved request, the answer given
                 to the caller, or both. Send at least one.
 
         Raises:
@@ -455,7 +455,7 @@ class AsyncUnresolvedRequestsResource(_resource.Resource):
             idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
                 unless the client adds one, as `Talki` and `AsyncTalki` do unless built with
                 `auto_idempotency=False`.
-            body (UnresolvedRequestTeach): The general answer to a resolved request's question,
+            body (UnresolvedRequestTeach | UnresolvedRequestTeachDict): The general answer to a resolved request's question,
                 written as the business would say it to any caller. It is added to a FAQ note the business
                 sees and edits in Talki. It is not the request's `answer`, which records what one caller
                 was told, and does not change it.
@@ -494,7 +494,7 @@ class AsyncUnresolvedRequestsResource(_resource.Resource):
             request_id (str):
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
-            body (UnresolvedRequestUpdate): A new status for an unresolved request, the answer given
+            body (UnresolvedRequestUpdate | UnresolvedRequestUpdateDict): A new status for an unresolved request, the answer given
                 to the caller, or both. Send at least one.
 
         Raises:

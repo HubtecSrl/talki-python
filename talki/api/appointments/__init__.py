@@ -226,7 +226,7 @@ class AppointmentsResource(_resource.Resource):
             idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
                 unless the client adds one, as `Talki` and `AsyncTalki` do unless built with
                 `auto_idempotency=False`.
-            body (AppointmentCreate): A booking to create: one service per appointment, booked at that
+            body (AppointmentCreate | AppointmentCreateDict): A booking to create: one service per appointment, booked at that
                 service's location. `notes` is visible to the business and stored on the booking.
 
         Raises:
@@ -295,7 +295,7 @@ class AppointmentsResource(_resource.Resource):
             idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
                 unless the client adds one, as `Talki` and `AsyncTalki` do unless built with
                 `auto_idempotency=False`.
-            body (AppointmentReschedule): A partial edit of a booking. Every field is optional, and an
+            body (AppointmentReschedule | AppointmentRescheduleDict): A partial edit of a booking. Every field is optional, and an
                 omitted field is left unchanged, not cleared. A move that does not fit is refused with a
                 conflict code; nothing is booked. A booking never changes location.
 
@@ -609,7 +609,7 @@ class AsyncAppointmentsResource(_resource.Resource):
             idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
                 unless the client adds one, as `Talki` and `AsyncTalki` do unless built with
                 `auto_idempotency=False`.
-            body (AppointmentCreate): A booking to create: one service per appointment, booked at that
+            body (AppointmentCreate | AppointmentCreateDict): A booking to create: one service per appointment, booked at that
                 service's location. `notes` is visible to the business and stored on the booking.
 
         Raises:
@@ -678,7 +678,7 @@ class AsyncAppointmentsResource(_resource.Resource):
             idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
                 unless the client adds one, as `Talki` and `AsyncTalki` do unless built with
                 `auto_idempotency=False`.
-            body (AppointmentReschedule): A partial edit of a booking. Every field is optional, and an
+            body (AppointmentReschedule | AppointmentRescheduleDict): A partial edit of a booking. Every field is optional, and an
                 omitted field is left unchanged, not cleared. A move that does not fit is refused with a
                 conflict code; nothing is booked. A booking never changes location.
 

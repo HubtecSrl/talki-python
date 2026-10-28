@@ -172,7 +172,7 @@ class ServicesResource(_resource.Resource):
             idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
                 unless the client adds one, as `Talki` and `AsyncTalki` do unless built with
                 `auto_idempotency=False`.
-            body (ServiceCreate): A new service with a fixed duration at one location, bookable at
+            body (ServiceCreate | ServiceCreateDict): A new service with a fixed duration at one location, bookable at
                 once. Send at most one of `initial_capacity`, which gives the service a resource of its
                 own, or `resource_ids`, which makes it draw on resources of the same location. With
                 neither, it draws on the location's default resource (`is_default`); a location with no
@@ -279,7 +279,7 @@ class ServicesResource(_resource.Resource):
             service_id (str):
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
-            body (ServiceUpdate): The service fields you can change. Every field is optional; an
+            body (ServiceUpdate | ServiceUpdateDict): The service fields you can change. Every field is optional; an
                 omitted one is left unchanged. Everything else on a service — booking mode, stay rules,
                 quantities, capacity — is read-only here.
 
@@ -495,7 +495,7 @@ class AsyncServicesResource(_resource.Resource):
             idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
                 unless the client adds one, as `Talki` and `AsyncTalki` do unless built with
                 `auto_idempotency=False`.
-            body (ServiceCreate): A new service with a fixed duration at one location, bookable at
+            body (ServiceCreate | ServiceCreateDict): A new service with a fixed duration at one location, bookable at
                 once. Send at most one of `initial_capacity`, which gives the service a resource of its
                 own, or `resource_ids`, which makes it draw on resources of the same location. With
                 neither, it draws on the location's default resource (`is_default`); a location with no
@@ -602,7 +602,7 @@ class AsyncServicesResource(_resource.Resource):
             service_id (str):
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
-            body (ServiceUpdate): The service fields you can change. Every field is optional; an
+            body (ServiceUpdate | ServiceUpdateDict): The service fields you can change. Every field is optional; an
                 omitted one is left unchanged. Everything else on a service — booking mode, stay rules,
                 quantities, capacity — is read-only here.
 

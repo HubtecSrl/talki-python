@@ -54,7 +54,7 @@ with Talki(api_key="talki_test_…") as talki:  # or access_token="talki_at_…"
 - `talki.types.UNSET` is a field left out, `None` an explicit `null`. In an
   update body (`AccountUpdate`, `ServiceUpdate`, …) UNSET leaves the field as
   it is and `None` sends `null`, which clears a field that allows it. In a
-  dict, a key left out (or set to UNSET) is a field left out.
+  dict, a key left out is a field left out.
 
 ### Async
 
@@ -105,6 +105,9 @@ its token renewal, so it is cheap to make for one call:
 ```python
 talki.with_options(timeout=5, max_retries=0).calls.get(call_id)
 ```
+
+The connections stay the original client's: closing the copy leaves them open,
+and closing the original closes them for both.
 
 ## Errors
 

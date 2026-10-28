@@ -775,7 +775,7 @@ class CallsResource(_resource.Resource):
             call_id (str):
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
-            body (CallUpdate): Inbox state for one call. Send `read`, `archived` or both.
+            body (CallUpdate | CallUpdateDict): Inbox state for one call. Send `read`, `archived` or both.
 
         Raises:
             talki.ApiError: The API answered with an error, as the subclass for its `type`.
@@ -1613,7 +1613,7 @@ class AsyncCallsResource(_resource.Resource):
             call_id (str):
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
-            body (CallUpdate): Inbox state for one call. Send `read`, `archived` or both.
+            body (CallUpdate | CallUpdateDict): Inbox state for one call. Send `read`, `archived` or both.
 
         Raises:
             talki.ApiError: The API answered with an error, as the subclass for its `type`.

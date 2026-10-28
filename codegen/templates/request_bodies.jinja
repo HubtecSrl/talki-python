@@ -64,7 +64,7 @@ Sequence[{{ dict_type(prop.inner_property) }}]
 {{ dict_type(inner) }}{{ " | " if not loop.last }}
 {%- endfor -%}
 {%- elif template == "enum_property.py.jinja" -%}
-{{ prop.class_info.name }} | Literal[{% for value in prop.values.values() %}"{{ value | in_double_quote_literal }}"{{ ", " if not loop.last }}{% endfor %}]
+{{ prop.class_info.name }} | Literal[{% for value in prop.values.values() %}{% if value is string %}"{{ value | in_double_quote_literal }}"{% else %}{{ value }}{% endif %}{{ ", " if not loop.last }}{% endfor %}]
 {%- elif template in ["date_property.py.jinja", "datetime_property.py.jinja", "uuid_property.py.jinja"] -%}
 {{ prop.get_base_type_string() | as_unembedded_code }} | str
 {%- else -%}

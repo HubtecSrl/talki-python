@@ -278,7 +278,7 @@ class AccountResource(_resource.Resource):
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
             if_match (str | Unset):
-            body (AccountUpdate): The settings you can change. Every field is optional and an omitted
+            body (AccountUpdate | AccountUpdateDict): The settings you can change. Every field is optional and an omitted
                 one is left unchanged, but send at least one. A `null` or empty text clears it; a voice, a
                 switch or the transfer list cannot be null. With `?location_id=`, a location's own
                 settings change at that location only, and the account's switches at every location.
@@ -555,7 +555,7 @@ class AsyncAccountResource(_resource.Resource):
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
             if_match (str | Unset):
-            body (AccountUpdate): The settings you can change. Every field is optional and an omitted
+            body (AccountUpdate | AccountUpdateDict): The settings you can change. Every field is optional and an omitted
                 one is left unchanged, but send at least one. A `null` or empty text clears it; a voice, a
                 switch or the transfer list cannot be null. With `?location_id=`, a location's own
                 settings change at that location only, and the account's switches at every location.

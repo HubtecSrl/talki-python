@@ -13,7 +13,7 @@ import httpx
 import pytest
 
 import talki.api
-from talki import AsyncTalki, ConflictError, InvalidRequestError, RawResponse, Talki
+from talki import AsyncTalki, ConflictError, InvalidRequestError, RawResponse, Talki, _resource
 from talki.api import AsyncResources, Resources
 from talki.models import CallCount, CallerRuleKind, Contact, Tag, TagCreate, WorkingHours, WorkingHoursSlot
 from talki.pagination import AsyncPage, AsyncPager, Page, PaginationError, position
@@ -547,6 +547,7 @@ def test_a_dict_body_sends_dates_enums_and_uuids_as_json_and_leaves_unset_out():
                 }
             )
     assert json.loads(server.requests[0].read()) == {"phone_number": "+393480000001", "kind": "vip"}
+    assert _resource._json({"days": [1, UNSET], "ids": frozenset({2})}) == {"days": [1], "ids": [2]}
     assert json.loads(server.requests[1].read()) == {
         "client_name": "Ada",
         "client_surname": "Lovelace",
@@ -663,10 +664,25 @@ def test_with_options_changes_the_settings_for_its_calls_only():
 
 def test_with_options_copies_every_setting():
     client = Talki(api_key="talki_test_x")
-    assert set(vars(client)) == talki._talki._SETTINGS
+    assert set(vars(client)) == talki._talki._SETTINGS | talki._talki._OWN
     copy = client.with_options()
-    assert set(vars(copy)) == talki._talki._SETTINGS
+    assert set(vars(copy)) == talki._talki._SETTINGS | talki._talki._OWN
     assert copy.transport is client.transport and copy.timeout == client.timeout
+
+
+def test_closing_a_copy_leaves_the_connections_to_the_original():
+    server = Server({("/v1/calls/count", None): httpx.Response(200, json={"total": 7})})
+    client = sync_for(server)
+    client.calls.count()
+    with client.with_options(timeout=5) as once:
+        once.calls.count()
+    assert client.transport._connections.sync is not None
+    assert not client.client.get_httpx_client().is_closed
+    assert client.calls.count().total == 7
+    # Closing the original closes them for both; both go on.
+    client.close()
+    assert client.transport._connections.sync is None
+    assert once.calls.count().total == 7 and client.calls.count().total == 7
 
 
 def test_with_options_on_the_async_client():

@@ -21,8 +21,10 @@ For API version `2026-10-01`, as 0.2.0b1.
 - On `AsyncTalki`, a list that pages returns a `talki.pagination.AsyncPager`:
   `async for call in talki.calls.list()` without `await`. Awaiting it still
   gives the first page, so `await talki.calls.list()` is unchanged; but the
-  method is no longer a coroutine function, so `asyncio.create_task()` no
-  longer takes its result directly.
+  method is no longer a coroutine function: `asyncio.create_task()` and
+  `TaskGroup.create_task()` no longer take its result, nor anyio's
+  `start_soon` the method, and `inspect.iscoroutinefunction()` is False for it.
+  `asyncio.gather()` and `asyncio.wait_for()` still take it.
 
 ## 0.2.0b1 — 2026-10-23
 
