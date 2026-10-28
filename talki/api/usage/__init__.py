@@ -1,6 +1,8 @@
 """The `usage` operations, one module each, and `UsageResource` / `AsyncUsageResource`,
 which `Talki` and `AsyncTalki` expose as `usage`."""
 
+from functools import cached_property
+
 from ... import _resource
 from ...models.usage import Usage
 from ...models.usage_history import UsageHistory
@@ -10,12 +12,59 @@ from . import (
     get_usage_history,
 )
 
-__all__ = ["AsyncUsageResource", "UsageResource"]
+__all__ = [
+    "AsyncUsageResource",
+    "AsyncUsageResourceWithRawResponse",
+    "UsageResource",
+    "UsageResourceWithRawResponse",
+]
+
+
+class UsageResourceWithRawResponse(_resource.Resource):
+    """`talki.usage.with_raw_response`: the methods of `talki.usage`, each
+    returning the whole answer, a `talki.RawResponse` whose `parse()` is what the
+    method returns. An error raises as it does there."""
+
+    def get(
+        self,
+        *,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Usage]:
+        """`talki.usage.get`, returning the whole answer."""
+        return _resource.raw(
+            get_usage.sync_detailed(
+                client=self._client,
+                talki_version=talki_version,
+            )
+        )
+
+    def get_history(
+        self,
+        *,
+        from_: None | str | Unset = UNSET,
+        to: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[UsageHistory]:
+        """`talki.usage.get_history`, returning the whole answer."""
+        return _resource.raw(
+            get_usage_history.sync_detailed(
+                client=self._client,
+                from_=from_,
+                to=to,
+                talki_version=talki_version,
+            )
+        )
 
 
 class UsageResource(_resource.Resource):
     """`talki.usage`: each method sends one operation and returns its value, or
     raises the `talki.ApiError` subclass for its error."""
+
+    @cached_property
+    def with_raw_response(self) -> UsageResourceWithRawResponse:
+        """The same methods, each returning the whole answer: its status and
+        headers (`ETag`, `X-Request-Id`, the rate limits) with the value."""
+        return UsageResourceWithRawResponse(self._client)
 
     def get(
         self,
@@ -38,12 +87,11 @@ class UsageResource(_resource.Resource):
         Returns:
             Usage
         """
-        return _resource.unwrap(
-            get_usage.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.get(
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     def get_history(
         self,
@@ -71,8 +119,43 @@ class UsageResource(_resource.Resource):
         Returns:
             UsageHistory
         """
-        return _resource.unwrap(
-            get_usage_history.sync_detailed(
+        return (
+            self.with_raw_response.get_history(
+                from_=from_,
+                to=to,
+                talki_version=talki_version,
+            )
+        ).parse()
+
+
+class AsyncUsageResourceWithRawResponse(_resource.Resource):
+    """`talki.usage.with_raw_response` on `AsyncTalki`: the methods of `talki.usage`, each
+    returning the whole answer, a `talki.RawResponse` whose `parse()` is what the
+    method returns. An error raises as it does there."""
+
+    async def get(
+        self,
+        *,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Usage]:
+        """`talki.usage.get`, returning the whole answer."""
+        return _resource.raw(
+            await get_usage.asyncio_detailed(
+                client=self._client,
+                talki_version=talki_version,
+            )
+        )
+
+    async def get_history(
+        self,
+        *,
+        from_: None | str | Unset = UNSET,
+        to: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[UsageHistory]:
+        """`talki.usage.get_history`, returning the whole answer."""
+        return _resource.raw(
+            await get_usage_history.asyncio_detailed(
                 client=self._client,
                 from_=from_,
                 to=to,
@@ -84,6 +167,12 @@ class UsageResource(_resource.Resource):
 class AsyncUsageResource(_resource.Resource):
     """`talki.usage` on `AsyncTalki`: each method sends one operation and returns its value, or
     raises the `talki.ApiError` subclass for its error."""
+
+    @cached_property
+    def with_raw_response(self) -> AsyncUsageResourceWithRawResponse:
+        """The same methods, each returning the whole answer: its status and
+        headers (`ETag`, `X-Request-Id`, the rate limits) with the value."""
+        return AsyncUsageResourceWithRawResponse(self._client)
 
     async def get(
         self,
@@ -106,12 +195,11 @@ class AsyncUsageResource(_resource.Resource):
         Returns:
             Usage
         """
-        return _resource.unwrap(
-            await get_usage.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.get(
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     async def get_history(
         self,
@@ -139,11 +227,10 @@ class AsyncUsageResource(_resource.Resource):
         Returns:
             UsageHistory
         """
-        return _resource.unwrap(
-            await get_usage_history.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.get_history(
                 from_=from_,
                 to=to,
                 talki_version=talki_version,
             )
-        )
+        ).parse()

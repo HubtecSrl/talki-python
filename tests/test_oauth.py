@@ -821,3 +821,18 @@ def test_a_refused_renewal_is_logged_as_an_error(caplog):
     assert record.getMessage() == (
         "The API refused the token renewal (invalid_grant): the customer has to reconnect the app"
     )
+
+
+def test_a_copy_with_other_options_shares_the_one_renewal():
+    server = Server()
+    talki = talki_with(server, expires_at=0.0)
+    copies = [talki, talki.with_options(timeout=5), talki.with_options(max_retries=1).with_options(timeout=7)]
+    with talki:
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            statuses = list(
+                pool.map(lambda n: get_account.sync_detailed(client=copies[n % 3].client).status_code, range(12))
+            )
+    assert statuses == [204] * 12
+    assert server.refreshes == ["talki_rt_1"]
+    assert all(copy.auth is talki.auth for copy in copies)
+    assert {copy.tokens.access_token for copy in copies if copy.tokens} == {talki.tokens.access_token}

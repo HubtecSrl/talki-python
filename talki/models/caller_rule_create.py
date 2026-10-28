@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar, cast
+from typing import Any, Literal, Required, TypedDict, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -101,3 +101,12 @@ class CallerRuleCreate:
 
     def __contains__(self, key: str) -> bool:
         return key in self.additional_properties
+
+
+# `CallerRuleCreate` as a dict, which a method's `body=` takes in its place: a key
+# left out is a field left out. A date, datetime or UUID can be its ISO string,
+# an enum its value.
+class CallerRuleCreateDict(TypedDict, total=False):
+    phone_number: Required[str]
+    kind: CallerRuleKind | Literal["vip", "blocked"]
+    label: str | None

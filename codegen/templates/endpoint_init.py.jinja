@@ -9,12 +9,17 @@
     the verb (`tag_contact` in `tags`). Operations of one tag that would share a
     name both keep their own, and a keyword gets `_` after it. Methods named
     after a builtin (`list`) come last in the class. A list that takes `cursor` returns a `Page` of its
-    `data` rows.
+    `data` rows (an `AsyncPager` on `AsyncTalki`).
+
+    Each method sends its request through `<Tag>ResourceWithRawResponse`, its
+    `with_raw_response`, which returns the whole answer as a `RawResponse`. A
+    body a model is the model of also takes its `Dict` (`request_bodies.jinja`).
 
     On a generator upgrade, check that `endpoint_collection` still carries the
     tag's endpoints, and that `get_imports` and `get_lazy_imports` still name
     what a signature needs. -#}
 {% from "endpoint_macros.py.jinja" import arguments, kwargs %}
+{% from "request_bodies.jinja" import dict_body %}
 {% from "helpers.jinja" import docstring as _docstring %}
 {% set tag = endpoint_collection.tag %}
 {% set resource = class_name(tag) + "Resource" %}
@@ -56,6 +61,16 @@
 {% macro method_name(endpoint) -%}
 {%- set short = short_name(endpoint) -%}
 {{- short if shorts.names.count(short) == 1 else python_identifier(endpoint.name) -}}
+{%- endmacro %}
+
+{#- The method's parameters: the operation's, with `body=` taking the body's `Dict` too. -#}
+{% macro signature(endpoint) -%}
+{%- set model = dict_body(endpoint) -%}
+{%- if model -%}
+{{ arguments(endpoint, include_client=False) | replace("body: " ~ model, "body: " ~ model ~ " | " ~ model ~ "Dict", 1) }}
+{%- else -%}
+{{ arguments(endpoint, include_client=False) }}
+{%- endif -%}
 {%- endmacro %}
 
 {% macro module(endpoint) -%}
@@ -110,14 +125,18 @@ Raises:
     httpx.TimeoutException: If the request takes longer than the client's timeout.
 
 Returns:
-{% if row_type(endpoint) %}
-    {{ prefix }}Page[{{ row_type(endpoint) | safe_for_docstring }}]: This page. Iterating it yields every row from here on,
+{% if row_type(endpoint) and prefix %}
+    AsyncPager[{{ row_type(endpoint) | safe_for_docstring }}]: Awaited, this page (an `AsyncPage`). Iterated with `async for`,
+    every row from here on, fetching the pages as it goes.
+{% elif row_type(endpoint) %}
+    Page[{{ row_type(endpoint) | safe_for_docstring }}]: This page. Iterating it yields every row from here on,
     fetching the pages after it as it goes.
 {% else %}
     {{ success_type(endpoint) | safe_for_docstring }}
 {% endif %}
 {% endset %}
-{{ _docstring(content) }}
+{% set model = dict_body(endpoint) %}
+{{ _docstring(content | replace("body (" ~ model ~ ")", "body (" ~ model ~ " | " ~ model ~ "Dict)", 1) if model else content) }}
 {% endmacro %}
 
 {#- What the signatures and return types name, without what only parsing uses. -#}
@@ -139,12 +158,20 @@ Returns:
 {% endfor %}
 {% endfor %}
 {% endfor %}
+{% for endpoint in endpoint_collection.endpoints if dict_body(endpoint) %}
+{% set line = "from ...models." ~ endpoint.bodies[0].prop.class_info.module_name ~ " import " ~ dict_body(endpoint) ~ "Dict" %}
+{% if line not in imports.lines %}
+{% set imports.lines = imports.lines + [line] %}
+{% endif %}
+{% endfor %}
 {% set has_pages = namespace(value=false) %}
 {% for endpoint in endpoint_collection.endpoints if row_type(endpoint) %}
 {% set has_pages.value = true %}
 {% endfor %}
 """The `{{ tag }}` operations, one module each, and `{{ resource }}` / `Async{{ resource }}`,
 which `Talki` and `AsyncTalki` expose as `{{ tag }}`."""
+
+from functools import cached_property
 
 {% for line in imports.lines | sort %}
 {{ line }}
@@ -160,15 +187,12 @@ from . import (
 {% endfor %}
 )
 
-__all__ = ["Async{{ resource }}", "{{ resource }}"]
-
-{% for is_async in [false, true] %}
-{% set prefix = "Async" if is_async else "" %}
-
-
-class {{ prefix }}{{ resource }}(_resource.Resource):
-    """`talki.{{ tag }}`{% if is_async %} on `AsyncTalki`{% endif %}: each method sends one operation and returns its value, or
-    raises the `talki.ApiError` subclass for its error."""
+__all__ = [
+    "Async{{ resource }}",
+    "Async{{ resource }}WithRawResponse",
+    "{{ resource }}",
+    "{{ resource }}WithRawResponse",
+]
 
 {% set ordered = namespace(plain=[], last=[]) %}
 {% for endpoint in endpoint_collection.endpoints | sort(attribute="name") %}
@@ -178,33 +202,95 @@ class {{ prefix }}{{ resource }}(_resource.Resource):
 {% set ordered.plain = ordered.plain + [endpoint] %}
 {% endif %}
 {% endfor %}
+{% for is_async in [false, true] %}
+{% set prefix = "Async" if is_async else "" %}
+
+
+class {{ prefix }}{{ resource }}WithRawResponse(_resource.Resource):
+    """`talki.{{ tag }}.with_raw_response`{% if is_async %} on `AsyncTalki`{% endif %}: the methods of `talki.{{ tag }}`, each
+    returning the whole answer, a `talki.RawResponse` whose `parse()` is what the
+    method returns. An error raises as it does there."""
+
 {% for endpoint in ordered.plain + ordered.last %}
 {% set returns = success_type(endpoint) %}
 {% set rows = row_type(endpoint) %}
 {% set call = module(endpoint) + (".asyncio_detailed(" if is_async else ".sync_detailed(") %}
     {{ "async " if is_async }}def {{ method_name(endpoint) }}(
         self,
-        {{ arguments(endpoint, include_client=False) | indent(8) }}
-    ) -> {% if rows %}_pagination.{{ prefix }}Page[{{ rows }}]{% else %}{{ returns }}{% endif %}:
-        {{ method_docstring(endpoint, prefix) | indent(8) -}}
+        {{ signature(endpoint) | indent(8) }}
+    ) -> _resource.RawResponse[{% if rows %}_pagination.{{ prefix }}Page[{{ rows }}]{% else %}{{ returns }}{% endif %}]:
+        """`talki.{{ tag }}.{{ method_name(endpoint) }}`, returning the whole answer."""
+{% if dict_body(endpoint) and endpoint.bodies[0].prop.required %}
+        body = _resource.as_body(body, {{ dict_body(endpoint) }})
+{% elif dict_body(endpoint) %}
+        if not isinstance(body, Unset):
+            body = _resource.as_body(body, {{ dict_body(endpoint) }})
+{% endif %}
 {% if rows %}
+
         {{ "async " if is_async }}def fetch(cursor: None | str | Unset) -> {{ returns }}:
             return _resource.unwrap({{ "await " if is_async }}{{ call }}
                 client=self._client,
                 {{ kwargs(endpoint, include_client=False) | indent(16) }}
             ))
 
-        return {{ "await " if is_async }}_pagination.{{ prefix }}Page.first(fetch, cursor)
-{% elif returns == "None" %}
-        _resource.unwrap({{ "await " if is_async }}{{ call }}
+        return _resource.raw({{ "await " if is_async }}{{ call }}
             client=self._client,
             {{ kwargs(endpoint, include_client=False) | indent(12) }}
-        ))
+        )).map(lambda page: _pagination.{{ prefix }}Page(page, fetch, cursor))
 {% else %}
-        return _resource.unwrap({{ "await " if is_async }}{{ call }}
+        return _resource.raw({{ "await " if is_async }}{{ call }}
             client=self._client,
             {{ kwargs(endpoint, include_client=False) | indent(12) }}
         ))
+{% endif %}
+
+{% endfor %}
+
+class {{ prefix }}{{ resource }}(_resource.Resource):
+    """`talki.{{ tag }}`{% if is_async %} on `AsyncTalki`{% endif %}: each method sends one operation and returns its value, or
+    raises the `talki.ApiError` subclass for its error."""
+
+    @cached_property
+    def with_raw_response(self) -> {{ prefix }}{{ resource }}WithRawResponse:
+        """The same methods, each returning the whole answer: its status and
+        headers (`ETag`, `X-Request-Id`, the rate limits) with the value."""
+        return {{ prefix }}{{ resource }}WithRawResponse(self._client)
+
+{% for endpoint in ordered.plain + ordered.last %}
+{% set returns = success_type(endpoint) %}
+{% set rows = row_type(endpoint) %}
+{% set name = method_name(endpoint) %}
+{% if rows and is_async %}
+    def {{ name }}(
+        self,
+        {{ signature(endpoint) | indent(8) }}
+    ) -> _pagination.AsyncPager[{{ rows }}]:
+        {{ method_docstring(endpoint, prefix) | indent(8) -}}
+{% filter indent(8, first=true) %}
+
+async def first() -> _pagination.AsyncPage[{{ rows }}]:
+    return (await self.with_raw_response.{{ name }}(
+        {{ kwargs(endpoint, include_client=False) | indent(8) }}
+    )).parse()
+
+return _pagination.AsyncPager(first)
+{% endfilter %}
+{% else %}
+    {{ "async " if is_async }}def {{ name }}(
+        self,
+        {{ signature(endpoint) | indent(8) }}
+    ) -> {% if rows %}_pagination.Page[{{ rows }}]{% else %}{{ returns }}{% endif %}:
+        {{ method_docstring(endpoint, prefix) | indent(8) -}}
+{% if returns != "None" or rows %}
+        return ({{ "await " if is_async }}self.with_raw_response.{{ name }}(
+            {{ kwargs(endpoint, include_client=False) | indent(12) }}
+        )).parse()
+{% else %}
+        ({{ "await " if is_async }}self.with_raw_response.{{ name }}(
+            {{ kwargs(endpoint, include_client=False) | indent(12) }}
+        )).parse()
+{% endif %}
 {% endif %}
 
 {% endfor %}

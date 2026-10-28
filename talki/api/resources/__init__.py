@@ -1,12 +1,14 @@
 """The `resources` operations, one module each, and `ResourcesResource` / `AsyncResourcesResource`,
 which `Talki` and `AsyncTalki` expose as `resources`."""
 
+from functools import cached_property
+
 from ... import _resource
 from ... import pagination as _pagination
 from ...models.resource import Resource
-from ...models.resource_create import ResourceCreate
+from ...models.resource_create import ResourceCreate, ResourceCreateDict
 from ...models.resource_list import ResourceList
-from ...models.resource_update import ResourceUpdate
+from ...models.resource_update import ResourceUpdate, ResourceUpdateDict
 from ...types import UNSET, Unset
 from . import (
     create_resource,
@@ -16,17 +18,137 @@ from . import (
     update_resource,
 )
 
-__all__ = ["AsyncResourcesResource", "ResourcesResource"]
+__all__ = [
+    "AsyncResourcesResource",
+    "AsyncResourcesResourceWithRawResponse",
+    "ResourcesResource",
+    "ResourcesResourceWithRawResponse",
+]
+
+
+class ResourcesResourceWithRawResponse(_resource.Resource):
+    """`talki.resources.with_raw_response`: the methods of `talki.resources`, each
+    returning the whole answer, a `talki.RawResponse` whose `parse()` is what the
+    method returns. An error raises as it does there."""
+
+    def create(
+        self,
+        *,
+        body: ResourceCreate | ResourceCreateDict,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Resource]:
+        """`talki.resources.create`, returning the whole answer."""
+        body = _resource.as_body(body, ResourceCreate)
+        return _resource.raw(
+            create_resource.sync_detailed(
+                client=self._client,
+                body=body,
+                location_id=location_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def delete(
+        self,
+        resource_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[None]:
+        """`talki.resources.delete`, returning the whole answer."""
+        return _resource.raw(
+            delete_resource.sync_detailed(
+                client=self._client,
+                resource_id=resource_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def get(
+        self,
+        resource_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Resource]:
+        """`talki.resources.get`, returning the whole answer."""
+        return _resource.raw(
+            get_resource.sync_detailed(
+                client=self._client,
+                resource_id=resource_id,
+                talki_version=talki_version,
+            )
+        )
+
+    def update(
+        self,
+        resource_id: str,
+        *,
+        body: ResourceUpdate | ResourceUpdateDict,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Resource]:
+        """`talki.resources.update`, returning the whole answer."""
+        body = _resource.as_body(body, ResourceUpdate)
+        return _resource.raw(
+            update_resource.sync_detailed(
+                client=self._client,
+                resource_id=resource_id,
+                body=body,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def list(
+        self,
+        *,
+        limit: int | Unset = 50,
+        cursor: None | str | Unset = UNSET,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[_pagination.Page[Resource]]:
+        """`talki.resources.list`, returning the whole answer."""
+
+        def fetch(cursor: None | str | Unset) -> ResourceList:
+            return _resource.unwrap(
+                list_resources.sync_detailed(
+                    client=self._client,
+                    limit=limit,
+                    cursor=cursor,
+                    location_id=location_id,
+                    talki_version=talki_version,
+                )
+            )
+
+        return _resource.raw(
+            list_resources.sync_detailed(
+                client=self._client,
+                limit=limit,
+                cursor=cursor,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        ).map(lambda page: _pagination.Page(page, fetch, cursor))
 
 
 class ResourcesResource(_resource.Resource):
     """`talki.resources`: each method sends one operation and returns its value, or
     raises the `talki.ApiError` subclass for its error."""
 
+    @cached_property
+    def with_raw_response(self) -> ResourcesResourceWithRawResponse:
+        """The same methods, each returning the whole answer: its status and
+        headers (`ETag`, `X-Request-Id`, the rate limits) with the value."""
+        return ResourcesResourceWithRawResponse(self._client)
+
     def create(
         self,
         *,
-        body: ResourceCreate,
+        body: ResourceCreate | ResourceCreateDict,
         location_id: None | str | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
@@ -46,7 +168,7 @@ class ResourcesResource(_resource.Resource):
             idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
                 unless the client adds one, as `Talki` and `AsyncTalki` do unless built with
                 `auto_idempotency=False`.
-            body (ResourceCreate): A new `shared` resource at one location: a count of interchangeable
+            body (ResourceCreate | ResourceCreateDict): A new `shared` resource at one location: a count of interchangeable
                 units, optionally drawn on by existing services of that location. With no `service_ids` it
                 limits nothing until a service is linked to it, for example by `POST /v1/services` with
                 `resource_ids`. Resources made of sized units are set up in Talki.
@@ -58,15 +180,14 @@ class ResourcesResource(_resource.Resource):
         Returns:
             Resource
         """
-        return _resource.unwrap(
-            create_resource.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.create(
                 body=body,
                 location_id=location_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def delete(
         self,
@@ -97,14 +218,13 @@ class ResourcesResource(_resource.Resource):
         Returns:
             None
         """
-        _resource.unwrap(
-            delete_resource.sync_detailed(
-                client=self._client,
+        (
+            self.with_raw_response.delete(
                 resource_id=resource_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def get(
         self,
@@ -129,19 +249,18 @@ class ResourcesResource(_resource.Resource):
         Returns:
             Resource
         """
-        return _resource.unwrap(
-            get_resource.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.get(
                 resource_id=resource_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     def update(
         self,
         resource_id: str,
         *,
-        body: ResourceUpdate,
+        body: ResourceUpdate | ResourceUpdateDict,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Resource:
@@ -155,7 +274,7 @@ class ResourcesResource(_resource.Resource):
             resource_id (str):
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
-            body (ResourceUpdate): The two fields you can change on a resource. A capacity below what
+            body (ResourceUpdate | ResourceUpdateDict): The two fields you can change on a resource. A capacity below what
                 is already booked is refused.
 
         Raises:
@@ -165,15 +284,14 @@ class ResourcesResource(_resource.Resource):
         Returns:
             Resource
         """
-        return _resource.unwrap(
-            update_resource.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.update(
                 resource_id=resource_id,
                 body=body,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def list(
         self,
@@ -211,10 +329,106 @@ class ResourcesResource(_resource.Resource):
             Page[Resource]: This page. Iterating it yields every row from here on,
             fetching the pages after it as it goes.
         """
+        return (
+            self.with_raw_response.list(
+                limit=limit,
+                cursor=cursor,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        ).parse()
 
-        def fetch(cursor: None | str | Unset) -> ResourceList:
+
+class AsyncResourcesResourceWithRawResponse(_resource.Resource):
+    """`talki.resources.with_raw_response` on `AsyncTalki`: the methods of `talki.resources`, each
+    returning the whole answer, a `talki.RawResponse` whose `parse()` is what the
+    method returns. An error raises as it does there."""
+
+    async def create(
+        self,
+        *,
+        body: ResourceCreate | ResourceCreateDict,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Resource]:
+        """`talki.resources.create`, returning the whole answer."""
+        body = _resource.as_body(body, ResourceCreate)
+        return _resource.raw(
+            await create_resource.asyncio_detailed(
+                client=self._client,
+                body=body,
+                location_id=location_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def delete(
+        self,
+        resource_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[None]:
+        """`talki.resources.delete`, returning the whole answer."""
+        return _resource.raw(
+            await delete_resource.asyncio_detailed(
+                client=self._client,
+                resource_id=resource_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def get(
+        self,
+        resource_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Resource]:
+        """`talki.resources.get`, returning the whole answer."""
+        return _resource.raw(
+            await get_resource.asyncio_detailed(
+                client=self._client,
+                resource_id=resource_id,
+                talki_version=talki_version,
+            )
+        )
+
+    async def update(
+        self,
+        resource_id: str,
+        *,
+        body: ResourceUpdate | ResourceUpdateDict,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Resource]:
+        """`talki.resources.update`, returning the whole answer."""
+        body = _resource.as_body(body, ResourceUpdate)
+        return _resource.raw(
+            await update_resource.asyncio_detailed(
+                client=self._client,
+                resource_id=resource_id,
+                body=body,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def list(
+        self,
+        *,
+        limit: int | Unset = 50,
+        cursor: None | str | Unset = UNSET,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[_pagination.AsyncPage[Resource]]:
+        """`talki.resources.list`, returning the whole answer."""
+
+        async def fetch(cursor: None | str | Unset) -> ResourceList:
             return _resource.unwrap(
-                list_resources.sync_detailed(
+                await list_resources.asyncio_detailed(
                     client=self._client,
                     limit=limit,
                     cursor=cursor,
@@ -223,17 +437,31 @@ class ResourcesResource(_resource.Resource):
                 )
             )
 
-        return _pagination.Page.first(fetch, cursor)
+        return _resource.raw(
+            await list_resources.asyncio_detailed(
+                client=self._client,
+                limit=limit,
+                cursor=cursor,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        ).map(lambda page: _pagination.AsyncPage(page, fetch, cursor))
 
 
 class AsyncResourcesResource(_resource.Resource):
     """`talki.resources` on `AsyncTalki`: each method sends one operation and returns its value, or
     raises the `talki.ApiError` subclass for its error."""
 
+    @cached_property
+    def with_raw_response(self) -> AsyncResourcesResourceWithRawResponse:
+        """The same methods, each returning the whole answer: its status and
+        headers (`ETag`, `X-Request-Id`, the rate limits) with the value."""
+        return AsyncResourcesResourceWithRawResponse(self._client)
+
     async def create(
         self,
         *,
-        body: ResourceCreate,
+        body: ResourceCreate | ResourceCreateDict,
         location_id: None | str | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
@@ -253,7 +481,7 @@ class AsyncResourcesResource(_resource.Resource):
             idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
                 unless the client adds one, as `Talki` and `AsyncTalki` do unless built with
                 `auto_idempotency=False`.
-            body (ResourceCreate): A new `shared` resource at one location: a count of interchangeable
+            body (ResourceCreate | ResourceCreateDict): A new `shared` resource at one location: a count of interchangeable
                 units, optionally drawn on by existing services of that location. With no `service_ids` it
                 limits nothing until a service is linked to it, for example by `POST /v1/services` with
                 `resource_ids`. Resources made of sized units are set up in Talki.
@@ -265,15 +493,14 @@ class AsyncResourcesResource(_resource.Resource):
         Returns:
             Resource
         """
-        return _resource.unwrap(
-            await create_resource.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.create(
                 body=body,
                 location_id=location_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     async def delete(
         self,
@@ -304,14 +531,13 @@ class AsyncResourcesResource(_resource.Resource):
         Returns:
             None
         """
-        _resource.unwrap(
-            await delete_resource.asyncio_detailed(
-                client=self._client,
+        (
+            await self.with_raw_response.delete(
                 resource_id=resource_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     async def get(
         self,
@@ -336,19 +562,18 @@ class AsyncResourcesResource(_resource.Resource):
         Returns:
             Resource
         """
-        return _resource.unwrap(
-            await get_resource.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.get(
                 resource_id=resource_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
 
     async def update(
         self,
         resource_id: str,
         *,
-        body: ResourceUpdate,
+        body: ResourceUpdate | ResourceUpdateDict,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Resource:
@@ -362,7 +587,7 @@ class AsyncResourcesResource(_resource.Resource):
             resource_id (str):
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
-            body (ResourceUpdate): The two fields you can change on a resource. A capacity below what
+            body (ResourceUpdate | ResourceUpdateDict): The two fields you can change on a resource. A capacity below what
                 is already booked is refused.
 
         Raises:
@@ -372,24 +597,23 @@ class AsyncResourcesResource(_resource.Resource):
         Returns:
             Resource
         """
-        return _resource.unwrap(
-            await update_resource.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.update(
                 resource_id=resource_id,
                 body=body,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
-    async def list(
+    def list(
         self,
         *,
         limit: int | Unset = 50,
         cursor: None | str | Unset = UNSET,
         location_id: None | str | Unset = UNSET,
         talki_version: str | Unset = UNSET,
-    ) -> _pagination.AsyncPage[Resource]:
+    ) -> _pagination.AsyncPager[Resource]:
         """List resource changes
 
          Walk the capacity change feed in commit order. A resource moves when its unit classes or service
@@ -415,19 +639,18 @@ class AsyncResourcesResource(_resource.Resource):
             httpx.TimeoutException: If the request takes longer than the client's timeout.
 
         Returns:
-            AsyncPage[Resource]: This page. Iterating it yields every row from here on,
-            fetching the pages after it as it goes.
+            AsyncPager[Resource]: Awaited, this page (an `AsyncPage`). Iterated with `async for`,
+            every row from here on, fetching the pages as it goes.
         """
 
-        async def fetch(cursor: None | str | Unset) -> ResourceList:
-            return _resource.unwrap(
-                await list_resources.asyncio_detailed(
-                    client=self._client,
+        async def first() -> _pagination.AsyncPage[Resource]:
+            return (
+                await self.with_raw_response.list(
                     limit=limit,
                     cursor=cursor,
                     location_id=location_id,
                     talki_version=talki_version,
                 )
-            )
+            ).parse()
 
-        return await _pagination.AsyncPage.first(fetch, cursor)
+        return _pagination.AsyncPager(first)

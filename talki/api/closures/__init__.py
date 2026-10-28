@@ -2,12 +2,13 @@
 which `Talki` and `AsyncTalki` expose as `closures`."""
 
 import datetime
+from functools import cached_property
 
 from ... import _resource
 from ...models.closure import Closure
-from ...models.closure_create import ClosureCreate
+from ...models.closure_create import ClosureCreate, ClosureCreateDict
 from ...models.closure_list import ClosureList
-from ...models.closure_update import ClosureUpdate
+from ...models.closure_update import ClosureUpdate, ClosureUpdateDict
 from ...models.list_closures_kind import ListClosuresKind
 from ...types import UNSET, Unset
 from . import (
@@ -17,17 +18,110 @@ from . import (
     update_closure,
 )
 
-__all__ = ["AsyncClosuresResource", "ClosuresResource"]
+__all__ = [
+    "AsyncClosuresResource",
+    "AsyncClosuresResourceWithRawResponse",
+    "ClosuresResource",
+    "ClosuresResourceWithRawResponse",
+]
+
+
+class ClosuresResourceWithRawResponse(_resource.Resource):
+    """`talki.closures.with_raw_response`: the methods of `talki.closures`, each
+    returning the whole answer, a `talki.RawResponse` whose `parse()` is what the
+    method returns. An error raises as it does there."""
+
+    def create(
+        self,
+        *,
+        body: ClosureCreate | ClosureCreateDict,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Closure]:
+        """`talki.closures.create`, returning the whole answer."""
+        body = _resource.as_body(body, ClosureCreate)
+        return _resource.raw(
+            create_closure.sync_detailed(
+                client=self._client,
+                body=body,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def delete(
+        self,
+        closure_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[None]:
+        """`talki.closures.delete`, returning the whole answer."""
+        return _resource.raw(
+            delete_closure.sync_detailed(
+                client=self._client,
+                closure_id=closure_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def update(
+        self,
+        closure_id: str,
+        *,
+        body: ClosureUpdate | ClosureUpdateDict,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Closure]:
+        """`talki.closures.update`, returning the whole answer."""
+        body = _resource.as_body(body, ClosureUpdate)
+        return _resource.raw(
+            update_closure.sync_detailed(
+                client=self._client,
+                closure_id=closure_id,
+                body=body,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    def list(
+        self,
+        *,
+        from_: datetime.date | None | Unset = UNSET,
+        to: datetime.date | None | Unset = UNSET,
+        kind: ListClosuresKind | Unset = ListClosuresKind.CLOSED,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[ClosureList]:
+        """`talki.closures.list`, returning the whole answer."""
+        return _resource.raw(
+            list_closures.sync_detailed(
+                client=self._client,
+                from_=from_,
+                to=to,
+                kind=kind,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        )
 
 
 class ClosuresResource(_resource.Resource):
     """`talki.closures`: each method sends one operation and returns its value, or
     raises the `talki.ApiError` subclass for its error."""
 
+    @cached_property
+    def with_raw_response(self) -> ClosuresResourceWithRawResponse:
+        """The same methods, each returning the whole answer: its status and
+        headers (`ETag`, `X-Request-Id`, the rate limits) with the value."""
+        return ClosuresResourceWithRawResponse(self._client)
+
     def create(
         self,
         *,
-        body: ClosureCreate,
+        body: ClosureCreate | ClosureCreateDict,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Closure:
@@ -44,7 +138,7 @@ class ClosuresResource(_resource.Resource):
             idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
                 unless the client adds one, as `Talki` and `AsyncTalki` do unless built with
                 `auto_idempotency=False`.
-            body (ClosureCreate): A new closure or special opening: `all_day: true` with `start_date`
+            body (ClosureCreate | ClosureCreateDict): A new closure or special opening: `all_day: true` with `start_date`
                 and `end_date` (closures only), or an exact range with `start_at` and `end_at`. Sending
                 fields of both forms is refused, and so is a special opening that does not start and end
                 on the same day in the account's `timezone`. Without `location_id`, it applies at every
@@ -57,14 +151,13 @@ class ClosuresResource(_resource.Resource):
         Returns:
             Closure
         """
-        return _resource.unwrap(
-            create_closure.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.create(
                 body=body,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def delete(
         self,
@@ -91,20 +184,19 @@ class ClosuresResource(_resource.Resource):
         Returns:
             None
         """
-        _resource.unwrap(
-            delete_closure.sync_detailed(
-                client=self._client,
+        (
+            self.with_raw_response.delete(
                 closure_id=closure_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def update(
         self,
         closure_id: str,
         *,
-        body: ClosureUpdate,
+        body: ClosureUpdate | ClosureUpdateDict,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Closure:
@@ -119,7 +211,7 @@ class ClosuresResource(_resource.Resource):
             closure_id (str):
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
-            body (ClosureUpdate): A partial edit of a closure or special opening. To move it, send the
+            body (ClosureUpdate | ClosureUpdateDict): A partial edit of a closure or special opening. To move it, send the
                 whole new window in one of the two forms. It stays at the location it was created for.
 
         Raises:
@@ -129,15 +221,14 @@ class ClosuresResource(_resource.Resource):
         Returns:
             Closure
         """
-        return _resource.unwrap(
-            update_closure.sync_detailed(
-                client=self._client,
+        return (
+            self.with_raw_response.update(
                 closure_id=closure_id,
                 body=body,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     def list(
         self,
@@ -173,8 +264,89 @@ class ClosuresResource(_resource.Resource):
         Returns:
             ClosureList
         """
-        return _resource.unwrap(
-            list_closures.sync_detailed(
+        return (
+            self.with_raw_response.list(
+                from_=from_,
+                to=to,
+                kind=kind,
+                location_id=location_id,
+                talki_version=talki_version,
+            )
+        ).parse()
+
+
+class AsyncClosuresResourceWithRawResponse(_resource.Resource):
+    """`talki.closures.with_raw_response` on `AsyncTalki`: the methods of `talki.closures`, each
+    returning the whole answer, a `talki.RawResponse` whose `parse()` is what the
+    method returns. An error raises as it does there."""
+
+    async def create(
+        self,
+        *,
+        body: ClosureCreate | ClosureCreateDict,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Closure]:
+        """`talki.closures.create`, returning the whole answer."""
+        body = _resource.as_body(body, ClosureCreate)
+        return _resource.raw(
+            await create_closure.asyncio_detailed(
+                client=self._client,
+                body=body,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def delete(
+        self,
+        closure_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[None]:
+        """`talki.closures.delete`, returning the whole answer."""
+        return _resource.raw(
+            await delete_closure.asyncio_detailed(
+                client=self._client,
+                closure_id=closure_id,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def update(
+        self,
+        closure_id: str,
+        *,
+        body: ClosureUpdate | ClosureUpdateDict,
+        talki_version: str | Unset = UNSET,
+        idempotency_key: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Closure]:
+        """`talki.closures.update`, returning the whole answer."""
+        body = _resource.as_body(body, ClosureUpdate)
+        return _resource.raw(
+            await update_closure.asyncio_detailed(
+                client=self._client,
+                closure_id=closure_id,
+                body=body,
+                talki_version=talki_version,
+                idempotency_key=idempotency_key,
+            )
+        )
+
+    async def list(
+        self,
+        *,
+        from_: datetime.date | None | Unset = UNSET,
+        to: datetime.date | None | Unset = UNSET,
+        kind: ListClosuresKind | Unset = ListClosuresKind.CLOSED,
+        location_id: None | str | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[ClosureList]:
+        """`talki.closures.list`, returning the whole answer."""
+        return _resource.raw(
+            await list_closures.asyncio_detailed(
                 client=self._client,
                 from_=from_,
                 to=to,
@@ -189,10 +361,16 @@ class AsyncClosuresResource(_resource.Resource):
     """`talki.closures` on `AsyncTalki`: each method sends one operation and returns its value, or
     raises the `talki.ApiError` subclass for its error."""
 
+    @cached_property
+    def with_raw_response(self) -> AsyncClosuresResourceWithRawResponse:
+        """The same methods, each returning the whole answer: its status and
+        headers (`ETag`, `X-Request-Id`, the rate limits) with the value."""
+        return AsyncClosuresResourceWithRawResponse(self._client)
+
     async def create(
         self,
         *,
-        body: ClosureCreate,
+        body: ClosureCreate | ClosureCreateDict,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Closure:
@@ -209,7 +387,7 @@ class AsyncClosuresResource(_resource.Resource):
             idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
                 unless the client adds one, as `Talki` and `AsyncTalki` do unless built with
                 `auto_idempotency=False`.
-            body (ClosureCreate): A new closure or special opening: `all_day: true` with `start_date`
+            body (ClosureCreate | ClosureCreateDict): A new closure or special opening: `all_day: true` with `start_date`
                 and `end_date` (closures only), or an exact range with `start_at` and `end_at`. Sending
                 fields of both forms is refused, and so is a special opening that does not start and end
                 on the same day in the account's `timezone`. Without `location_id`, it applies at every
@@ -222,14 +400,13 @@ class AsyncClosuresResource(_resource.Resource):
         Returns:
             Closure
         """
-        return _resource.unwrap(
-            await create_closure.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.create(
                 body=body,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     async def delete(
         self,
@@ -256,20 +433,19 @@ class AsyncClosuresResource(_resource.Resource):
         Returns:
             None
         """
-        _resource.unwrap(
-            await delete_closure.asyncio_detailed(
-                client=self._client,
+        (
+            await self.with_raw_response.delete(
                 closure_id=closure_id,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     async def update(
         self,
         closure_id: str,
         *,
-        body: ClosureUpdate,
+        body: ClosureUpdate | ClosureUpdateDict,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Closure:
@@ -284,7 +460,7 @@ class AsyncClosuresResource(_resource.Resource):
             closure_id (str):
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
-            body (ClosureUpdate): A partial edit of a closure or special opening. To move it, send the
+            body (ClosureUpdate | ClosureUpdateDict): A partial edit of a closure or special opening. To move it, send the
                 whole new window in one of the two forms. It stays at the location it was created for.
 
         Raises:
@@ -294,15 +470,14 @@ class AsyncClosuresResource(_resource.Resource):
         Returns:
             Closure
         """
-        return _resource.unwrap(
-            await update_closure.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.update(
                 closure_id=closure_id,
                 body=body,
                 talki_version=talki_version,
                 idempotency_key=idempotency_key,
             )
-        )
+        ).parse()
 
     async def list(
         self,
@@ -338,13 +513,12 @@ class AsyncClosuresResource(_resource.Resource):
         Returns:
             ClosureList
         """
-        return _resource.unwrap(
-            await list_closures.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.list(
                 from_=from_,
                 to=to,
                 kind=kind,
                 location_id=location_id,
                 talki_version=talki_version,
             )
-        )
+        ).parse()

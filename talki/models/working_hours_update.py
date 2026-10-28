@@ -9,6 +9,12 @@ from attrs import field as _attrs_field
 if TYPE_CHECKING:
     from ..models.working_hours_slot import WorkingHoursSlot
 
+from collections.abc import Sequence
+from typing import Required, TypedDict
+
+if TYPE_CHECKING:
+    from ..models.working_hours_slot import WorkingHoursSlotDict
+
 
 T = TypeVar("T", bound="WorkingHoursUpdate")
 
@@ -76,3 +82,10 @@ class WorkingHoursUpdate:
 
     def __contains__(self, key: str) -> bool:
         return key in self.additional_properties
+
+
+# `WorkingHoursUpdate` as a dict, which a method's `body=` takes in its place: a key
+# left out is a field left out. A date, datetime or UUID can be its ISO string,
+# an enum its value.
+class WorkingHoursUpdateDict(TypedDict, total=False):
+    slots: Required[Sequence[WorkingHoursSlotDict | WorkingHoursSlot]]

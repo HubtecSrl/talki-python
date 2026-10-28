@@ -3,6 +3,29 @@
 This package follows [semantic versioning](https://semver.org). The API
 version each release targets by default is `talki.API_VERSION`.
 
+## 0.3.0b1 — 2026-10-28
+
+For API version `2026-10-01`, as 0.2.0b1.
+
+- `talki.<tag>.with_raw_response.<method>()`: the same call, returning a
+  `talki.RawResponse` with the status, the headers (`ETag` to send back as
+  `if_match=`, `X-Request-Id`, the rate limits) and `parse()`, the value.
+- `body=` takes a dict as well as the model, typed by a TypedDict per request
+  model (`talki.models.AppointmentCreateDict`, …). It is sent as written, with
+  dates, datetimes and UUIDs as ISO strings and enums as their values.
+- `talki.with_options(timeout=…, max_retries=…)`: the client with other
+  settings for the calls made on it, sharing its connections and its token
+  renewal.
+- `Talki(user_agent="acme-crm/2.1")` adds an integration's name to the
+  `User-Agent`.
+- On `AsyncTalki`, a list that pages returns a `talki.pagination.AsyncPager`:
+  `async for call in talki.calls.list()` without `await`. Awaiting it still
+  gives the first page, so `await talki.calls.list()` is unchanged; but the
+  method is no longer a coroutine function: `asyncio.create_task()` and
+  `TaskGroup.create_task()` no longer take its result, nor anyio's
+  `start_soon` the method, and `inspect.iscoroutinefunction()` is False for it.
+  `asyncio.gather()` and `asyncio.wait_for()` still take it.
+
 ## 0.2.0b1 — 2026-10-23
 
 For API version `2026-10-01`, as 0.1.0b1.

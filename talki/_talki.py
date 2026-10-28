@@ -11,9 +11,13 @@
 `account = await talki.account.get()`. Each method returns the operation's
 value or raises the `talki.ApiError` subclass for its error.
 
+`talki.with_options(timeout=…, max_retries=…)` is the same client with other
+settings, for the calls made on it. `talki.<tag>.with_raw_response` has the
+same methods, returning the whole answer (`ETag`, `X-Request-Id`, …) with the
+value.
+
 `talki.client` is the generated `AuthenticatedClient`, for the operations under
-`talki.api` when the whole `Response` is wanted:
-`get_account.sync_detailed(client=talki.client)`, then `unwrap` it.
+`talki.api`: `get_account.sync_detailed(client=talki.client)`, then `unwrap` it.
 """
 
 from __future__ import annotations
@@ -70,6 +74,7 @@ class _Configured:
         verify: ssl.SSLContext | str | bool = True,
         proxy: str | None = None,
         transport: httpx.BaseTransport | httpx.AsyncBaseTransport | None = None,
+        user_agent: str | None = None,
     ) -> None:
         """A client for Talki's public API.
 
@@ -105,6 +110,9 @@ class _Configured:
             transport: The httpx transport requests go out on, for tests
                 (`httpx.MockTransport`); httpx's own by default. It is closed with
                 the client, and must take requests again after that.
+            user_agent: Your product and version (`acme-crm/2.1`), added after
+                this package's own in the `User-Agent` of every API request. A
+                token renewal carries this package's alone, as `OAuthApp` sends it.
         """
         if api_key is None and access_token is None and tokens is None:
             api_key = os.environ.get(API_KEY_ENV, "").strip() or None
@@ -119,6 +127,10 @@ class _Configured:
             # A staging pair renewed against production would send the refresh
             # token and the client secret to the wrong deployment.
             raise ValueError(f"oauth_app talks to {oauth_app.base_url}, this client to {base_url}: make them the same.")
+        if user_agent is not None and (
+            not user_agent.strip() or not user_agent.isascii() or not user_agent.isprintable()
+        ):
+            raise ValueError("user_agent must be one non-blank line of printable ASCII.")
         token = tokens.access_token if tokens is not None else str(given[0])
         if isinstance(version, _Current):
             from . import API_VERSION
@@ -139,14 +151,47 @@ class _Configured:
             if tokens and oauth_app
             else None
         )
-        self.client = AuthenticatedClient(
+        self._token = token
+        self._verify = verify
+        self._headers = {
+            "User-Agent": f"{USER_AGENT} {user_agent.strip()}" if user_agent else USER_AGENT,
+            **({VERSION_HEADER: version} if version else {}),
+        }
+        self.timeout = timeout
+        self.client = self._client_for(self.transport, timeout)
+        # False on a `with_options` copy, whose connections are its original's.
+        self._owns_connections = True
+
+    def _client_for(self, transport: TalkiTransport, timeout: float) -> AuthenticatedClient:
+        return AuthenticatedClient(
             base_url=self.base_url,
-            token=token,
-            headers={"User-Agent": USER_AGENT, **({VERSION_HEADER: version} if version else {})},
+            token=self._token,
+            headers=dict(self._headers),
             timeout=httpx.Timeout(timeout),
-            verify_ssl=verify,
-            httpx_args={"transport": self.transport, **({"auth": self.auth} if self.auth else {})},
+            verify_ssl=self._verify,
+            httpx_args={"transport": transport, **({"auth": self.auth} if self.auth else {})},
         )
+
+    def with_options(self, *, timeout: float | None = None, max_retries: int | None = None) -> Self:
+        """This client with another ``timeout`` or ``max_retries``, for the
+        calls made on what it returns: `talki.with_options(timeout=5).calls.get(id)`.
+
+        The copy shares this client's connections and its token renewal, so it
+        is cheap to make for one call. They belong to this client: closing the
+        copy (or leaving its ``with`` block) leaves them open, and closing this
+        client closes them for both, which stay usable, as after any `close`.
+        """
+        copy = object.__new__(type(self))
+        # Every attribute but the per-tag resources, which are bound to the
+        # old `client` and built again on first use.
+        copy.__dict__.update({name: value for name, value in vars(self).items() if name in _SETTINGS})
+        if max_retries is not None:
+            copy.transport = self.transport.with_retries(max_retries)
+        if timeout is not None:
+            copy.timeout = timeout
+        copy.client = copy._client_for(copy.transport, copy.timeout)
+        copy._owns_connections = False
+        return copy
 
     @property
     def tokens(self) -> TokenSet | None:
@@ -156,6 +201,14 @@ class _Configured:
     def __repr__(self) -> str:
         # Never the credential.
         return f"{type(self).__name__}(base_url={self.base_url!r}, version={self.version!r})"
+
+
+# What `with_options` copies: everything `_Configured.__init__` sets.
+_SETTINGS = frozenset(
+    {"version", "_tokens", "base_url", "transport", "auth", "_token", "_verify", "_headers", "timeout", "client"}
+)
+# Set by `__init__` and `with_options` each for itself.
+_OWN = frozenset({"_owns_connections"})
 
 
 class Talki(_Configured, Resources):
@@ -169,12 +222,13 @@ class Talki(_Configured, Resources):
     def close(self) -> None:
         """Close the connections the sync methods opened. The client stays
         usable: the next request opens new ones. Call it with no request in
-        flight: one running on another thread may fail."""
-        _close(self.client)
+        flight: one running on another thread may fail. On a `with_options`
+        copy, it leaves the connections to the client it came from."""
+        _close(self.client, self._owns_connections)
 
     async def aclose(self) -> None:
         """Close the connections the async operations under `talki.api` opened."""
-        await _aclose(self.client)
+        await _aclose(self.client, self._owns_connections)
 
     def __enter__(self) -> Self:
         return self
@@ -213,8 +267,9 @@ class AsyncTalki(_Configured, AsyncResources):
     async def aclose(self) -> None:
         """Close the connections the methods opened. The client stays usable:
         the next request opens new ones. Call it with no request in flight:
-        one running on another task may fail."""
-        await _aclose(self.client)
+        one running on another task may fail. On a `with_options` copy, it
+        leaves the connections to the client it came from."""
+        await _aclose(self.client, self._owns_connections)
 
     async def __aenter__(self) -> Self:
         return self
@@ -230,14 +285,16 @@ class AsyncTalki(_Configured, AsyncResources):
 
 # The generated client builds its httpx clients on first use and keeps them in
 # `_client` / `_async_client`. A closed httpx client cannot be opened again, so
-# closing drops it, and the next request builds a new one.
-def _close(client: AuthenticatedClient) -> None:
+# closing drops it, and the next request builds a new one. Closing an httpx
+# client closes its transport's connections: a copy that does not own them
+# only drops its client, which holds nothing else.
+def _close(client: AuthenticatedClient, owns_connections: bool) -> None:
     opened, client._client = client._client, None
-    if opened is not None:
+    if opened is not None and owns_connections:
         opened.close()
 
 
-async def _aclose(client: AuthenticatedClient) -> None:
+async def _aclose(client: AuthenticatedClient, owns_connections: bool) -> None:
     opened, client._async_client = client._async_client, None
-    if opened is not None:
+    if opened is not None and owns_connections:
         await opened.aclose()

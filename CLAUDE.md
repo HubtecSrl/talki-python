@@ -23,10 +23,12 @@ or customer names.
   be added to that list, or the next regeneration deletes it.
 - Each template in `codegen/templates/` is a copy of the upstream 0.29.1
   template with one marked change, described in its header comment. On a
-  generator upgrade, re-copy them and re-apply the changes. Two are not copies:
+  generator upgrade, re-copy them and re-apply the changes. Three are not copies:
   `endpoint_init.py.jinja` writes each tag's resource classes (`talki.calls`, …)
-  and `api_init.py.jinja` the `Resources` mixins `Talki` and `AsyncTalki` use.
-  Their headers say what to re-check on an upgrade.
+  and their `with_raw_response` twins, `api_init.py.jinja` the `Resources`
+  mixins `Talki` and `AsyncTalki` use, and `request_bodies.jinja` the macros
+  behind the `<Model>Dict` TypedDicts that `model.py.jinja` writes beside each
+  request model. Their headers say what to re-check on an upgrade.
 - The resource method names are derived from the operation IDs, so a new
   operation can rename an existing method (two that would share a name both
   keep their full ones). `tests/test_resources.py` pins the whole surface in

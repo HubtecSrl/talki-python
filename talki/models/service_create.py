@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from collections.abc import Mapping
-from typing import Any, TypeVar, cast
+from collections.abc import Mapping, Sequence
+from typing import Any, Required, TypedDict, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -170,3 +170,15 @@ class ServiceCreate:
 
     def __contains__(self, key: str) -> bool:
         return key in self.additional_properties
+
+
+# `ServiceCreate` as a dict, which a method's `body=` takes in its place: a key
+# left out is a field left out. A date, datetime or UUID can be its ISO string,
+# an enum its value.
+class ServiceCreateDict(TypedDict, total=False):
+    name: Required[str]
+    duration_minutes: Required[int]
+    description: str | None
+    price: str | None
+    initial_capacity: int | None
+    resource_ids: Sequence[str] | None

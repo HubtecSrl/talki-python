@@ -1,0 +1,25 @@
+{#- Copied from openapi-python-client 0.29.1 (the version pyproject.toml pins) and
+    changed in one place: it also exports each `<Model>Dict` that
+    `model.py.jinja` writes. Re-copy on a generator upgrade and re-apply. -#}
+{% from "request_bodies.jinja" import input_models %}
+{% set inputs = input_models().split(",") | reject("equalto", "") | list %}
+{% set names = namespace(all=alls | list) %}
+{% for entry in inputs %}
+{% set names.all = names.all + [entry.split(":")[0] ~ "Dict"] %}
+{% endfor %}
+""" Contains all the data models used in inputs/outputs """
+
+{% for import in imports | sort %}
+{{ import }}
+{% endfor %}
+{% for entry in inputs %}
+from .{{ entry.split(":")[1] }} import {{ entry.split(":")[0] }}Dict
+{% endfor %}
+
+{% if imports %}
+__all__ = (
+    {% for all in names.all | sort %}
+    "{{ all }}",
+    {% endfor %}
+)
+{% endif %}

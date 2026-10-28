@@ -7,6 +7,7 @@
 API_VERSION = "{{ openapi.version.get_untrusted_value() }}"
 
 from .client import AuthenticatedClient, Client
+from ._resource import RawResponse
 from ._talki import AsyncTalki, Talki, unwrap
 from ._transport import new_idempotency_key
 from ._version import __version__
@@ -32,6 +33,7 @@ __all__ = (
     "InvalidRequestError",
     "PermissionDeniedError",
     "RateLimitError",
+    "RawResponse",
     "ServerError",
     "Talki",
     "TalkiError",

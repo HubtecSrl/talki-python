@@ -1,6 +1,6 @@
 [project]
 name = "talki"
-version = "0.2.0b1"
+version = "0.3.0b1"
 description = "Python client for the Talki API"
 readme = "README.md"
 license = "MIT"

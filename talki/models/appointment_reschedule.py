@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 from collections.abc import Mapping
-from typing import Any, TypeVar, cast
+from typing import Any, TypedDict, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -176,3 +176,14 @@ class AppointmentReschedule:
 
     def __contains__(self, key: str) -> bool:
         return key in self.additional_properties
+
+
+# `AppointmentReschedule` as a dict, which a method's `body=` takes in its place: a key
+# left out is a field left out. A date, datetime or UUID can be its ISO string,
+# an enum its value.
+class AppointmentRescheduleDict(TypedDict, total=False):
+    client_name: str | None
+    client_surname: str | None
+    client_phone_number: str | None
+    start_at: datetime.datetime | str | None
+    end_at: datetime.datetime | str | None

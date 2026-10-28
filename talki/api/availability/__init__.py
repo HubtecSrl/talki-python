@@ -2,6 +2,7 @@
 which `Talki` and `AsyncTalki` expose as `availability`."""
 
 import datetime
+from functools import cached_property
 
 from ... import _resource
 from ...models.availability import Availability
@@ -10,12 +11,52 @@ from . import (
     get_availability,
 )
 
-__all__ = ["AsyncAvailabilityResource", "AvailabilityResource"]
+__all__ = [
+    "AsyncAvailabilityResource",
+    "AsyncAvailabilityResourceWithRawResponse",
+    "AvailabilityResource",
+    "AvailabilityResourceWithRawResponse",
+]
+
+
+class AvailabilityResourceWithRawResponse(_resource.Resource):
+    """`talki.availability.with_raw_response`: the methods of `talki.availability`, each
+    returning the whole answer, a `talki.RawResponse` whose `parse()` is what the
+    method returns. An error raises as it does there."""
+
+    def get(
+        self,
+        *,
+        service_id: str,
+        from_: datetime.date,
+        to: datetime.date,
+        quantity: int | Unset = 1,
+        stay_length: int | None | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Availability]:
+        """`talki.availability.get`, returning the whole answer."""
+        return _resource.raw(
+            get_availability.sync_detailed(
+                client=self._client,
+                service_id=service_id,
+                from_=from_,
+                to=to,
+                quantity=quantity,
+                stay_length=stay_length,
+                talki_version=talki_version,
+            )
+        )
 
 
 class AvailabilityResource(_resource.Resource):
     """`talki.availability`: each method sends one operation and returns its value, or
     raises the `talki.ApiError` subclass for its error."""
+
+    @cached_property
+    def with_raw_response(self) -> AvailabilityResourceWithRawResponse:
+        """The same methods, each returning the whole answer: its status and
+        headers (`ETag`, `X-Request-Id`, the rate limits) with the value."""
+        return AvailabilityResourceWithRawResponse(self._client)
 
     def get(
         self,
@@ -56,8 +97,36 @@ class AvailabilityResource(_resource.Resource):
         Returns:
             Availability
         """
-        return _resource.unwrap(
-            get_availability.sync_detailed(
+        return (
+            self.with_raw_response.get(
+                service_id=service_id,
+                from_=from_,
+                to=to,
+                quantity=quantity,
+                stay_length=stay_length,
+                talki_version=talki_version,
+            )
+        ).parse()
+
+
+class AsyncAvailabilityResourceWithRawResponse(_resource.Resource):
+    """`talki.availability.with_raw_response` on `AsyncTalki`: the methods of `talki.availability`, each
+    returning the whole answer, a `talki.RawResponse` whose `parse()` is what the
+    method returns. An error raises as it does there."""
+
+    async def get(
+        self,
+        *,
+        service_id: str,
+        from_: datetime.date,
+        to: datetime.date,
+        quantity: int | Unset = 1,
+        stay_length: int | None | Unset = UNSET,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[Availability]:
+        """`talki.availability.get`, returning the whole answer."""
+        return _resource.raw(
+            await get_availability.asyncio_detailed(
                 client=self._client,
                 service_id=service_id,
                 from_=from_,
@@ -72,6 +141,12 @@ class AvailabilityResource(_resource.Resource):
 class AsyncAvailabilityResource(_resource.Resource):
     """`talki.availability` on `AsyncTalki`: each method sends one operation and returns its value, or
     raises the `talki.ApiError` subclass for its error."""
+
+    @cached_property
+    def with_raw_response(self) -> AsyncAvailabilityResourceWithRawResponse:
+        """The same methods, each returning the whole answer: its status and
+        headers (`ETag`, `X-Request-Id`, the rate limits) with the value."""
+        return AsyncAvailabilityResourceWithRawResponse(self._client)
 
     async def get(
         self,
@@ -112,9 +187,8 @@ class AsyncAvailabilityResource(_resource.Resource):
         Returns:
             Availability
         """
-        return _resource.unwrap(
-            await get_availability.asyncio_detailed(
-                client=self._client,
+        return (
+            await self.with_raw_response.get(
                 service_id=service_id,
                 from_=from_,
                 to=to,
@@ -122,4 +196,4 @@ class AsyncAvailabilityResource(_resource.Resource):
                 stay_length=stay_length,
                 talki_version=talki_version,
             )
-        )
+        ).parse()
