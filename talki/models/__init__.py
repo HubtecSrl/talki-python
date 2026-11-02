@@ -1,9 +1,11 @@
 """Contains all the data models used in inputs/outputs"""
 
 from .account import Account
+from .account_call_auto_archive_days_type_0 import AccountCallAutoArchiveDaysType0
 from .account_languages import AccountLanguages
 from .account_line import AccountLine
 from .account_update import AccountUpdate, AccountUpdateDict
+from .account_update_call_auto_archive_days_type_0 import AccountUpdateCallAutoArchiveDaysType0
 from .answers_as import AnswersAs
 from .appointment import Appointment
 from .appointment_client import AppointmentClient
@@ -41,6 +43,25 @@ from .closure_update import ClosureUpdate, ClosureUpdateDict
 from .contact import Contact
 from .contact_list import ContactList
 from .contact_upsert import ContactUpsert, ContactUpsertDict
+from .document import Document
+from .document_create import DocumentCreate, DocumentCreateDict
+from .document_create_source import DocumentCreateSource
+from .document_discover import DocumentDiscover, DocumentDiscoverDict
+from .document_discovery import DocumentDiscovery
+from .document_file_replace import DocumentFileReplace
+from .document_list import DocumentList
+from .document_page import DocumentPage
+from .document_page_list import DocumentPageList
+from .document_page_status import DocumentPageStatus
+from .document_replace import DocumentReplace, DocumentReplaceDict
+from .document_site_create import DocumentSiteCreate, DocumentSiteCreateDict
+from .document_site_create_source import DocumentSiteCreateSource
+from .document_site_replace import DocumentSiteReplace, DocumentSiteReplaceDict
+from .document_source import DocumentSource
+from .document_status import DocumentStatus
+from .document_text import DocumentText
+from .document_update import DocumentUpdate, DocumentUpdateDict
+from .document_upload import DocumentUpload
 from .error_detail import ErrorDetail
 from .error_detail_type import ErrorDetailType
 from .error_envelope import ErrorEnvelope
@@ -52,6 +73,7 @@ from .forwarding_check_status import ForwardingCheckStatus
 from .inbox_status import InboxStatus
 from .line_status import LineStatus
 from .list_closures_kind import ListClosuresKind
+from .list_documents_source_type_0 import ListDocumentsSourceType0
 from .location import Location
 from .location_line import LocationLine
 from .location_list import LocationList
@@ -106,9 +128,11 @@ from .working_hours_update import WorkingHoursUpdate, WorkingHoursUpdateDict
 
 __all__ = (
     "Account",
+    "AccountCallAutoArchiveDaysType0",
     "AccountLanguages",
     "AccountLine",
     "AccountUpdate",
+    "AccountUpdateCallAutoArchiveDaysType0",
     "AccountUpdateDict",
     "AnswersAs",
     "Appointment",
@@ -155,6 +179,31 @@ __all__ = (
     "ContactList",
     "ContactUpsert",
     "ContactUpsertDict",
+    "Document",
+    "DocumentCreate",
+    "DocumentCreateDict",
+    "DocumentCreateSource",
+    "DocumentDiscover",
+    "DocumentDiscoverDict",
+    "DocumentDiscovery",
+    "DocumentFileReplace",
+    "DocumentList",
+    "DocumentPage",
+    "DocumentPageList",
+    "DocumentPageStatus",
+    "DocumentReplace",
+    "DocumentReplaceDict",
+    "DocumentSiteCreate",
+    "DocumentSiteCreateDict",
+    "DocumentSiteCreateSource",
+    "DocumentSiteReplace",
+    "DocumentSiteReplaceDict",
+    "DocumentSource",
+    "DocumentStatus",
+    "DocumentText",
+    "DocumentUpdate",
+    "DocumentUpdateDict",
+    "DocumentUpload",
     "ErrorDetail",
     "ErrorDetailType",
     "ErrorEnvelope",
@@ -167,6 +216,7 @@ __all__ = (
     "InboxStatus",
     "LineStatus",
     "ListClosuresKind",
+    "ListDocumentsSourceType0",
     "Location",
     "LocationLine",
     "LocationList",

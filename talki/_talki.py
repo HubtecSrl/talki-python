@@ -25,11 +25,13 @@ from __future__ import annotations
 import os
 import ssl
 from collections.abc import Callable
+from functools import cached_property
 from types import TracebackType
 from typing import Self
 
 import httpx
 
+from ._documents import AsyncDocumentsResource, DocumentsResource
 from ._resource import unwrap
 from ._transport import TalkiTransport
 from ._version import USER_AGENT
@@ -219,6 +221,12 @@ class Talki(_Configured, Resources):
     keep one for the life of the process and call `close` when done.
     """
 
+    @cached_property
+    def documents(self) -> DocumentsResource:
+        """The `documents` operations, with `upload`, `replace_file` and
+        `download` for files."""
+        return DocumentsResource(self.client)
+
     def close(self) -> None:
         """Close the connections the sync methods opened. The client stays
         usable: the next request opens new ones. Call it with no request in
@@ -263,6 +271,12 @@ class AsyncTalki(_Configured, AsyncResources):
     Open it with ``async with`` to close its connections at the end of the
     block, or keep one for the life of the process and await `aclose` when done.
     """
+
+    @cached_property
+    def documents(self) -> AsyncDocumentsResource:
+        """The `documents` operations, with `upload`, `replace_file` and
+        `download` for files."""
+        return AsyncDocumentsResource(self.client)
 
     async def aclose(self) -> None:
         """Close the connections the methods opened. The client stays usable:
