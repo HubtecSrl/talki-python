@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, TypeVar, cast
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.account_call_auto_archive_days_type_0 import AccountCallAutoArchiveDaysType0
 from ..models.answers_as import AnswersAs
 
 if TYPE_CHECKING:
@@ -89,6 +90,10 @@ class Account:
                 `POST /v1/forwarding_check` rings it to prove forwarding is on. Null when not set.
             line (AccountLine): How calls reach Talki: the location's own line forwards to its Talki number. Read only. A
                 check still ringing, or one that found no forwarding, is read from `GET /v1/forwarding_check`.
+            call_auto_archive_days (AccountCallAutoArchiveDaysType0 | None): How many days after it started a call that has
+                been read is archived on its own: `7`, `30` or `90`, as in the Talki apps. Null when calls are never archived on
+                their own. An unread call is never archived this way. Archiving runs once a night, sends `call.updated` for each
+                call, and can be undone like an archive by hand. The account's own setting: the same at every location.
             multi_sede (bool): True when the account works from several locations, or may add them: show locations (`GET
                 /v1/locations`) to the owner only when true. False for an account that has only ever had its main location and
                 cannot add another; it still has that one location, every record still carries its `location_id`, and nothing
@@ -122,6 +127,7 @@ class Account:
     phone_number: None | str
     forwarding_number: None | str
     line: AccountLine
+    call_auto_archive_days: AccountCallAutoArchiveDaysType0 | None
     multi_sede: bool
     onboarding_completed: bool
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -188,6 +194,12 @@ class Account:
 
         line = self.line.to_dict()
 
+        call_auto_archive_days: int | None
+        if isinstance(self.call_auto_archive_days, AccountCallAutoArchiveDaysType0):
+            call_auto_archive_days = self.call_auto_archive_days.value
+        else:
+            call_auto_archive_days = self.call_auto_archive_days
+
         multi_sede = self.multi_sede
 
         onboarding_completed = self.onboarding_completed
@@ -221,6 +233,7 @@ class Account:
                 "phone_number": phone_number,
                 "forwarding_number": forwarding_number,
                 "line": line,
+                "call_auto_archive_days": call_auto_archive_days,
                 "multi_sede": multi_sede,
                 "onboarding_completed": onboarding_completed,
             }
@@ -330,6 +343,21 @@ class Account:
 
         line = AccountLine.from_dict(d.pop("line"))
 
+        def _parse_call_auto_archive_days(data: object) -> AccountCallAutoArchiveDaysType0 | None:
+            if data is None:
+                return data
+            try:
+                if not isinstance(data, int):
+                    raise TypeError()
+                call_auto_archive_days_type_0 = AccountCallAutoArchiveDaysType0(data)
+
+                return call_auto_archive_days_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(AccountCallAutoArchiveDaysType0 | None, data)
+
+        call_auto_archive_days = _parse_call_auto_archive_days(d.pop("call_auto_archive_days"))
+
         multi_sede = d.pop("multi_sede")
 
         onboarding_completed = d.pop("onboarding_completed")
@@ -360,6 +388,7 @@ class Account:
             phone_number=phone_number,
             forwarding_number=forwarding_number,
             line=line,
+            call_auto_archive_days=call_auto_archive_days,
             multi_sede=multi_sede,
             onboarding_completed=onboarding_completed,
         )

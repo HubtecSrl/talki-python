@@ -11,6 +11,7 @@ from .caller_rules import AsyncCallerRulesResource, CallerRulesResource
 from .calls import AsyncCallsResource, CallsResource
 from .closures import AsyncClosuresResource, ClosuresResource
 from .contacts import AsyncContactsResource, ContactsResource
+from .documents import AsyncDocumentsResource, DocumentsResource
 from .locations import AsyncLocationsResource, LocationsResource
 from .pending_contacts import AsyncPendingContactsResource, PendingContactsResource
 from .resources import AsyncResourcesResource, ResourcesResource
@@ -64,6 +65,11 @@ class Resources:
     def contacts(self) -> ContactsResource:
         """The `contacts` operations."""
         return ContactsResource(self.client)
+
+    @cached_property
+    def documents(self) -> DocumentsResource:
+        """The `documents` operations."""
+        return DocumentsResource(self.client)
 
     @cached_property
     def locations(self) -> LocationsResource:
@@ -155,6 +161,11 @@ class AsyncResources:
     def contacts(self) -> AsyncContactsResource:
         """The `contacts` operations."""
         return AsyncContactsResource(self.client)
+
+    @cached_property
+    def documents(self) -> AsyncDocumentsResource:
+        """The `documents` operations."""
+        return AsyncDocumentsResource(self.client)
 
     @cached_property
     def locations(self) -> AsyncLocationsResource:

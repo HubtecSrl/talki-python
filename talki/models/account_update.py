@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, TypeVar, cast
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.account_update_call_auto_archive_days_type_0 import AccountUpdateCallAutoArchiveDaysType0
 from ..models.answers_as import AnswersAs
 from ..types import UNSET, Unset
 
@@ -56,6 +57,9 @@ class AccountUpdate:
             store_transcripts (bool | None | Unset): Cannot be null. `false` deletes the stored transcripts of this
                 location's calls in the same request, and they cannot be recovered, so a test-mode credential sending it is
                 refused with `livemode_required`.
+            call_auto_archive_days (AccountUpdateCallAutoArchiveDaysType0 | None | Unset): `7`, `30` or `90`, or `null` to
+                stop archiving calls on their own. The account's own setting: refused with `location_id` naming a location other
+                than the main one.
             forwarding_number (None | str | Unset): Replaces the location's forwarding number: a mobile or landline that can
                 be rung, E.164 or national (read as Italian). Send `null` or an empty string to clear it. Refused if it equals a
                 transfer target of any location, or the line of another location, unless the same request replaces this
@@ -80,6 +84,7 @@ class AccountUpdate:
     notify_on_every_call: bool | None | Unset = UNSET
     notify_on_incoming_call: bool | None | Unset = UNSET
     store_transcripts: bool | None | Unset = UNSET
+    call_auto_archive_days: AccountUpdateCallAutoArchiveDaysType0 | None | Unset = UNSET
     forwarding_number: None | str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -188,6 +193,14 @@ class AccountUpdate:
         else:
             store_transcripts = self.store_transcripts
 
+        call_auto_archive_days: int | None | Unset
+        if isinstance(self.call_auto_archive_days, Unset):
+            call_auto_archive_days = UNSET
+        elif isinstance(self.call_auto_archive_days, AccountUpdateCallAutoArchiveDaysType0):
+            call_auto_archive_days = self.call_auto_archive_days.value
+        else:
+            call_auto_archive_days = self.call_auto_archive_days
+
         forwarding_number: None | str | Unset
         if isinstance(self.forwarding_number, Unset):
             forwarding_number = UNSET
@@ -229,6 +242,8 @@ class AccountUpdate:
             field_dict["notify_on_incoming_call"] = notify_on_incoming_call
         if store_transcripts is not UNSET:
             field_dict["store_transcripts"] = store_transcripts
+        if call_auto_archive_days is not UNSET:
+            field_dict["call_auto_archive_days"] = call_auto_archive_days
         if forwarding_number is not UNSET:
             field_dict["forwarding_number"] = forwarding_number
 
@@ -405,6 +420,23 @@ class AccountUpdate:
 
         store_transcripts = _parse_store_transcripts(d.pop("store_transcripts", UNSET))
 
+        def _parse_call_auto_archive_days(data: object) -> AccountUpdateCallAutoArchiveDaysType0 | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, int):
+                    raise TypeError()
+                call_auto_archive_days_type_0 = AccountUpdateCallAutoArchiveDaysType0(data)
+
+                return call_auto_archive_days_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(AccountUpdateCallAutoArchiveDaysType0 | None | Unset, data)
+
+        call_auto_archive_days = _parse_call_auto_archive_days(d.pop("call_auto_archive_days", UNSET))
+
         def _parse_forwarding_number(data: object) -> None | str | Unset:
             if data is None:
                 return data
@@ -431,6 +463,7 @@ class AccountUpdate:
             notify_on_every_call=notify_on_every_call,
             notify_on_incoming_call=notify_on_incoming_call,
             store_transcripts=store_transcripts,
+            call_auto_archive_days=call_auto_archive_days,
             forwarding_number=forwarding_number,
         )
 
@@ -474,4 +507,5 @@ class AccountUpdateDict(TypedDict, total=False):
     notify_on_every_call: bool | None
     notify_on_incoming_call: bool | None
     store_transcripts: bool | None
+    call_auto_archive_days: AccountUpdateCallAutoArchiveDaysType0 | Literal[7, 30, 90] | None
     forwarding_number: str | None

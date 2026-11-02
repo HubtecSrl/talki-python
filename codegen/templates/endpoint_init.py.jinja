@@ -152,6 +152,8 @@ Returns:
 {% for prop in used.props %}
 {% for line in prop.get_imports(prefix="...") | list + prop.get_lazy_imports(prefix="...") | list %}
 {% set line = "from ...types import File" if line == "from ...types import File, FileTypes" else line %}
+{#- A `Literal` property imports `cast` with it, which only parsing uses. -#}
+{% set line = "from typing import Literal" if line == "from typing import Literal, cast" else line %}
 {% if line not in imports.lines and line not in ["from typing import cast", "from io import BytesIO"] %}
 {% set imports.lines = imports.lines + [line] %}
 {% endif %}

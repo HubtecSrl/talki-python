@@ -587,8 +587,10 @@ class CallsResource(_resource.Resource):
         (API key) or per installation (OAuth).
 
         Args:
-            days (int | None | Unset): Length of the period, in days, ending now. Default 30. Cannot
-                be combined with `from` / `to`.
+            days (int | None | Unset): Length of the period, in days, ending now. Default 30. It
+                starts at the same local time, in the account's `timezone`, `days` days earlier: across a
+                daylight-saving change, an hour more or less than `days` × 24 hours. Cannot be combined
+                with `from` / `to`.
             from_ (datetime.date | None | Unset): First day of the period, `YYYY-MM-DD`, local to the
                 account's `timezone`. Sent with `to`, instead of `days`.
             to (datetime.date | None | Unset): Last day of the period, included, `YYYY-MM-DD`. At most
@@ -660,8 +662,10 @@ class CallsResource(_resource.Resource):
         key) or per installation (OAuth).
 
         Args:
-            days (int | None | Unset): Length of the period, in days, ending now. Default 30. Cannot
-                be combined with `from` / `to`.
+            days (int | None | Unset): Length of the period, in days, ending now. Default 30. It
+                starts at the same local time, in the account's `timezone`, `days` days earlier: across a
+                daylight-saving change, an hour more or less than `days` × 24 hours. Cannot be combined
+                with `from` / `to`.
             from_ (datetime.date | None | Unset): First day of the period, `YYYY-MM-DD`, local to the
                 account's `timezone`. Sent with `to`, instead of `days`.
             to (datetime.date | None | Unset): Last day of the period, included, `YYYY-MM-DD`. At most
@@ -1421,8 +1425,10 @@ class AsyncCallsResource(_resource.Resource):
         (API key) or per installation (OAuth).
 
         Args:
-            days (int | None | Unset): Length of the period, in days, ending now. Default 30. Cannot
-                be combined with `from` / `to`.
+            days (int | None | Unset): Length of the period, in days, ending now. Default 30. It
+                starts at the same local time, in the account's `timezone`, `days` days earlier: across a
+                daylight-saving change, an hour more or less than `days` × 24 hours. Cannot be combined
+                with `from` / `to`.
             from_ (datetime.date | None | Unset): First day of the period, `YYYY-MM-DD`, local to the
                 account's `timezone`. Sent with `to`, instead of `days`.
             to (datetime.date | None | Unset): Last day of the period, included, `YYYY-MM-DD`. At most
@@ -1494,8 +1500,10 @@ class AsyncCallsResource(_resource.Resource):
         key) or per installation (OAuth).
 
         Args:
-            days (int | None | Unset): Length of the period, in days, ending now. Default 30. Cannot
-                be combined with `from` / `to`.
+            days (int | None | Unset): Length of the period, in days, ending now. Default 30. It
+                starts at the same local time, in the account's `timezone`, `days` days earlier: across a
+                daylight-saving change, an hour more or less than `days` × 24 hours. Cannot be combined
+                with `from` / `to`.
             from_ (datetime.date | None | Unset): First day of the period, `YYYY-MM-DD`, local to the
                 account's `timezone`. Sent with `to`, instead of `days`.
             to (datetime.date | None | Unset): Last day of the period, included, `YYYY-MM-DD`. At most

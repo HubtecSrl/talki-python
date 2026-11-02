@@ -3,6 +3,27 @@
 This package follows [semantic versioning](https://semver.org). The API
 version each release targets by default is `talki.API_VERSION`.
 
+## 0.4.0b1 — 2026-11-02
+
+For API version `2026-10-01`, as 0.3.0b1, with the operations added to it since.
+
+- `talki.documents`: the knowledge base by API, notes, websites and files.
+  `list`, `get`, `create`, `update`, `replace`, `delete`, `get_text`, and for a
+  website `discover_pages`, `list_pages` and `delete_page`.
+- `talki.documents.upload()` and `replace_file()` send a file (a path, bytes,
+  an open file or a `talki.types.File`) as `multipart/form-data`. `get_file()`
+  and `download()`, the same method, return it as a `talki.types.File` with the
+  name and type it was uploaded with.
+- A `multipart/form-data` body, `create()` and `replace()` given a
+  `DocumentUpload` or `DocumentFileReplace` included, is encoded whole with a
+  random boundary, so a request turned away unrun is retried like any other.
+  A `talki.types.File` without a `file_name` raises `ValueError` before sending.
+- `ErrorDetail.code` lists two new codes, `document_not_ready` and
+  `unsupported_file_type`.
+- The lowest supported `anyio` is 3.0.1.
+- `Account.call_auto_archive_days` and `AccountUpdate.call_auto_archive_days`:
+  how many days after it started a read call is archived on its own.
+
 ## 0.3.0b1 — 2026-10-28
 
 For API version `2026-10-01`, as 0.2.0b1.
