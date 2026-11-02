@@ -1,14 +1,17 @@
 {#- Copied from openapi-python-client 0.29.1 (the version pyproject.toml pins) and
-    changed in one place: `Response` is frozen and covariant in its parsed
+    changed in three places: `Response` is frozen and covariant in its parsed
     type, so `Response[CallList | ErrorEnvelope]` is a
     `Response[ListPage[Call] | ErrorEnvelope]` to a type checker, which
-    `talki.pagination` relies on. Re-copy on a generator upgrade and re-apply. -#}
+    `talki.pagination` relies on; `File.to_tuple` refuses a file with no name;
+    and `encode_multipart`, which `endpoint_module.py.jinja` calls, is added.
+    Re-copy on a generator upgrade and re-apply. -#}
 """ Contains some shared types for properties """
 
 from collections.abc import Mapping, MutableMapping
 from http import HTTPStatus
 from typing import BinaryIO, Generic, TypeVar, Literal, IO
 
+import httpx
 from attrs import define
 
 
@@ -39,7 +42,23 @@ class File:
 
     def to_tuple(self) -> FileTypes:
         """ Return a tuple representation that httpx will accept for multipart/form-data """
+        if not self.file_name:
+            # Without a filename the part is a plain form field, not a file,
+            # and the API refuses the request.
+            raise ValueError("A File sent as multipart/form-data needs a file_name.")
         return self.file_name, self.payload, self.mime_type
+
+
+def encode_multipart(files: RequestFiles) -> tuple[bytes, str]:
+    """ A `multipart/form-data` body encoded whole, and the `Content-Type` that names its boundary.
+
+    Held as bytes, the body can be sent again: the client retries a request
+    turned away unrun (a 429, `request_in_progress`, a connection never made)
+    only when it has the whole body. httpx draws a random boundary for it, so
+    no part's content can end the part early.
+    """
+    request = httpx.Request("POST", "https://multipart.invalid", files=files)
+    return request.read(), request.headers["Content-Type"]
 
 
 T_co = TypeVar("T_co", covariant=True)
@@ -55,4 +74,4 @@ class Response(Generic[T_co]):
     parsed: T_co | None
 
 
-__all__ = ["UNSET", "File", "FileTypes", "RequestFiles", "Response", "Unset"]
+__all__ = ["UNSET", "File", "FileTypes", "RequestFiles", "Response", "Unset", "encode_multipart"]

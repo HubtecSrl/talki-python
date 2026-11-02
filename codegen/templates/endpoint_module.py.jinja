@@ -1,8 +1,11 @@
 {#- Copied from openapi-python-client 0.29.1 (the version pyproject.toml pins) and
-    changed in one place: `_parse_response` treats an error answer that is not
+    changed in two places: `_parse_response` treats an error answer that is not
     the API's envelope (a proxy's HTML 502, the maintenance page's
-    `{"error": "maintenance"}`) as undeclared, instead of failing to parse it.
-    Re-copy on a generator upgrade and re-apply `_is_envelope` and its branch. -#}
+    `{"error": "maintenance"}`) as undeclared, instead of failing to parse it;
+    and a `multipart/form-data` body is encoded whole by `encode_multipart`
+    (`content=` with a random boundary) instead of passed as `files=` under the
+    fixed boundary `+++`. Re-copy on a generator upgrade and re-apply
+    `_is_envelope` and its branch, and the two `encode_multipart` lines. -#}
 from http import HTTPStatus
 from typing import Any, cast
 from urllib.parse import quote
@@ -10,7 +13,7 @@ from urllib.parse import quote
 import httpx
 
 from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
+from ...types import Response, UNSET, encode_multipart
 from ... import errors
 
 {% for relative in endpoint.relative_imports | sort %}
@@ -56,7 +59,7 @@ def _get_kwargs(
     if isinstance(body, {{body.prop.get_type_string(no_optional=True) | as_unembedded_code }}):
         {{ body_to_kwarg(body) | indent(8) }}
         {%- if body.content_type == "multipart/form-data" %}
-        headers["Content-Type"] = "multipart/form-data; boundary=+++"
+        _kwargs["content"], headers["Content-Type"] = encode_multipart(_kwargs.pop("files"))
         {% else %}
         headers["Content-Type"] = "{{ body.content_type | in_double_quote_literal }}"
         {% endif %}
@@ -65,7 +68,8 @@ def _get_kwargs(
 {% set body = endpoint.bodies[0] %}
     {{ body_to_kwarg(body) | indent(4) }}
     {%- if body.content_type == "multipart/form-data" %}
-    headers["Content-Type"] = "multipart/form-data; boundary=+++"
+    if "files" in _kwargs:
+        _kwargs["content"], headers["Content-Type"] = encode_multipart(_kwargs.pop("files"))
     {% else %}
     headers["Content-Type"] = "{{ body.content_type | in_double_quote_literal }}"
     {% endif %}

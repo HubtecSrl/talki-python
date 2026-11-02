@@ -11,7 +11,7 @@ from ...models.document_file_replace import DocumentFileReplace
 from ...models.document_replace import DocumentReplace
 from ...models.document_site_replace import DocumentSiteReplace
 from ...models.error_envelope import ErrorEnvelope
-from ...types import UNSET, Response, Unset
+from ...types import UNSET, Response, Unset, encode_multipart
 
 
 def _get_kwargs(
@@ -58,7 +58,7 @@ def _get_kwargs(
     if isinstance(body, DocumentFileReplace):
         _kwargs["files"] = body.to_multipart()
 
-        headers["Content-Type"] = "multipart/form-data; boundary=+++"
+        _kwargs["content"], headers["Content-Type"] = encode_multipart(_kwargs.pop("files"))
 
     _kwargs["headers"] = headers
     return _kwargs

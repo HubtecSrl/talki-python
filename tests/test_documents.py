@@ -13,7 +13,7 @@ import pytest
 
 from talki import AsyncTalki, ConflictError, InvalidRequestError, Talki, _documents
 from talki.api import documents as generated
-from talki.models import Document, DocumentCreate, DocumentStatus
+from talki.models import Document, DocumentCreate, DocumentFileReplace, DocumentStatus, DocumentUpload
 from talki.types import File
 
 DOCUMENT = {
@@ -246,6 +246,43 @@ def test_a_note_still_goes_as_json_through_the_generated_method():
     assert json.loads(request.content) == {"title": "Parking", "body": "Behind the salon.", "source": "text"}
 
 
+# The generated methods, given a file
+
+
+def test_a_file_through_the_generated_create_is_encoded_whole_and_retried():
+    # Content holding the generator's fixed boundary still arrives intact.
+    content = b"before\r\n--+++\r\nafter"
+    recorder = Recorder(envelope(429, "rate_limit_error", "rate_limit_exceeded", **{"Retry-After": "1"}), accepted())
+    with sync_for(recorder) as client:
+        client.documents.create(
+            body=DocumentUpload(file=File(payload=io.BytesIO(content), file_name="a.txt"), location_ids=["l2"])
+        )
+    first, second = recorder.requests
+    assert first.content == second.content
+    assert first.headers["Idempotency-Key"] == second.headers["Idempotency-Key"]
+    assert "boundary=+++" not in first.headers["Content-Type"]
+    assert parts(second) == [("file", "a.txt", "text/plain", content), ("location_ids", None, "text/plain", b"l2")]
+
+
+def test_a_file_through_the_generated_replace_is_encoded_whole():
+    recorder = Recorder(accepted())
+    with sync_for(recorder) as client:
+        client.documents.replace(
+            DOCUMENT["id"], body=DocumentFileReplace(file=File(payload=io.BytesIO(b"%PDF-2"), file_name="b.pdf"))
+        )
+    (request,) = recorder.requests
+    assert isinstance(request.stream, httpx.ByteStream)
+    assert parts(request) == [("file", "b.pdf", "application/pdf", b"%PDF-2")]
+
+
+def test_a_file_without_a_name_is_refused_before_sending():
+    recorder = Recorder()
+    with sync_for(recorder) as client:
+        with pytest.raises(ValueError, match="file_name"):
+            client.documents.create(body=DocumentUpload(file=File(payload=io.BytesIO(b"x"))))
+    assert recorder.requests == []
+
+
 # Download
 
 
@@ -263,6 +300,18 @@ def test_a_download_has_the_name_and_type_it_was_uploaded_with():
         file = client.documents.download(DOCUMENT["id"])
     assert recorder.requests[0].url.path == FILE_PATH
     assert (file.file_name, file.mime_type, file.payload.read()) == ("Listino città.csv", "text/csv", b"a;b\n")
+
+
+def test_get_file_names_the_file_too():
+    answer = httpx.Response(
+        200,
+        content=b"%PDF",
+        headers={"Content-Type": "application/pdf", "Content-Disposition": 'attachment; filename="a.pdf"'},
+    )
+    recorder = Recorder(answer)
+    with sync_for(recorder) as client:
+        file = client.documents.get_file(DOCUMENT["id"])
+    assert (file.file_name, file.mime_type, file.payload.read()) == ("a.pdf", "application/pdf", b"%PDF")
 
 
 def test_the_raw_download_keeps_the_headers():
@@ -322,7 +371,7 @@ def test_the_async_methods_upload_replace_and_download(tmp_path):
         async with async_for(recorder) as client:
             await client.documents.upload(path, location_ids=["l2"])
             await client.documents.replace_file(DOCUMENT["id"], path)
-            return await client.documents.download(DOCUMENT["id"])
+            return await client.documents.get_file(DOCUMENT["id"])
 
     file = asyncio.run(run())
     upload, replace, _ = recorder.requests

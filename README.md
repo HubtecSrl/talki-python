@@ -286,12 +286,14 @@ Path(file.file_name or "download").write_bytes(file.payload.read())
 
 - `upload` and `replace_file` send the file as `multipart/form-data`. Its name
   becomes the document's title: bytes need `filename=`. PDF, DOCX, XLSX, plain
-  text and CSV, 10 MB at most.
+  text and CSV, at most 10 MB, or less if the account's plan sets a lower
+  limit.
 - A new file is processed after the call returns: the document is `processing`
   until `document.updated` says it is `ready` or `failed`. Until then a
   replacement is refused with `409 document_not_ready`.
-- `download` returns a `talki.types.File` with the name and type the file was
-  uploaded with, while the document's `file_available` is true.
+- `download` (or `get_file`, the same) returns a `talki.types.File` with the
+  name and type the file was uploaded with, while the document's
+  `file_available` is true.
 
 ## Webhooks
 

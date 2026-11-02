@@ -8,6 +8,9 @@ returns one with the name and type it was uploaded with.
     file = talki.documents.download(document.id)
     Path(file.file_name or "download").write_bytes(file.payload.read())
 
+`get_file`, which `download` is another name for, is the generated operation
+with the file's name and type filled in from the answer's headers.
+
 `Talki` and `AsyncTalki` expose these classes as `documents` in place of the
 generated `DocumentsResource` and `AsyncDocumentsResource`, which they extend.
 """
@@ -24,7 +27,6 @@ from typing import IO, Any, Literal
 from urllib.parse import unquote
 
 import anyio.to_thread
-import httpx
 
 from . import _resource
 from .api import documents as _generated
@@ -98,22 +100,6 @@ def _file(read: tuple[bytes, str | None, str | None], filename: str | None, cont
     return File(payload=BytesIO(data), file_name=name, mime_type=content_type or carried_type)
 
 
-def _encoded(kwargs: dict[str, Any]) -> dict[str, Any]:
-    """The generated operation's request with its multipart body encoded here,
-    whole, as bytes.
-
-    The transport resends only a body it holds whole: so encoded, an upload
-    turned away unrun (a 429, `request_in_progress`, a connection never made)
-    is retried like any other write. httpx draws a random boundary for it,
-    which replaces the fixed one the generated operation sets.
-    """
-    files = kwargs.pop("files")
-    request = httpx.Request("POST", "https://api.talki.it", files=files)
-    kwargs["content"] = request.read()
-    kwargs["headers"]["Content-Type"] = request.headers["Content-Type"]
-    return kwargs
-
-
 def _no_none(location_ids: list[str] | None | Unset) -> list[str] | Unset:
     """`None` as no field at all: a form sends text, and the API's default is
     already none."""
@@ -185,7 +171,7 @@ class DocumentsResourceWithRawResponse(_generated.DocumentsResourceWithRawRespon
         kwargs = create_document._get_kwargs(
             body=body, location_id=location_id, talki_version=talki_version, idempotency_key=idempotency_key
         )
-        response = self._client.get_httpx_client().request(**_encoded(kwargs))
+        response = self._client.get_httpx_client().request(**kwargs)
         return _resource.raw(create_document._build_response(client=self._client, response=response))
 
     def replace_file(
@@ -204,8 +190,18 @@ class DocumentsResourceWithRawResponse(_generated.DocumentsResourceWithRawRespon
         kwargs = replace_document._get_kwargs(
             document_id, body=body, also=also, talki_version=talki_version, idempotency_key=idempotency_key
         )
-        response = self._client.get_httpx_client().request(**_encoded(kwargs))
+        response = self._client.get_httpx_client().request(**kwargs)
         return _resource.raw(replace_document._build_response(client=self._client, response=response))
+
+    def get_file(
+        self,
+        document_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[File]:
+        """`talki.documents.get_file`, returning the whole answer: the `File`
+        with the name and type its answer gives."""
+        return _named(super().get_file(document_id, talki_version=talki_version))
 
     def download(
         self,
@@ -214,7 +210,7 @@ class DocumentsResourceWithRawResponse(_generated.DocumentsResourceWithRawRespon
         talki_version: str | Unset = UNSET,
     ) -> _resource.RawResponse[File]:
         """`talki.documents.download`, returning the whole answer."""
-        return _named(self.get_file(document_id, talki_version=talki_version))
+        return self.get_file(document_id, talki_version=talki_version)
 
 
 class DocumentsResource(_generated.DocumentsResource):
@@ -245,8 +241,9 @@ class DocumentsResource(_generated.DocumentsResource):
         Args:
             file: A path (a `str` is a path), the content as bytes, a file opened
                 in binary mode, or a `talki.types.File`. It is read whole before
-                sending (the API takes 10 MB at most), so a request turned away
-                unrun is retried.
+                sending (the API takes at most 10 MB, or less if the account's
+                plan sets a lower limit), so a request turned away unrun is
+                retried.
             filename: Its name, which becomes the document's `title`. Defaults to
                 the path's, the open file's or the `File`'s; bytes need one.
             content_type: PDF, DOCX, XLSX, plain text or CSV. Defaults to the
@@ -316,8 +313,7 @@ class DocumentsResource(_generated.DocumentsResource):
         `payload`, its `file_name` (directories dropped) and its `mime_type`.
 
         Only while the document's `file_available` is true; otherwise
-        `404 resource_not_found`. `get_file` returns the same bytes without the
-        name and type.
+        `404 resource_not_found`. The same as `get_file`.
         """
         return self.with_raw_response.download(document_id, talki_version=talki_version).parse()
 
@@ -347,7 +343,7 @@ class AsyncDocumentsResourceWithRawResponse(_generated.AsyncDocumentsResourceWit
         kwargs = create_document._get_kwargs(
             body=body, location_id=location_id, talki_version=talki_version, idempotency_key=idempotency_key
         )
-        response = await self._client.get_async_httpx_client().request(**_encoded(kwargs))
+        response = await self._client.get_async_httpx_client().request(**kwargs)
         return _resource.raw(create_document._build_response(client=self._client, response=response))
 
     async def replace_file(
@@ -366,8 +362,18 @@ class AsyncDocumentsResourceWithRawResponse(_generated.AsyncDocumentsResourceWit
         kwargs = replace_document._get_kwargs(
             document_id, body=body, also=also, talki_version=talki_version, idempotency_key=idempotency_key
         )
-        response = await self._client.get_async_httpx_client().request(**_encoded(kwargs))
+        response = await self._client.get_async_httpx_client().request(**kwargs)
         return _resource.raw(replace_document._build_response(client=self._client, response=response))
+
+    async def get_file(
+        self,
+        document_id: str,
+        *,
+        talki_version: str | Unset = UNSET,
+    ) -> _resource.RawResponse[File]:
+        """`talki.documents.get_file`, returning the whole answer: the `File`
+        with the name and type its answer gives."""
+        return _named(await super().get_file(document_id, talki_version=talki_version))
 
     async def download(
         self,
@@ -376,7 +382,7 @@ class AsyncDocumentsResourceWithRawResponse(_generated.AsyncDocumentsResourceWit
         talki_version: str | Unset = UNSET,
     ) -> _resource.RawResponse[File]:
         """`talki.documents.download`, returning the whole answer."""
-        return _named(await self.get_file(document_id, talki_version=talki_version))
+        return await self.get_file(document_id, talki_version=talki_version)
 
 
 class AsyncDocumentsResource(_generated.AsyncDocumentsResource):

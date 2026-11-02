@@ -23,7 +23,8 @@ classifiers = [
 dependencies = [
     "httpx>=0.23.1,<0.29.0",
     "attrs>=22.2.0",
-    "anyio>=3.0.0",
+    # Not 3.0.0: its worker threads outlive `asyncio.run`, and the process never exits.
+    "anyio>=3.0.1",
 ]
 
 [project.urls]

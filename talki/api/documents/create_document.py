@@ -10,7 +10,7 @@ from ...models.document_create import DocumentCreate
 from ...models.document_site_create import DocumentSiteCreate
 from ...models.document_upload import DocumentUpload
 from ...models.error_envelope import ErrorEnvelope
-from ...types import UNSET, Response, Unset
+from ...types import UNSET, Response, Unset, encode_multipart
 
 
 def _get_kwargs(
@@ -54,7 +54,7 @@ def _get_kwargs(
     if isinstance(body, DocumentUpload):
         _kwargs["files"] = body.to_multipart()
 
-        headers["Content-Type"] = "multipart/form-data; boundary=+++"
+        _kwargs["content"], headers["Content-Type"] = encode_multipart(_kwargs.pop("files"))
 
     _kwargs["headers"] = headers
     return _kwargs
