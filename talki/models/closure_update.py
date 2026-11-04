@@ -19,9 +19,8 @@ class ClosureUpdate:
     stays at the location it was created for.
 
         Attributes:
-            kind (ClosureKind | None | Unset): `closed` or `open`. Cannot be null. Turning a closure into a special opening
-                needs a window that starts and ends on one day.
-            all_day (bool | None | Unset): Whole days or an exact range. Cannot be null.
+            kind (ClosureKind | Unset): `closed` for a closure, `open` for a special opening.
+            all_day (bool | Unset): Whole days or an exact range. Cannot be null.
             start_date (None | str | Unset): First day, `YYYY-MM-DD`.
             end_date (None | str | Unset): Last day, included, `YYYY-MM-DD`.
             start_at (datetime.datetime | None | Unset): Start, RFC 3339 with a UTC offset.
@@ -32,8 +31,8 @@ class ClosureUpdate:
                 `invalid_parameter`.
     """
 
-    kind: ClosureKind | None | Unset = UNSET
-    all_day: bool | None | Unset = UNSET
+    kind: ClosureKind | Unset = UNSET
+    all_day: bool | Unset = UNSET
     start_date: None | str | Unset = UNSET
     end_date: None | str | Unset = UNSET
     start_at: datetime.datetime | None | Unset = UNSET
@@ -43,19 +42,11 @@ class ClosureUpdate:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        kind: None | str | Unset
-        if isinstance(self.kind, Unset):
-            kind = UNSET
-        elif isinstance(self.kind, ClosureKind):
+        kind: str | Unset = UNSET
+        if not isinstance(self.kind, Unset):
             kind = self.kind.value
-        else:
-            kind = self.kind
 
-        all_day: bool | None | Unset
-        if isinstance(self.all_day, Unset):
-            all_day = UNSET
-        else:
-            all_day = self.all_day
+        all_day = self.all_day
 
         start_date: None | str | Unset
         if isinstance(self.start_date, Unset):
@@ -122,32 +113,14 @@ class ClosureUpdate:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
+        _kind = d.pop("kind", UNSET)
+        kind: ClosureKind | Unset
+        if isinstance(_kind, Unset):
+            kind = UNSET
+        else:
+            kind = ClosureKind(_kind)
 
-        def _parse_kind(data: object) -> ClosureKind | None | Unset:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            try:
-                if not isinstance(data, str):
-                    raise TypeError()
-                kind_type_0 = ClosureKind(data)
-
-                return kind_type_0
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            return cast(ClosureKind | None | Unset, data)
-
-        kind = _parse_kind(d.pop("kind", UNSET))
-
-        def _parse_all_day(data: object) -> bool | None | Unset:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(bool | None | Unset, data)
-
-        all_day = _parse_all_day(d.pop("all_day", UNSET))
+        all_day = d.pop("all_day", UNSET)
 
         def _parse_start_date(data: object) -> None | str | Unset:
             if data is None:
@@ -254,8 +227,8 @@ class ClosureUpdate:
 # left out is a field left out. A date, datetime or UUID can be its ISO string,
 # an enum its value.
 class ClosureUpdateDict(TypedDict, total=False):
-    kind: ClosureKind | Literal["closed", "open"] | None
-    all_day: bool | None
+    kind: ClosureKind | Literal["closed", "open"]
+    all_day: bool
     start_date: str | None
     end_date: str | None
     start_at: datetime.datetime | str | None

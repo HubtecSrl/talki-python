@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar
 
@@ -21,8 +22,8 @@ class CallStats:
 
         Attributes:
             period_days (int): How many days the period covers: `days`, or the days from `from` to `to`.
-            period_start (str): Start of the period, RFC 3339 UTC, included.
-            period_end (str): End of the period, RFC 3339 UTC, excluded: now, or local midnight after `to`.
+            period_start (datetime.datetime): Start of the period, RFC 3339 UTC, included.
+            period_end (datetime.datetime): End of the period, RFC 3339 UTC, excluded: now, or local midnight after `to`.
             total_calls (int): Calls in the period.
             total_duration_seconds (int): Their total talk time, as billed (`Call.duration_seconds`).
             average_duration_seconds (float): Their average talk time, to one decimal. 0 with no calls.
@@ -43,8 +44,8 @@ class CallStats:
     """
 
     period_days: int
-    period_start: str
-    period_end: str
+    period_start: datetime.datetime
+    period_end: datetime.datetime
     total_calls: int
     total_duration_seconds: int
     average_duration_seconds: float
@@ -61,9 +62,9 @@ class CallStats:
     def to_dict(self) -> dict[str, Any]:
         period_days = self.period_days
 
-        period_start = self.period_start
+        period_start = self.period_start.isoformat()
 
-        period_end = self.period_end
+        period_end = self.period_end.isoformat()
 
         total_calls = self.total_calls
 
@@ -124,9 +125,9 @@ class CallStats:
         d = dict(src_dict)
         period_days = d.pop("period_days")
 
-        period_start = d.pop("period_start")
+        period_start = datetime.datetime.fromisoformat(d.pop("period_start"))
 
-        period_end = d.pop("period_end")
+        period_end = datetime.datetime.fromisoformat(d.pop("period_end"))
 
         total_calls = d.pop("total_calls")
 

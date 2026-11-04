@@ -16,13 +16,15 @@ T = TypeVar("T", bound="ContactList")
 @_attrs_define
 class ContactList:
     """A page of the contact change feed. `next_cursor` is your position, returned on the last page too; resume an
-    incremental sync from it.
+    incremental sync from it. With `phone` or `tag_id`, a page of a search instead, newest contact first, whose
+    `next_cursor` is null on the last page.
 
         Attributes:
             data (list[Contact]):
             next_cursor (None | str): Your position in the change feed after this page. Present on every page that returned
                 data, including the last one. Store it and pass it back as `cursor` to receive only what has changed since. Null
-                only when the page was empty. Opaque: do not parse it, and do not use it on another endpoint.
+                only when the page was empty. Opaque: do not parse it, and do not use it on another endpoint. On a search
+                (`phone` or `tag_id`), the cursor of the next page instead, null on the last one.
             has_more (bool): True when another page is available. Default: False.
     """
 

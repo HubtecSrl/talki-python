@@ -16,14 +16,15 @@ class FakeCallResponse:
 
     Attributes:
         call_id (str): The Call this fake call produced — fetchable at `GET /v1/calls/{id}`, and the same id the
-            `call.ended` delivery carries in `data.object.id`.
+            `call.ended` delivery carries in `data.object.id` and the `call.ringing` delivery before it in `data.call_id`.
         scenario (str):
         caller_phone (str):
         started_at (datetime.datetime):
         ended_at (datetime.datetime):
         duration_seconds (int):
         appointment_id (None | str): The appointment this call created, moved or cancelled, if any.
-        events (list[str]): The event types this call emitted. Every delivery carries `livemode: false`.
+        events (list[str]): The scenario's event types, each sent by this call. A pending contact it proposed sends its
+            own event too, not listed here. Every delivery carries `livemode: false`.
     """
 
     call_id: str

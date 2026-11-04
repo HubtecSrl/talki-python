@@ -17,22 +17,18 @@ class CallerRuleUpdate:
     """A partial edit of a caller rule.
 
     Attributes:
-        kind (CallerRuleKind | None | Unset): Move it to the other list. Cannot be null.
+        kind (CallerRuleKind | Unset): `vip` or `blocked`. A number is on one list at most at a location.
         label (None | str | Unset): Replaces the label. `null` or empty removes it.
     """
 
-    kind: CallerRuleKind | None | Unset = UNSET
+    kind: CallerRuleKind | Unset = UNSET
     label: None | str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        kind: None | str | Unset
-        if isinstance(self.kind, Unset):
-            kind = UNSET
-        elif isinstance(self.kind, CallerRuleKind):
+        kind: str | Unset = UNSET
+        if not isinstance(self.kind, Unset):
             kind = self.kind.value
-        else:
-            kind = self.kind
 
         label: None | str | Unset
         if isinstance(self.label, Unset):
@@ -53,23 +49,12 @@ class CallerRuleUpdate:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-
-        def _parse_kind(data: object) -> CallerRuleKind | None | Unset:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            try:
-                if not isinstance(data, str):
-                    raise TypeError()
-                kind_type_0 = CallerRuleKind(data)
-
-                return kind_type_0
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            return cast(CallerRuleKind | None | Unset, data)
-
-        kind = _parse_kind(d.pop("kind", UNSET))
+        _kind = d.pop("kind", UNSET)
+        kind: CallerRuleKind | Unset
+        if isinstance(_kind, Unset):
+            kind = UNSET
+        else:
+            kind = CallerRuleKind(_kind)
 
         def _parse_label(data: object) -> None | str | Unset:
             if data is None:
@@ -109,5 +94,5 @@ class CallerRuleUpdate:
 # left out is a field left out. A date, datetime or UUID can be its ISO string,
 # an enum its value.
 class CallerRuleUpdateDict(TypedDict, total=False):
-    kind: CallerRuleKind | Literal["vip", "blocked"] | None
+    kind: CallerRuleKind | Literal["vip", "blocked"]
     label: str | None

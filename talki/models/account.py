@@ -23,10 +23,12 @@ class Account:
     """The account a credential belongs to, and everything its owner sets up for the assistant: the business name and
     texts, the voice, the opening and greeting, the switches, the transfer numbers, and the line that forwards to Talki.
     `GET /v1/account` needs only `account:read`, which makes it the call to validate a new credential. The settings are
-    those of one location: the main one, or the one `?location_id=` names; the account's own switches read the same at
-    every location. The response's `ETag` covers every writable field at that location; send it back as `If-Match` on
-    `PATCH /v1/account` with the same `location_id`. `account.updated` reports a change to the main location's settings
-    or to the account's switches, `location.settings_updated` one to another location's.
+    those of one location: the main one, or the one `?location_id=` names, the switches included. Only the account's own
+    fields (`id`, `timezone`, `livemode`, `test`, `multi_sede`, `onboarding_completed` and `call_auto_archive_days`)
+    read the same at every location. The response's `ETag` covers every writable field at that location; send it back as
+    `If-Match` on `PATCH /v1/account` with the same `location_id`. `account.updated` reports a change to the main
+    location's settings or to `call_auto_archive_days`, `location.settings_updated` one to another location's settings,
+    its switches included.
 
         Attributes:
             id (str): Opaque Talki account identifier.

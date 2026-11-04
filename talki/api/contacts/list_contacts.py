@@ -14,6 +14,8 @@ def _get_kwargs(
     *,
     limit: int | Unset = 50,
     cursor: None | str | Unset = UNSET,
+    phone: None | str | Unset = UNSET,
+    tag_id: None | str | Unset = UNSET,
     talki_version: str | Unset = UNSET,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
@@ -30,6 +32,20 @@ def _get_kwargs(
     else:
         json_cursor = cursor
     params["cursor"] = json_cursor
+
+    json_phone: None | str | Unset
+    if isinstance(phone, Unset):
+        json_phone = UNSET
+    else:
+        json_phone = phone
+    params["phone"] = json_phone
+
+    json_tag_id: None | str | Unset
+    if isinstance(tag_id, Unset):
+        json_tag_id = UNSET
+    else:
+        json_tag_id = tag_id
+    params["tag_id"] = json_tag_id
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -118,12 +134,15 @@ def sync_detailed(
     client: AuthenticatedClient,
     limit: int | Unset = 50,
     cursor: None | str | Unset = UNSET,
+    phone: None | str | Unset = UNSET,
+    tag_id: None | str | Unset = UNSET,
     talki_version: str | Unset = UNSET,
 ) -> Response[ContactList | ErrorEnvelope]:
     """List contact changes
 
-     Walk the curated-contact change feed in commit order. Requires `contacts:read`. Limited to 600
-    requests per minute per account (API key) or per installation (OAuth).
+     Walk the curated-contact change feed in commit order. With `phone` or `tag_id`, find contacts
+    instead: newest first, not resumable as a sync. Requires `contacts:read`. Limited to 600 requests
+    per minute per account (API key) or per installation (OAuth).
 
     Args:
         limit (int | Unset): Maximum number of contacts to return. Default: 50.
@@ -131,6 +150,12 @@ def sync_detailed(
             response's `next_cursor`. Omit to start from the beginning. Store the last one you
             received: it is how you resume a sync without re-reading the whole address book. Not
             interchangeable with another endpoint's cursor.
+        phone (None | str | Unset): Only the contact with this number: E.164, or a national number
+            read as Italian. Makes the list a search: see `tag_id`.
+        tag_id (None | str | Unset): Only contacts with this tag (`Tag.id`). With it or `phone`
+            the list is a search, not the change feed: newest contact first, `next_cursor` null on the
+            last page, and a cursor works only in the mode that issued it. Resume a sync from the
+            unfiltered feed.
         talki_version (str | Unset):  Example: 2026-10-01.
 
     Raises:
@@ -144,6 +169,8 @@ def sync_detailed(
     kwargs = _get_kwargs(
         limit=limit,
         cursor=cursor,
+        phone=phone,
+        tag_id=tag_id,
         talki_version=talki_version,
     )
 
@@ -159,12 +186,15 @@ def sync(
     client: AuthenticatedClient,
     limit: int | Unset = 50,
     cursor: None | str | Unset = UNSET,
+    phone: None | str | Unset = UNSET,
+    tag_id: None | str | Unset = UNSET,
     talki_version: str | Unset = UNSET,
 ) -> ContactList | ErrorEnvelope | None:
     """List contact changes
 
-     Walk the curated-contact change feed in commit order. Requires `contacts:read`. Limited to 600
-    requests per minute per account (API key) or per installation (OAuth).
+     Walk the curated-contact change feed in commit order. With `phone` or `tag_id`, find contacts
+    instead: newest first, not resumable as a sync. Requires `contacts:read`. Limited to 600 requests
+    per minute per account (API key) or per installation (OAuth).
 
     Args:
         limit (int | Unset): Maximum number of contacts to return. Default: 50.
@@ -172,6 +202,12 @@ def sync(
             response's `next_cursor`. Omit to start from the beginning. Store the last one you
             received: it is how you resume a sync without re-reading the whole address book. Not
             interchangeable with another endpoint's cursor.
+        phone (None | str | Unset): Only the contact with this number: E.164, or a national number
+            read as Italian. Makes the list a search: see `tag_id`.
+        tag_id (None | str | Unset): Only contacts with this tag (`Tag.id`). With it or `phone`
+            the list is a search, not the change feed: newest contact first, `next_cursor` null on the
+            last page, and a cursor works only in the mode that issued it. Resume a sync from the
+            unfiltered feed.
         talki_version (str | Unset):  Example: 2026-10-01.
 
     Raises:
@@ -186,6 +222,8 @@ def sync(
         client=client,
         limit=limit,
         cursor=cursor,
+        phone=phone,
+        tag_id=tag_id,
         talki_version=talki_version,
     ).parsed
 
@@ -195,12 +233,15 @@ async def asyncio_detailed(
     client: AuthenticatedClient,
     limit: int | Unset = 50,
     cursor: None | str | Unset = UNSET,
+    phone: None | str | Unset = UNSET,
+    tag_id: None | str | Unset = UNSET,
     talki_version: str | Unset = UNSET,
 ) -> Response[ContactList | ErrorEnvelope]:
     """List contact changes
 
-     Walk the curated-contact change feed in commit order. Requires `contacts:read`. Limited to 600
-    requests per minute per account (API key) or per installation (OAuth).
+     Walk the curated-contact change feed in commit order. With `phone` or `tag_id`, find contacts
+    instead: newest first, not resumable as a sync. Requires `contacts:read`. Limited to 600 requests
+    per minute per account (API key) or per installation (OAuth).
 
     Args:
         limit (int | Unset): Maximum number of contacts to return. Default: 50.
@@ -208,6 +249,12 @@ async def asyncio_detailed(
             response's `next_cursor`. Omit to start from the beginning. Store the last one you
             received: it is how you resume a sync without re-reading the whole address book. Not
             interchangeable with another endpoint's cursor.
+        phone (None | str | Unset): Only the contact with this number: E.164, or a national number
+            read as Italian. Makes the list a search: see `tag_id`.
+        tag_id (None | str | Unset): Only contacts with this tag (`Tag.id`). With it or `phone`
+            the list is a search, not the change feed: newest contact first, `next_cursor` null on the
+            last page, and a cursor works only in the mode that issued it. Resume a sync from the
+            unfiltered feed.
         talki_version (str | Unset):  Example: 2026-10-01.
 
     Raises:
@@ -221,6 +268,8 @@ async def asyncio_detailed(
     kwargs = _get_kwargs(
         limit=limit,
         cursor=cursor,
+        phone=phone,
+        tag_id=tag_id,
         talki_version=talki_version,
     )
 
@@ -234,12 +283,15 @@ async def asyncio(
     client: AuthenticatedClient,
     limit: int | Unset = 50,
     cursor: None | str | Unset = UNSET,
+    phone: None | str | Unset = UNSET,
+    tag_id: None | str | Unset = UNSET,
     talki_version: str | Unset = UNSET,
 ) -> ContactList | ErrorEnvelope | None:
     """List contact changes
 
-     Walk the curated-contact change feed in commit order. Requires `contacts:read`. Limited to 600
-    requests per minute per account (API key) or per installation (OAuth).
+     Walk the curated-contact change feed in commit order. With `phone` or `tag_id`, find contacts
+    instead: newest first, not resumable as a sync. Requires `contacts:read`. Limited to 600 requests
+    per minute per account (API key) or per installation (OAuth).
 
     Args:
         limit (int | Unset): Maximum number of contacts to return. Default: 50.
@@ -247,6 +299,12 @@ async def asyncio(
             response's `next_cursor`. Omit to start from the beginning. Store the last one you
             received: it is how you resume a sync without re-reading the whole address book. Not
             interchangeable with another endpoint's cursor.
+        phone (None | str | Unset): Only the contact with this number: E.164, or a national number
+            read as Italian. Makes the list a search: see `tag_id`.
+        tag_id (None | str | Unset): Only contacts with this tag (`Tag.id`). With it or `phone`
+            the list is a search, not the change feed: newest contact first, `next_cursor` null on the
+            last page, and a cursor works only in the mode that issued it. Resume a sync from the
+            unfiltered feed.
         talki_version (str | Unset):  Example: 2026-10-01.
 
     Raises:
@@ -262,6 +320,8 @@ async def asyncio(
             client=client,
             limit=limit,
             cursor=cursor,
+            phone=phone,
+            tag_id=tag_id,
             talki_version=talki_version,
         )
     ).parsed

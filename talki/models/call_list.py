@@ -23,8 +23,8 @@ class CallList:
             next_cursor (None | str): Opaque position after this page. In the default newest-first list this is a page
                 pointer and is null on the last page. With `sync=true` it is your position in the change feed and is present on
                 every page that returned data, including the last one — store it and pass it back as `cursor` to receive only
-                what has been recorded since. Null when the page was empty. Do not parse it, and do not use a cursor from one
-                mode in the other.
+                what has been recorded since. An empty page answers null, so keep the cursor you hold; only a cursor issued up
+                to 2026-11-04 gets its replacement there. Do not parse it, and do not use a cursor from one mode in the other.
             has_more (bool): True when another page is available. Default: False.
     """
 

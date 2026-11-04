@@ -26,8 +26,9 @@ T = TypeVar("T", bound="AccountUpdate")
 @_attrs_define
 class AccountUpdate:
     """The settings you can change. Every field is optional and an omitted one is left unchanged, but send at least one. A
-    `null` or empty text clears it; a voice, a switch or the transfer list cannot be null. With `?location_id=`, a
-    location's own settings change at that location only, and the account's switches at every location.
+    `null` or empty text clears it; a voice, a switch or the transfer list cannot be null. With `?location_id=`, the
+    settings change at that location only. `call_auto_archive_days` is the account's: it is refused with a `location_id`
+    other than the main location's.
 
         Attributes:
             business_name (None | str | Unset): Replaces the business name. Send `null` or an empty string to clear it.
@@ -35,28 +36,29 @@ class AccountUpdate:
                 clear it.
             instructions (None | str | Unset): Replaces the instructions. Send `null` or an empty string to clear them. Keep
                 them to a few short orders: longer text makes each one less likely to be followed.
-            voice (None | str | Unset): A voice id from `GET /v1/voices`. Cannot be null.
-            answers_as (AnswersAs | None | Unset): `business` or `owner`. Cannot be null.
+            voice (str | Unset): A voice id from `GET /v1/voices`. Cannot be null.
+            answers_as (AnswersAs | Unset): Which name the assistant answers calls in and speaks for: `business` uses the
+                business name, `owner` the account holder's own name.
             greeting (None | str | Unset): Replaces the greeting. May contain `{company_name}` and `{owner_name}`. Leading
                 and trailing whitespace is removed. Send `null` or an empty string to clear it.
             call_opening (None | str | Unset): Replaces the opening, at most 160 characters once runs of whitespace are
                 collapsed to one space. May contain `{company_name}` and `{owner_name}`. Setting one needs a plan that includes
                 a custom opening, or the request is refused with `plan_feature_unavailable`. Send `null` or an empty string to
                 go back to the default, which every plan may do.
-            multilingual_enabled (bool | None | Unset): Cannot be null.
+            multilingual_enabled (bool | Unset): Cannot be null.
             service_area (None | str | Unset): Replaces the service area. Send `null` or an empty string to clear it.
-            transfer_numbers (list[TransferNumberInput] | None | Unset): The whole list, replacing every existing entry.
-                Send an empty list to remove them all; `null` is refused. A non-empty list needs the main location's
+            transfer_numbers (list[TransferNumberInput] | Unset): The whole list, replacing every existing entry. Send an
+                empty list to remove them all; `null` is refused. A non-empty list needs the main location's
                 `forwarding_number`, already stored or sent in the same request, and may not contain it, nor the location's own
                 `forwarding_number`: a call transferred there would come straight back to the assistant.
-            bookings_enabled (bool | None | Unset): Cannot be null.
-            unresolved_requests_enabled (bool | None | Unset): Cannot be null.
-            remember_callers (bool | None | Unset): Cannot be null.
-            notify_on_every_call (bool | None | Unset): Cannot be null.
-            notify_on_incoming_call (bool | None | Unset): Cannot be null.
-            store_transcripts (bool | None | Unset): Cannot be null. `false` deletes the stored transcripts of this
-                location's calls in the same request, and they cannot be recovered, so a test-mode credential sending it is
-                refused with `livemode_required`.
+            bookings_enabled (bool | Unset): Cannot be null.
+            unresolved_requests_enabled (bool | Unset): Cannot be null.
+            remember_callers (bool | Unset): Cannot be null.
+            notify_on_every_call (bool | Unset): Cannot be null.
+            notify_on_incoming_call (bool | Unset): Cannot be null.
+            store_transcripts (bool | Unset): Cannot be null. `false` deletes the stored transcripts of this location's
+                calls in the same request, and they cannot be recovered, so a test-mode credential sending it is refused with
+                `livemode_required`.
             call_auto_archive_days (AccountUpdateCallAutoArchiveDaysType0 | None | Unset): `7`, `30` or `90`, or `null` to
                 stop archiving calls on their own. The account's own setting: refused with `location_id` naming a location other
                 than the main one.
@@ -71,19 +73,19 @@ class AccountUpdate:
     business_name: None | str | Unset = UNSET
     business_information: None | str | Unset = UNSET
     instructions: None | str | Unset = UNSET
-    voice: None | str | Unset = UNSET
-    answers_as: AnswersAs | None | Unset = UNSET
+    voice: str | Unset = UNSET
+    answers_as: AnswersAs | Unset = UNSET
     greeting: None | str | Unset = UNSET
     call_opening: None | str | Unset = UNSET
-    multilingual_enabled: bool | None | Unset = UNSET
+    multilingual_enabled: bool | Unset = UNSET
     service_area: None | str | Unset = UNSET
-    transfer_numbers: list[TransferNumberInput] | None | Unset = UNSET
-    bookings_enabled: bool | None | Unset = UNSET
-    unresolved_requests_enabled: bool | None | Unset = UNSET
-    remember_callers: bool | None | Unset = UNSET
-    notify_on_every_call: bool | None | Unset = UNSET
-    notify_on_incoming_call: bool | None | Unset = UNSET
-    store_transcripts: bool | None | Unset = UNSET
+    transfer_numbers: list[TransferNumberInput] | Unset = UNSET
+    bookings_enabled: bool | Unset = UNSET
+    unresolved_requests_enabled: bool | Unset = UNSET
+    remember_callers: bool | Unset = UNSET
+    notify_on_every_call: bool | Unset = UNSET
+    notify_on_incoming_call: bool | Unset = UNSET
+    store_transcripts: bool | Unset = UNSET
     call_auto_archive_days: AccountUpdateCallAutoArchiveDaysType0 | None | Unset = UNSET
     forwarding_number: None | str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -107,19 +109,11 @@ class AccountUpdate:
         else:
             instructions = self.instructions
 
-        voice: None | str | Unset
-        if isinstance(self.voice, Unset):
-            voice = UNSET
-        else:
-            voice = self.voice
+        voice = self.voice
 
-        answers_as: None | str | Unset
-        if isinstance(self.answers_as, Unset):
-            answers_as = UNSET
-        elif isinstance(self.answers_as, AnswersAs):
+        answers_as: str | Unset = UNSET
+        if not isinstance(self.answers_as, Unset):
             answers_as = self.answers_as.value
-        else:
-            answers_as = self.answers_as
 
         greeting: None | str | Unset
         if isinstance(self.greeting, Unset):
@@ -133,11 +127,7 @@ class AccountUpdate:
         else:
             call_opening = self.call_opening
 
-        multilingual_enabled: bool | None | Unset
-        if isinstance(self.multilingual_enabled, Unset):
-            multilingual_enabled = UNSET
-        else:
-            multilingual_enabled = self.multilingual_enabled
+        multilingual_enabled = self.multilingual_enabled
 
         service_area: None | str | Unset
         if isinstance(self.service_area, Unset):
@@ -145,53 +135,24 @@ class AccountUpdate:
         else:
             service_area = self.service_area
 
-        transfer_numbers: list[dict[str, Any]] | None | Unset
-        if isinstance(self.transfer_numbers, Unset):
-            transfer_numbers = UNSET
-        elif isinstance(self.transfer_numbers, list):
+        transfer_numbers: list[dict[str, Any]] | Unset = UNSET
+        if not isinstance(self.transfer_numbers, Unset):
             transfer_numbers = []
-            for transfer_numbers_type_0_item_data in self.transfer_numbers:
-                transfer_numbers_type_0_item = transfer_numbers_type_0_item_data.to_dict()
-                transfer_numbers.append(transfer_numbers_type_0_item)
+            for transfer_numbers_item_data in self.transfer_numbers:
+                transfer_numbers_item = transfer_numbers_item_data.to_dict()
+                transfer_numbers.append(transfer_numbers_item)
 
-        else:
-            transfer_numbers = self.transfer_numbers
+        bookings_enabled = self.bookings_enabled
 
-        bookings_enabled: bool | None | Unset
-        if isinstance(self.bookings_enabled, Unset):
-            bookings_enabled = UNSET
-        else:
-            bookings_enabled = self.bookings_enabled
+        unresolved_requests_enabled = self.unresolved_requests_enabled
 
-        unresolved_requests_enabled: bool | None | Unset
-        if isinstance(self.unresolved_requests_enabled, Unset):
-            unresolved_requests_enabled = UNSET
-        else:
-            unresolved_requests_enabled = self.unresolved_requests_enabled
+        remember_callers = self.remember_callers
 
-        remember_callers: bool | None | Unset
-        if isinstance(self.remember_callers, Unset):
-            remember_callers = UNSET
-        else:
-            remember_callers = self.remember_callers
+        notify_on_every_call = self.notify_on_every_call
 
-        notify_on_every_call: bool | None | Unset
-        if isinstance(self.notify_on_every_call, Unset):
-            notify_on_every_call = UNSET
-        else:
-            notify_on_every_call = self.notify_on_every_call
+        notify_on_incoming_call = self.notify_on_incoming_call
 
-        notify_on_incoming_call: bool | None | Unset
-        if isinstance(self.notify_on_incoming_call, Unset):
-            notify_on_incoming_call = UNSET
-        else:
-            notify_on_incoming_call = self.notify_on_incoming_call
-
-        store_transcripts: bool | None | Unset
-        if isinstance(self.store_transcripts, Unset):
-            store_transcripts = UNSET
-        else:
-            store_transcripts = self.store_transcripts
+        store_transcripts = self.store_transcripts
 
         call_auto_archive_days: int | None | Unset
         if isinstance(self.call_auto_archive_days, Unset):
@@ -282,31 +243,14 @@ class AccountUpdate:
 
         instructions = _parse_instructions(d.pop("instructions", UNSET))
 
-        def _parse_voice(data: object) -> None | str | Unset:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(None | str | Unset, data)
+        voice = d.pop("voice", UNSET)
 
-        voice = _parse_voice(d.pop("voice", UNSET))
-
-        def _parse_answers_as(data: object) -> AnswersAs | None | Unset:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            try:
-                if not isinstance(data, str):
-                    raise TypeError()
-                answers_as_type_0 = AnswersAs(data)
-
-                return answers_as_type_0
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            return cast(AnswersAs | None | Unset, data)
-
-        answers_as = _parse_answers_as(d.pop("answers_as", UNSET))
+        _answers_as = d.pop("answers_as", UNSET)
+        answers_as: AnswersAs | Unset
+        if isinstance(_answers_as, Unset):
+            answers_as = UNSET
+        else:
+            answers_as = AnswersAs(_answers_as)
 
         def _parse_greeting(data: object) -> None | str | Unset:
             if data is None:
@@ -326,14 +270,7 @@ class AccountUpdate:
 
         call_opening = _parse_call_opening(d.pop("call_opening", UNSET))
 
-        def _parse_multilingual_enabled(data: object) -> bool | None | Unset:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(bool | None | Unset, data)
-
-        multilingual_enabled = _parse_multilingual_enabled(d.pop("multilingual_enabled", UNSET))
+        multilingual_enabled = d.pop("multilingual_enabled", UNSET)
 
         def _parse_service_area(data: object) -> None | str | Unset:
             if data is None:
@@ -344,81 +281,26 @@ class AccountUpdate:
 
         service_area = _parse_service_area(d.pop("service_area", UNSET))
 
-        def _parse_transfer_numbers(data: object) -> list[TransferNumberInput] | None | Unset:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            try:
-                if not isinstance(data, list):
-                    raise TypeError()
-                transfer_numbers_type_0 = []
-                _transfer_numbers_type_0 = data
-                for transfer_numbers_type_0_item_data in _transfer_numbers_type_0:
-                    transfer_numbers_type_0_item = TransferNumberInput.from_dict(transfer_numbers_type_0_item_data)
+        _transfer_numbers = d.pop("transfer_numbers", UNSET)
+        transfer_numbers: list[TransferNumberInput] | Unset = UNSET
+        if _transfer_numbers is not UNSET:
+            transfer_numbers = []
+            for transfer_numbers_item_data in _transfer_numbers:
+                transfer_numbers_item = TransferNumberInput.from_dict(transfer_numbers_item_data)
 
-                    transfer_numbers_type_0.append(transfer_numbers_type_0_item)
+                transfer_numbers.append(transfer_numbers_item)
 
-                return transfer_numbers_type_0
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            return cast(list[TransferNumberInput] | None | Unset, data)
+        bookings_enabled = d.pop("bookings_enabled", UNSET)
 
-        transfer_numbers = _parse_transfer_numbers(d.pop("transfer_numbers", UNSET))
+        unresolved_requests_enabled = d.pop("unresolved_requests_enabled", UNSET)
 
-        def _parse_bookings_enabled(data: object) -> bool | None | Unset:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(bool | None | Unset, data)
+        remember_callers = d.pop("remember_callers", UNSET)
 
-        bookings_enabled = _parse_bookings_enabled(d.pop("bookings_enabled", UNSET))
+        notify_on_every_call = d.pop("notify_on_every_call", UNSET)
 
-        def _parse_unresolved_requests_enabled(data: object) -> bool | None | Unset:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(bool | None | Unset, data)
+        notify_on_incoming_call = d.pop("notify_on_incoming_call", UNSET)
 
-        unresolved_requests_enabled = _parse_unresolved_requests_enabled(d.pop("unresolved_requests_enabled", UNSET))
-
-        def _parse_remember_callers(data: object) -> bool | None | Unset:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(bool | None | Unset, data)
-
-        remember_callers = _parse_remember_callers(d.pop("remember_callers", UNSET))
-
-        def _parse_notify_on_every_call(data: object) -> bool | None | Unset:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(bool | None | Unset, data)
-
-        notify_on_every_call = _parse_notify_on_every_call(d.pop("notify_on_every_call", UNSET))
-
-        def _parse_notify_on_incoming_call(data: object) -> bool | None | Unset:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(bool | None | Unset, data)
-
-        notify_on_incoming_call = _parse_notify_on_incoming_call(d.pop("notify_on_incoming_call", UNSET))
-
-        def _parse_store_transcripts(data: object) -> bool | None | Unset:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(bool | None | Unset, data)
-
-        store_transcripts = _parse_store_transcripts(d.pop("store_transcripts", UNSET))
+        store_transcripts = d.pop("store_transcripts", UNSET)
 
         def _parse_call_auto_archive_days(data: object) -> AccountUpdateCallAutoArchiveDaysType0 | None | Unset:
             if data is None:
@@ -494,18 +376,18 @@ class AccountUpdateDict(TypedDict, total=False):
     business_name: str | None
     business_information: str | None
     instructions: str | None
-    voice: str | None
-    answers_as: AnswersAs | Literal["business", "owner"] | None
+    voice: str
+    answers_as: AnswersAs | Literal["business", "owner"]
     greeting: str | None
     call_opening: str | None
-    multilingual_enabled: bool | None
+    multilingual_enabled: bool
     service_area: str | None
-    transfer_numbers: Sequence[TransferNumberInputDict | TransferNumberInput] | None
-    bookings_enabled: bool | None
-    unresolved_requests_enabled: bool | None
-    remember_callers: bool | None
-    notify_on_every_call: bool | None
-    notify_on_incoming_call: bool | None
-    store_transcripts: bool | None
+    transfer_numbers: Sequence[TransferNumberInputDict | TransferNumberInput]
+    bookings_enabled: bool
+    unresolved_requests_enabled: bool
+    remember_callers: bool
+    notify_on_every_call: bool
+    notify_on_incoming_call: bool
+    store_transcripts: bool
     call_auto_archive_days: AccountUpdateCallAutoArchiveDaysType0 | Literal[7, 30, 90] | None
     forwarding_number: str | None

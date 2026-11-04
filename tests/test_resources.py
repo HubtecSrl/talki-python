@@ -276,6 +276,21 @@ def test_a_binary_answer_is_a_file():
 # Pages
 
 
+def test_a_contact_search_keeps_its_filters_on_every_page():
+    server = Server(
+        {
+            ("/v1/contacts", None): contacts([1, 2], has_more=True, next_cursor="c1"),
+            ("/v1/contacts", "c1"): contacts([3], has_more=False, next_cursor=None),
+        }
+    )
+    with sync_for(server) as client:
+        walked = list(client.contacts.list(phone="+393480000001", tag_id="tag"))
+    assert [row.phone_number[-2:] for row in walked] == ["01", "02", "03"]
+    assert server.cursors == [None, "c1"]
+    assert all(request.url.params["phone"] == "+393480000001" for request in server.requests)
+    assert all(request.url.params["tag_id"] == "tag" for request in server.requests)
+
+
 def test_a_list_is_its_first_page():
     server = three_pages()
     with sync_for(server) as client:

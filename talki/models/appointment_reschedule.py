@@ -25,6 +25,8 @@ class AppointmentReschedule:
             start_at (datetime.datetime | None | Unset): New start, RFC 3339 with an offset. Null leaves it unchanged.
             end_at (datetime.datetime | None | Unset): New end, RFC 3339 with an offset. Null leaves it unchanged — moving
                 only `start_at` does NOT shift the end to preserve the duration, it moves one edge. Send both to move a booking.
+                A booking of one service with a `duration_minutes` keeps that length, or the length it has now: a move that
+                changes it is refused with 400 `invalid_parameter`.
     """
 
     client_name: None | str | Unset = UNSET

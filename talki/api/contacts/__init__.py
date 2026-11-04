@@ -84,6 +84,8 @@ class ContactsResourceWithRawResponse(_resource.Resource):
         *,
         limit: int | Unset = 50,
         cursor: None | str | Unset = UNSET,
+        phone: None | str | Unset = UNSET,
+        tag_id: None | str | Unset = UNSET,
         talki_version: str | Unset = UNSET,
     ) -> _resource.RawResponse[_pagination.Page[Contact]]:
         """`talki.contacts.list`, returning the whole answer."""
@@ -94,6 +96,8 @@ class ContactsResourceWithRawResponse(_resource.Resource):
                     client=self._client,
                     limit=limit,
                     cursor=cursor,
+                    phone=phone,
+                    tag_id=tag_id,
                     talki_version=talki_version,
                 )
             )
@@ -103,6 +107,8 @@ class ContactsResourceWithRawResponse(_resource.Resource):
                 client=self._client,
                 limit=limit,
                 cursor=cursor,
+                phone=phone,
+                tag_id=tag_id,
                 talki_version=talki_version,
             )
         ).map(lambda page: _pagination.Page(page, fetch, cursor))
@@ -222,12 +228,15 @@ class ContactsResource(_resource.Resource):
         *,
         limit: int | Unset = 50,
         cursor: None | str | Unset = UNSET,
+        phone: None | str | Unset = UNSET,
+        tag_id: None | str | Unset = UNSET,
         talki_version: str | Unset = UNSET,
     ) -> _pagination.Page[Contact]:
         """List contact changes
 
-         Walk the curated-contact change feed in commit order. Requires `contacts:read`. Limited to 600
-        requests per minute per account (API key) or per installation (OAuth).
+         Walk the curated-contact change feed in commit order. With `phone` or `tag_id`, find contacts
+        instead: newest first, not resumable as a sync. Requires `contacts:read`. Limited to 600 requests
+        per minute per account (API key) or per installation (OAuth).
 
         Args:
             limit (int | Unset): Maximum number of contacts to return. Default: 50.
@@ -235,6 +244,12 @@ class ContactsResource(_resource.Resource):
                 response's `next_cursor`. Omit to start from the beginning. Store the last one you
                 received: it is how you resume a sync without re-reading the whole address book. Not
                 interchangeable with another endpoint's cursor.
+            phone (None | str | Unset): Only the contact with this number: E.164, or a national number
+                read as Italian. Makes the list a search: see `tag_id`.
+            tag_id (None | str | Unset): Only contacts with this tag (`Tag.id`). With it or `phone`
+                the list is a search, not the change feed: newest contact first, `next_cursor` null on the
+                last page, and a cursor works only in the mode that issued it. Resume a sync from the
+                unfiltered feed.
             talki_version (str | Unset):  Example: 2026-10-01.
 
         Raises:
@@ -249,6 +264,8 @@ class ContactsResource(_resource.Resource):
             self.with_raw_response.list(
                 limit=limit,
                 cursor=cursor,
+                phone=phone,
+                tag_id=tag_id,
                 talki_version=talki_version,
             )
         ).parse()
@@ -314,6 +331,8 @@ class AsyncContactsResourceWithRawResponse(_resource.Resource):
         *,
         limit: int | Unset = 50,
         cursor: None | str | Unset = UNSET,
+        phone: None | str | Unset = UNSET,
+        tag_id: None | str | Unset = UNSET,
         talki_version: str | Unset = UNSET,
     ) -> _resource.RawResponse[_pagination.AsyncPage[Contact]]:
         """`talki.contacts.list`, returning the whole answer."""
@@ -324,6 +343,8 @@ class AsyncContactsResourceWithRawResponse(_resource.Resource):
                     client=self._client,
                     limit=limit,
                     cursor=cursor,
+                    phone=phone,
+                    tag_id=tag_id,
                     talki_version=talki_version,
                 )
             )
@@ -333,6 +354,8 @@ class AsyncContactsResourceWithRawResponse(_resource.Resource):
                 client=self._client,
                 limit=limit,
                 cursor=cursor,
+                phone=phone,
+                tag_id=tag_id,
                 talki_version=talki_version,
             )
         ).map(lambda page: _pagination.AsyncPage(page, fetch, cursor))
@@ -452,12 +475,15 @@ class AsyncContactsResource(_resource.Resource):
         *,
         limit: int | Unset = 50,
         cursor: None | str | Unset = UNSET,
+        phone: None | str | Unset = UNSET,
+        tag_id: None | str | Unset = UNSET,
         talki_version: str | Unset = UNSET,
     ) -> _pagination.AsyncPager[Contact]:
         """List contact changes
 
-         Walk the curated-contact change feed in commit order. Requires `contacts:read`. Limited to 600
-        requests per minute per account (API key) or per installation (OAuth).
+         Walk the curated-contact change feed in commit order. With `phone` or `tag_id`, find contacts
+        instead: newest first, not resumable as a sync. Requires `contacts:read`. Limited to 600 requests
+        per minute per account (API key) or per installation (OAuth).
 
         Args:
             limit (int | Unset): Maximum number of contacts to return. Default: 50.
@@ -465,6 +491,12 @@ class AsyncContactsResource(_resource.Resource):
                 response's `next_cursor`. Omit to start from the beginning. Store the last one you
                 received: it is how you resume a sync without re-reading the whole address book. Not
                 interchangeable with another endpoint's cursor.
+            phone (None | str | Unset): Only the contact with this number: E.164, or a national number
+                read as Italian. Makes the list a search: see `tag_id`.
+            tag_id (None | str | Unset): Only contacts with this tag (`Tag.id`). With it or `phone`
+                the list is a search, not the change feed: newest contact first, `next_cursor` null on the
+                last page, and a cursor works only in the mode that issued it. Resume a sync from the
+                unfiltered feed.
             talki_version (str | Unset):  Example: 2026-10-01.
 
         Raises:
@@ -481,6 +513,8 @@ class AsyncContactsResource(_resource.Resource):
                 await self.with_raw_response.list(
                     limit=limit,
                     cursor=cursor,
+                    phone=phone,
+                    tag_id=tag_id,
                     talki_version=talki_version,
                 )
             ).parse()

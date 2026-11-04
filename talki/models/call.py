@@ -23,7 +23,8 @@ class Call:
     deleted call leaves the feed and the log; `call.deleted` is its only trace.
 
         Attributes:
-            id (str): Opaque Talki call identifier.
+            id (str): Opaque Talki call identifier. Decided when the call arrives: the `call.ringing` event sent while it
+                rang carries the same id as `data.call_id`.
             location_id (str): The location the call was for: the one whose Talki number the caller dialled (`GET
                 /v1/locations`). Never null: a call to the account's own number, and every call from before locations existed,
                 is the main location's. It never changes.

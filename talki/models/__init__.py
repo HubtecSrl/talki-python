@@ -44,6 +44,7 @@ from .contact import Contact
 from .contact_list import ContactList
 from .contact_upsert import ContactUpsert, ContactUpsertDict
 from .document import Document
+from .document_also import DocumentAlso
 from .document_create import DocumentCreate, DocumentCreateDict
 from .document_create_source import DocumentCreateSource
 from .document_discover import DocumentDiscover, DocumentDiscoverDict
@@ -180,6 +181,7 @@ __all__ = (
     "ContactUpsert",
     "ContactUpsertDict",
     "Document",
+    "DocumentAlso",
     "DocumentCreate",
     "DocumentCreateDict",
     "DocumentCreateSource",

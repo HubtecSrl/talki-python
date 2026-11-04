@@ -28,9 +28,9 @@ class Appointment:
                 null, and it never changes: moving a booking keeps its location.
             status (AppointmentStatus): `active` or `cancelled`. A cancelled appointment is kept, and can be restored to
                 `active`.
-            client (AppointmentClient): Who the booking is for. Always present; `contact_id` and `phone_number` are null for
-                a booking entered by hand. The name is the one the booking was taken under, exactly as the owner sees it, and
-                may come from what the assistant heard on the call.
+            client (AppointmentClient): Who the booking is for. Always present; `contact_id` and `phone_number` are null
+                when Talki has no number for the client. The name is the one the booking was taken under, exactly as the owner
+                sees it, and may come from what the assistant heard on the call.
             service (None | ServiceRef): The service booked. After the service is deleted it keeps its name with a null
                 `id`. Null for an appointment taken without one (a generic slot), or whose service was deleted before Talki kept
                 the name.
@@ -42,6 +42,8 @@ class Appointment:
                 unconditionally. It is the booking's total, not a breakdown per resource or unit.
             call_id (None | str): The call this booking was taken on, or null when it was not made on a call (entered in the
                 Talki app or created through this API).
+            notes (None | str): The note on the booking, as the business sees it beside it: what `POST /v1/appointments`
+                sent as `notes`, or what the assistant wrote on a booking taken on a call. Null when there is none.
             created_at (datetime.datetime): When the booking was written, RFC 3339 UTC.
             updated_at (datetime.datetime): Last change to the booking, RFC 3339 UTC. Show it to a human as "last modified";
                 **do not sync on it**: changes do not become visible in `updated_at` order, so a watermark on it can skip a
@@ -57,6 +59,7 @@ class Appointment:
     end_at: datetime.datetime
     quantity: int
     call_id: None | str
+    notes: None | str
     created_at: datetime.datetime
     updated_at: datetime.datetime
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -87,6 +90,9 @@ class Appointment:
         call_id: None | str
         call_id = self.call_id
 
+        notes: None | str
+        notes = self.notes
+
         created_at = self.created_at.isoformat()
 
         updated_at = self.updated_at.isoformat()
@@ -104,6 +110,7 @@ class Appointment:
                 "end_at": end_at,
                 "quantity": quantity,
                 "call_id": call_id,
+                "notes": notes,
                 "created_at": created_at,
                 "updated_at": updated_at,
             }
@@ -153,6 +160,13 @@ class Appointment:
 
         call_id = _parse_call_id(d.pop("call_id"))
 
+        def _parse_notes(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        notes = _parse_notes(d.pop("notes"))
+
         created_at = datetime.datetime.fromisoformat(d.pop("created_at"))
 
         updated_at = datetime.datetime.fromisoformat(d.pop("updated_at"))
@@ -167,6 +181,7 @@ class Appointment:
             end_at=end_at,
             quantity=quantity,
             call_id=call_id,
+            notes=notes,
             created_at=created_at,
             updated_at=updated_at,
         )

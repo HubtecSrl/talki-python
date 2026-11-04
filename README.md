@@ -244,6 +244,10 @@ cursor raises `PaginationError`. Iterating a page again starts from it again.
 `position` is for change feeds: a plain list's last page has no cursor though
 it holds rows.
 
+`talki.contacts.list(phone=…)` and `tag_id=` search instead of walking the feed:
+newest contact first, and `next_cursor` is null on the last page. A cursor works
+only in the mode that issued it, so resume a sync from the unfiltered list.
+
 On `AsyncTalki` the method returns an `AsyncPager`, which sends nothing
 until it is used. Await it for the first page, an `AsyncPage` with the same
 `data`, `has_more` and `next_cursor`, iterated with `async for`; or `async for`
@@ -383,9 +387,10 @@ talki = Talki(tokens=tokens, oauth_app=app, on_token_refresh=save)
 ## Not covered yet
 
 The partner routes (`/oauth/app/*`, `/oauth/managed-accounts`,
-`/oauth/enrollments`) and typed webhook event payloads are not in the OpenAPI
-document yet, so not in this package. See the
-[API reference](https://developers.talki.it) for them.
+`/oauth/enrollments`) are not in the OpenAPI document yet, so not in this
+package. Webhook event payloads are in its `webhooks` section, but this package
+generates no types from them: `construct_event` returns a dict. See the
+[API reference](https://developers.talki.it) for both.
 
 ## Versions
 

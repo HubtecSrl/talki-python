@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 from collections.abc import Mapping
 from typing import Any, TypeVar, cast
 
@@ -15,19 +16,22 @@ class CallTransfer:
 
     Attributes:
         target_label (str): The destination as the owner named it in Talki (e.g. `Reception`). Never the number behind
-            it.
-        at (None | str): When the call was handed over, RFC 3339.
+            it. Compare it case-insensitively.
+        at (datetime.datetime | None): When the call was handed over, RFC 3339 UTC.
     """
 
     target_label: str
-    at: None | str
+    at: datetime.datetime | None
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         target_label = self.target_label
 
         at: None | str
-        at = self.at
+        if isinstance(self.at, datetime.datetime):
+            at = self.at.isoformat()
+        else:
+            at = self.at
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -45,10 +49,18 @@ class CallTransfer:
         d = dict(src_dict)
         target_label = d.pop("target_label")
 
-        def _parse_at(data: object) -> None | str:
+        def _parse_at(data: object) -> datetime.datetime | None:
             if data is None:
                 return data
-            return cast(None | str, data)
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                at_type_0 = datetime.datetime.fromisoformat(data)
+
+                return at_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(datetime.datetime | None, data)
 
         at = _parse_at(d.pop("at"))
 

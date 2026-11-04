@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypedDict, TypeVar, cast
+from typing import Any, TypedDict, TypeVar
 
 from attrs import define as _attrs_define
 
@@ -15,26 +15,18 @@ class DocumentUpdate:
     """A partial edit of a document: its title, or whether the assistant uses it.
 
     Attributes:
-        title (None | str | Unset): Its new title. Not for a website, whose title is its address. A note's new title is
-            indexed again, as a change of its text is.
-        enabled (bool | None | Unset): Switch it off (`false`) or on again (`true`). Cannot be null.
+        title (str | Unset): Its new title. Not for a website, whose title is its address. A note's new title is indexed
+            again, as a change of its text is.
+        enabled (bool | Unset): Switch it off (`false`) or on again (`true`). Cannot be null.
     """
 
-    title: None | str | Unset = UNSET
-    enabled: bool | None | Unset = UNSET
+    title: str | Unset = UNSET
+    enabled: bool | Unset = UNSET
 
     def to_dict(self) -> dict[str, Any]:
-        title: None | str | Unset
-        if isinstance(self.title, Unset):
-            title = UNSET
-        else:
-            title = self.title
+        title = self.title
 
-        enabled: bool | None | Unset
-        if isinstance(self.enabled, Unset):
-            enabled = UNSET
-        else:
-            enabled = self.enabled
+        enabled = self.enabled
 
         field_dict: dict[str, Any] = {}
 
@@ -49,24 +41,9 @@ class DocumentUpdate:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
+        title = d.pop("title", UNSET)
 
-        def _parse_title(data: object) -> None | str | Unset:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(None | str | Unset, data)
-
-        title = _parse_title(d.pop("title", UNSET))
-
-        def _parse_enabled(data: object) -> bool | None | Unset:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(bool | None | Unset, data)
-
-        enabled = _parse_enabled(d.pop("enabled", UNSET))
+        enabled = d.pop("enabled", UNSET)
 
         document_update = cls(
             title=title,
@@ -80,5 +57,5 @@ class DocumentUpdate:
 # left out is a field left out. A date, datetime or UUID can be its ISO string,
 # an enum its value.
 class DocumentUpdateDict(TypedDict, total=False):
-    title: str | None
-    enabled: bool | None
+    title: str
+    enabled: bool

@@ -32,6 +32,7 @@ from . import _resource
 from .api import documents as _generated
 from .api.documents import create_document, replace_document
 from .models.document import Document
+from .models.document_also import DocumentAlso
 from .models.document_file_replace import DocumentFileReplace
 from .models.document_upload import DocumentUpload
 from .types import UNSET, File, Unset
@@ -98,6 +99,11 @@ def _file(read: tuple[bytes, str | None, str | None], filename: str | None, cont
     # With no type, httpx guesses one from the name, `application/octet-stream`
     # failing that, which the API types by the file's extension.
     return File(payload=BytesIO(data), file_name=name, mime_type=content_type or carried_type)
+
+
+def _also(also: DocumentAlso | Literal["copies"] | None | Unset) -> DocumentAlso | None | Unset:
+    """`replace_file`'s `also`, as the operation takes it: the plain string too."""
+    return DocumentAlso(also) if isinstance(also, str) else also
 
 
 def _no_none(location_ids: list[str] | None | Unset) -> list[str] | Unset:
@@ -181,14 +187,14 @@ class DocumentsResourceWithRawResponse(_generated.DocumentsResourceWithRawRespon
         *,
         filename: str | None = None,
         content_type: str | None = None,
-        also: Literal["copies"] | None | Unset = UNSET,
+        also: DocumentAlso | Literal["copies"] | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> _resource.RawResponse[Document]:
         """`talki.documents.replace_file`, returning the whole answer."""
         body = DocumentFileReplace(file=_file(_read(file), filename, content_type))
         kwargs = replace_document._get_kwargs(
-            document_id, body=body, also=also, talki_version=talki_version, idempotency_key=idempotency_key
+            document_id, body=body, also=_also(also), talki_version=talki_version, idempotency_key=idempotency_key
         )
         response = self._client.get_httpx_client().request(**kwargs)
         return _resource.raw(replace_document._build_response(client=self._client, response=response))
@@ -278,7 +284,7 @@ class DocumentsResource(_generated.DocumentsResource):
         *,
         filename: str | None = None,
         content_type: str | None = None,
-        also: Literal["copies"] | None | Unset = UNSET,
+        also: DocumentAlso | Literal["copies"] | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Document:
@@ -353,14 +359,14 @@ class AsyncDocumentsResourceWithRawResponse(_generated.AsyncDocumentsResourceWit
         *,
         filename: str | None = None,
         content_type: str | None = None,
-        also: Literal["copies"] | None | Unset = UNSET,
+        also: DocumentAlso | Literal["copies"] | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> _resource.RawResponse[Document]:
         """`talki.documents.replace_file`, returning the whole answer."""
         body = DocumentFileReplace(file=_file(await _aread(file), filename, content_type))
         kwargs = replace_document._get_kwargs(
-            document_id, body=body, also=also, talki_version=talki_version, idempotency_key=idempotency_key
+            document_id, body=body, also=_also(also), talki_version=talki_version, idempotency_key=idempotency_key
         )
         response = await self._client.get_async_httpx_client().request(**kwargs)
         return _resource.raw(replace_document._build_response(client=self._client, response=response))
@@ -427,7 +433,7 @@ class AsyncDocumentsResource(_generated.AsyncDocumentsResource):
         *,
         filename: str | None = None,
         content_type: str | None = None,
-        also: Literal["copies"] | None | Unset = UNSET,
+        also: DocumentAlso | Literal["copies"] | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Document:

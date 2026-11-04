@@ -11,16 +11,16 @@ T = TypeVar("T", bound="AppointmentClient")
 
 @_attrs_define
 class AppointmentClient:
-    """Who the booking is for. Always present; `contact_id` and `phone_number` are null for a booking entered by hand. The
-    name is the one the booking was taken under, exactly as the owner sees it, and may come from what the assistant
-    heard on the call.
+    """Who the booking is for. Always present; `contact_id` and `phone_number` are null when Talki has no number for the
+    client. The name is the one the booking was taken under, exactly as the owner sees it, and may come from what the
+    assistant heard on the call.
 
         Attributes:
             contact_id (None | str): Talki contact whose number is `phone_number`, when there is one. Null otherwise.
             name (str): First name the booking was taken under.
             surname (str): Surname the booking was taken under.
-            phone_number (None | str): Client's number in E.164. Null when Talki has no number for the client, e.g. a caller
-                who withheld theirs.
+            phone_number (None | str): Client's number in E.164. Null when Talki has no number for the client, as on a
+                booking taken on a call from a caller who withheld their number.
     """
 
     contact_id: None | str
