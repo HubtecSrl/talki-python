@@ -32,9 +32,9 @@ from . import _resource
 from .api import documents as _generated
 from .api.documents import create_document, replace_document
 from .models.document import Document
+from .models.document_also import DocumentAlso
 from .models.document_file_replace import DocumentFileReplace
 from .models.document_upload import DocumentUpload
-from .models.replace_document_also_type_0 import ReplaceDocumentAlsoType0
 from .types import UNSET, File, Unset
 
 __all__ = [
@@ -101,9 +101,9 @@ def _file(read: tuple[bytes, str | None, str | None], filename: str | None, cont
     return File(payload=BytesIO(data), file_name=name, mime_type=content_type or carried_type)
 
 
-def _also(also: ReplaceDocumentAlsoType0 | Literal["copies"] | None | Unset) -> ReplaceDocumentAlsoType0 | None | Unset:
+def _also(also: DocumentAlso | Literal["copies"] | None | Unset) -> DocumentAlso | None | Unset:
     """`replace_file`'s `also`, as the operation takes it: the plain string too."""
-    return ReplaceDocumentAlsoType0(also) if isinstance(also, str) else also
+    return DocumentAlso(also) if isinstance(also, str) else also
 
 
 def _no_none(location_ids: list[str] | None | Unset) -> list[str] | Unset:
@@ -187,7 +187,7 @@ class DocumentsResourceWithRawResponse(_generated.DocumentsResourceWithRawRespon
         *,
         filename: str | None = None,
         content_type: str | None = None,
-        also: ReplaceDocumentAlsoType0 | Literal["copies"] | None | Unset = UNSET,
+        also: DocumentAlso | Literal["copies"] | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> _resource.RawResponse[Document]:
@@ -284,7 +284,7 @@ class DocumentsResource(_generated.DocumentsResource):
         *,
         filename: str | None = None,
         content_type: str | None = None,
-        also: ReplaceDocumentAlsoType0 | Literal["copies"] | None | Unset = UNSET,
+        also: DocumentAlso | Literal["copies"] | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Document:
@@ -359,7 +359,7 @@ class AsyncDocumentsResourceWithRawResponse(_generated.AsyncDocumentsResourceWit
         *,
         filename: str | None = None,
         content_type: str | None = None,
-        also: ReplaceDocumentAlsoType0 | Literal["copies"] | None | Unset = UNSET,
+        also: DocumentAlso | Literal["copies"] | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> _resource.RawResponse[Document]:
@@ -433,7 +433,7 @@ class AsyncDocumentsResource(_generated.AsyncDocumentsResource):
         *,
         filename: str | None = None,
         content_type: str | None = None,
-        also: ReplaceDocumentAlsoType0 | Literal["copies"] | None | Unset = UNSET,
+        also: DocumentAlso | Literal["copies"] | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Document:

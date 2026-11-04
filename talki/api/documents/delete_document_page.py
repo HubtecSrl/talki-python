@@ -6,7 +6,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.delete_document_page_also_type_0 import DeleteDocumentPageAlsoType0
+from ...models.document_also import DocumentAlso
 from ...models.error_envelope import ErrorEnvelope
 from ...types import UNSET, Response, Unset
 
@@ -15,7 +15,7 @@ def _get_kwargs(
     document_id: str,
     page_id: str,
     *,
-    also: DeleteDocumentPageAlsoType0 | None | Unset = UNSET,
+    also: DocumentAlso | None | Unset = UNSET,
     talki_version: str | Unset = UNSET,
     idempotency_key: str | Unset = UNSET,
 ) -> dict[str, Any]:
@@ -31,7 +31,7 @@ def _get_kwargs(
     json_also: None | str | Unset
     if isinstance(also, Unset):
         json_also = UNSET
-    elif isinstance(also, DeleteDocumentPageAlsoType0):
+    elif isinstance(also, DocumentAlso):
         json_also = also.value
     else:
         json_also = also
@@ -137,7 +137,7 @@ def sync_detailed(
     page_id: str,
     *,
     client: AuthenticatedClient,
-    also: DeleteDocumentPageAlsoType0 | None | Unset = UNSET,
+    also: DocumentAlso | None | Unset = UNSET,
     talki_version: str | Unset = UNSET,
     idempotency_key: str | Unset = UNSET,
 ) -> Response[Any | ErrorEnvelope]:
@@ -155,8 +155,8 @@ def sync_detailed(
     Args:
         document_id (str):
         page_id (str):
-        also (DeleteDocumentPageAlsoType0 | None | Unset): `copies` applies the change to every
-            copy of the document at other locations too. Omit it to change only this document.
+        also (DocumentAlso | None | Unset): `copies` applies the change to every copy of the
+            document at other locations too. Omit it to change only this document.
         talki_version (str | Unset):  Example: 2026-10-01.
         idempotency_key (str | Unset):
 
@@ -188,7 +188,7 @@ def sync(
     page_id: str,
     *,
     client: AuthenticatedClient,
-    also: DeleteDocumentPageAlsoType0 | None | Unset = UNSET,
+    also: DocumentAlso | None | Unset = UNSET,
     talki_version: str | Unset = UNSET,
     idempotency_key: str | Unset = UNSET,
 ) -> Any | ErrorEnvelope | None:
@@ -206,8 +206,8 @@ def sync(
     Args:
         document_id (str):
         page_id (str):
-        also (DeleteDocumentPageAlsoType0 | None | Unset): `copies` applies the change to every
-            copy of the document at other locations too. Omit it to change only this document.
+        also (DocumentAlso | None | Unset): `copies` applies the change to every copy of the
+            document at other locations too. Omit it to change only this document.
         talki_version (str | Unset):  Example: 2026-10-01.
         idempotency_key (str | Unset):
 
@@ -234,7 +234,7 @@ async def asyncio_detailed(
     page_id: str,
     *,
     client: AuthenticatedClient,
-    also: DeleteDocumentPageAlsoType0 | None | Unset = UNSET,
+    also: DocumentAlso | None | Unset = UNSET,
     talki_version: str | Unset = UNSET,
     idempotency_key: str | Unset = UNSET,
 ) -> Response[Any | ErrorEnvelope]:
@@ -252,8 +252,8 @@ async def asyncio_detailed(
     Args:
         document_id (str):
         page_id (str):
-        also (DeleteDocumentPageAlsoType0 | None | Unset): `copies` applies the change to every
-            copy of the document at other locations too. Omit it to change only this document.
+        also (DocumentAlso | None | Unset): `copies` applies the change to every copy of the
+            document at other locations too. Omit it to change only this document.
         talki_version (str | Unset):  Example: 2026-10-01.
         idempotency_key (str | Unset):
 
@@ -283,7 +283,7 @@ async def asyncio(
     page_id: str,
     *,
     client: AuthenticatedClient,
-    also: DeleteDocumentPageAlsoType0 | None | Unset = UNSET,
+    also: DocumentAlso | None | Unset = UNSET,
     talki_version: str | Unset = UNSET,
     idempotency_key: str | Unset = UNSET,
 ) -> Any | ErrorEnvelope | None:
@@ -301,8 +301,8 @@ async def asyncio(
     Args:
         document_id (str):
         page_id (str):
-        also (DeleteDocumentPageAlsoType0 | None | Unset): `copies` applies the change to every
-            copy of the document at other locations too. Omit it to change only this document.
+        also (DocumentAlso | None | Unset): `copies` applies the change to every copy of the
+            document at other locations too. Omit it to change only this document.
         talki_version (str | Unset):  Example: 2026-10-01.
         idempotency_key (str | Unset):
 

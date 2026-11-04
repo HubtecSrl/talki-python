@@ -6,7 +6,7 @@ from typing import Any
 _UNLISTED: dict[str, Any] = {}
 
 
-class DeleteDocumentPageAlsoType0(StrEnum):
+class DocumentAlso(StrEnum):
     COPIES = "copies"
 
     def __str__(self) -> str:

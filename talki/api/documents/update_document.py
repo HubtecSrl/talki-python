@@ -7,9 +7,9 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.document import Document
+from ...models.document_also import DocumentAlso
 from ...models.document_update import DocumentUpdate
 from ...models.error_envelope import ErrorEnvelope
-from ...models.update_document_also_type_0 import UpdateDocumentAlsoType0
 from ...types import UNSET, Response, Unset
 
 
@@ -17,7 +17,7 @@ def _get_kwargs(
     document_id: str,
     *,
     body: DocumentUpdate,
-    also: None | Unset | UpdateDocumentAlsoType0 = UNSET,
+    also: DocumentAlso | None | Unset = UNSET,
     talki_version: str | Unset = UNSET,
     idempotency_key: str | Unset = UNSET,
 ) -> dict[str, Any]:
@@ -33,7 +33,7 @@ def _get_kwargs(
     json_also: None | str | Unset
     if isinstance(also, Unset):
         json_also = UNSET
-    elif isinstance(also, UpdateDocumentAlsoType0):
+    elif isinstance(also, DocumentAlso):
         json_also = also.value
     else:
         json_also = also
@@ -142,7 +142,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: DocumentUpdate,
-    also: None | Unset | UpdateDocumentAlsoType0 = UNSET,
+    also: DocumentAlso | None | Unset = UNSET,
     talki_version: str | Unset = UNSET,
     idempotency_key: str | Unset = UNSET,
 ) -> Response[Document | ErrorEnvelope]:
@@ -160,8 +160,8 @@ def sync_detailed(
 
     Args:
         document_id (str):
-        also (None | Unset | UpdateDocumentAlsoType0): `copies` applies the change to every copy
-            of the document at other locations too. Omit it to change only this document.
+        also (DocumentAlso | None | Unset): `copies` applies the change to every copy of the
+            document at other locations too. Omit it to change only this document.
         talki_version (str | Unset):  Example: 2026-10-01.
         idempotency_key (str | Unset):
         body (DocumentUpdate): A partial edit of a document: its title, or whether the assistant
@@ -195,7 +195,7 @@ def sync(
     *,
     client: AuthenticatedClient,
     body: DocumentUpdate,
-    also: None | Unset | UpdateDocumentAlsoType0 = UNSET,
+    also: DocumentAlso | None | Unset = UNSET,
     talki_version: str | Unset = UNSET,
     idempotency_key: str | Unset = UNSET,
 ) -> Document | ErrorEnvelope | None:
@@ -213,8 +213,8 @@ def sync(
 
     Args:
         document_id (str):
-        also (None | Unset | UpdateDocumentAlsoType0): `copies` applies the change to every copy
-            of the document at other locations too. Omit it to change only this document.
+        also (DocumentAlso | None | Unset): `copies` applies the change to every copy of the
+            document at other locations too. Omit it to change only this document.
         talki_version (str | Unset):  Example: 2026-10-01.
         idempotency_key (str | Unset):
         body (DocumentUpdate): A partial edit of a document: its title, or whether the assistant
@@ -243,7 +243,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: DocumentUpdate,
-    also: None | Unset | UpdateDocumentAlsoType0 = UNSET,
+    also: DocumentAlso | None | Unset = UNSET,
     talki_version: str | Unset = UNSET,
     idempotency_key: str | Unset = UNSET,
 ) -> Response[Document | ErrorEnvelope]:
@@ -261,8 +261,8 @@ async def asyncio_detailed(
 
     Args:
         document_id (str):
-        also (None | Unset | UpdateDocumentAlsoType0): `copies` applies the change to every copy
-            of the document at other locations too. Omit it to change only this document.
+        also (DocumentAlso | None | Unset): `copies` applies the change to every copy of the
+            document at other locations too. Omit it to change only this document.
         talki_version (str | Unset):  Example: 2026-10-01.
         idempotency_key (str | Unset):
         body (DocumentUpdate): A partial edit of a document: its title, or whether the assistant
@@ -294,7 +294,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     body: DocumentUpdate,
-    also: None | Unset | UpdateDocumentAlsoType0 = UNSET,
+    also: DocumentAlso | None | Unset = UNSET,
     talki_version: str | Unset = UNSET,
     idempotency_key: str | Unset = UNSET,
 ) -> Document | ErrorEnvelope | None:
@@ -312,8 +312,8 @@ async def asyncio(
 
     Args:
         document_id (str):
-        also (None | Unset | UpdateDocumentAlsoType0): `copies` applies the change to every copy
-            of the document at other locations too. Omit it to change only this document.
+        also (DocumentAlso | None | Unset): `copies` applies the change to every copy of the
+            document at other locations too. Omit it to change only this document.
         talki_version (str | Unset):  Example: 2026-10-01.
         idempotency_key (str | Unset):
         body (DocumentUpdate): A partial edit of a document: its title, or whether the assistant

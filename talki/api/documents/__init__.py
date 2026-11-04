@@ -5,9 +5,8 @@ from functools import cached_property
 
 from ... import _resource
 from ... import pagination as _pagination
-from ...models.delete_document_also_type_0 import DeleteDocumentAlsoType0
-from ...models.delete_document_page_also_type_0 import DeleteDocumentPageAlsoType0
 from ...models.document import Document
+from ...models.document_also import DocumentAlso
 from ...models.document_create import DocumentCreate
 from ...models.document_discover import DocumentDiscover, DocumentDiscoverDict
 from ...models.document_discovery import DocumentDiscovery
@@ -21,8 +20,6 @@ from ...models.document_text import DocumentText
 from ...models.document_update import DocumentUpdate, DocumentUpdateDict
 from ...models.document_upload import DocumentUpload
 from ...models.list_documents_source_type_0 import ListDocumentsSourceType0
-from ...models.replace_document_also_type_0 import ReplaceDocumentAlsoType0
-from ...models.update_document_also_type_0 import UpdateDocumentAlsoType0
 from ...types import UNSET, File, Unset
 from . import (
     create_document,
@@ -74,7 +71,7 @@ class DocumentsResourceWithRawResponse(_resource.Resource):
         self,
         document_id: str,
         *,
-        also: DeleteDocumentAlsoType0 | None | Unset = UNSET,
+        also: DocumentAlso | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> _resource.RawResponse[None]:
@@ -94,7 +91,7 @@ class DocumentsResourceWithRawResponse(_resource.Resource):
         document_id: str,
         page_id: str,
         *,
-        also: DeleteDocumentPageAlsoType0 | None | Unset = UNSET,
+        also: DocumentAlso | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> _resource.RawResponse[None]:
@@ -193,7 +190,7 @@ class DocumentsResourceWithRawResponse(_resource.Resource):
         document_id: str,
         *,
         body: DocumentReplace | DocumentSiteReplace | DocumentFileReplace | Unset = UNSET,
-        also: None | ReplaceDocumentAlsoType0 | Unset = UNSET,
+        also: DocumentAlso | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> _resource.RawResponse[Document]:
@@ -214,7 +211,7 @@ class DocumentsResourceWithRawResponse(_resource.Resource):
         document_id: str,
         *,
         body: DocumentUpdate | DocumentUpdateDict,
-        also: None | Unset | UpdateDocumentAlsoType0 = UNSET,
+        also: DocumentAlso | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> _resource.RawResponse[Document]:
@@ -340,7 +337,7 @@ class DocumentsResource(_resource.Resource):
         self,
         document_id: str,
         *,
-        also: DeleteDocumentAlsoType0 | None | Unset = UNSET,
+        also: DocumentAlso | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> None:
@@ -353,8 +350,8 @@ class DocumentsResource(_resource.Resource):
 
         Args:
             document_id (str):
-            also (DeleteDocumentAlsoType0 | None | Unset): `copies` applies the change to every copy
-                of the document at other locations too. Omit it to change only this document.
+            also (DocumentAlso | None | Unset): `copies` applies the change to every copy of the
+                document at other locations too. Omit it to change only this document.
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
 
@@ -379,7 +376,7 @@ class DocumentsResource(_resource.Resource):
         document_id: str,
         page_id: str,
         *,
-        also: DeleteDocumentPageAlsoType0 | None | Unset = UNSET,
+        also: DocumentAlso | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> None:
@@ -397,8 +394,8 @@ class DocumentsResource(_resource.Resource):
         Args:
             document_id (str):
             page_id (str):
-            also (DeleteDocumentPageAlsoType0 | None | Unset): `copies` applies the change to every
-                copy of the document at other locations too. Omit it to change only this document.
+            also (DocumentAlso | None | Unset): `copies` applies the change to every copy of the
+                document at other locations too. Omit it to change only this document.
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
 
@@ -585,7 +582,7 @@ class DocumentsResource(_resource.Resource):
         document_id: str,
         *,
         body: DocumentReplace | DocumentSiteReplace | DocumentFileReplace | Unset = UNSET,
-        also: None | ReplaceDocumentAlsoType0 | Unset = UNSET,
+        also: DocumentAlso | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Document:
@@ -608,8 +605,8 @@ class DocumentsResource(_resource.Resource):
 
         Args:
             document_id (str):
-            also (None | ReplaceDocumentAlsoType0 | Unset): `copies` applies the change to every copy
-                of the document at other locations too. Omit it to change only this document.
+            also (DocumentAlso | None | Unset): `copies` applies the change to every copy of the
+                document at other locations too. Omit it to change only this document.
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
             body (DocumentReplace | DocumentSiteReplace):
@@ -637,7 +634,7 @@ class DocumentsResource(_resource.Resource):
         document_id: str,
         *,
         body: DocumentUpdate | DocumentUpdateDict,
-        also: None | Unset | UpdateDocumentAlsoType0 = UNSET,
+        also: DocumentAlso | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Document:
@@ -655,8 +652,8 @@ class DocumentsResource(_resource.Resource):
 
         Args:
             document_id (str):
-            also (None | Unset | UpdateDocumentAlsoType0): `copies` applies the change to every copy
-                of the document at other locations too. Omit it to change only this document.
+            also (DocumentAlso | None | Unset): `copies` applies the change to every copy of the
+                document at other locations too. Omit it to change only this document.
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
             body (DocumentUpdate | DocumentUpdateDict): A partial edit of a document: its title, or whether the assistant
@@ -763,7 +760,7 @@ class AsyncDocumentsResourceWithRawResponse(_resource.Resource):
         self,
         document_id: str,
         *,
-        also: DeleteDocumentAlsoType0 | None | Unset = UNSET,
+        also: DocumentAlso | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> _resource.RawResponse[None]:
@@ -783,7 +780,7 @@ class AsyncDocumentsResourceWithRawResponse(_resource.Resource):
         document_id: str,
         page_id: str,
         *,
-        also: DeleteDocumentPageAlsoType0 | None | Unset = UNSET,
+        also: DocumentAlso | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> _resource.RawResponse[None]:
@@ -882,7 +879,7 @@ class AsyncDocumentsResourceWithRawResponse(_resource.Resource):
         document_id: str,
         *,
         body: DocumentReplace | DocumentSiteReplace | DocumentFileReplace | Unset = UNSET,
-        also: None | ReplaceDocumentAlsoType0 | Unset = UNSET,
+        also: DocumentAlso | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> _resource.RawResponse[Document]:
@@ -903,7 +900,7 @@ class AsyncDocumentsResourceWithRawResponse(_resource.Resource):
         document_id: str,
         *,
         body: DocumentUpdate | DocumentUpdateDict,
-        also: None | Unset | UpdateDocumentAlsoType0 = UNSET,
+        also: DocumentAlso | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> _resource.RawResponse[Document]:
@@ -1029,7 +1026,7 @@ class AsyncDocumentsResource(_resource.Resource):
         self,
         document_id: str,
         *,
-        also: DeleteDocumentAlsoType0 | None | Unset = UNSET,
+        also: DocumentAlso | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> None:
@@ -1042,8 +1039,8 @@ class AsyncDocumentsResource(_resource.Resource):
 
         Args:
             document_id (str):
-            also (DeleteDocumentAlsoType0 | None | Unset): `copies` applies the change to every copy
-                of the document at other locations too. Omit it to change only this document.
+            also (DocumentAlso | None | Unset): `copies` applies the change to every copy of the
+                document at other locations too. Omit it to change only this document.
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
 
@@ -1068,7 +1065,7 @@ class AsyncDocumentsResource(_resource.Resource):
         document_id: str,
         page_id: str,
         *,
-        also: DeleteDocumentPageAlsoType0 | None | Unset = UNSET,
+        also: DocumentAlso | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> None:
@@ -1086,8 +1083,8 @@ class AsyncDocumentsResource(_resource.Resource):
         Args:
             document_id (str):
             page_id (str):
-            also (DeleteDocumentPageAlsoType0 | None | Unset): `copies` applies the change to every
-                copy of the document at other locations too. Omit it to change only this document.
+            also (DocumentAlso | None | Unset): `copies` applies the change to every copy of the
+                document at other locations too. Omit it to change only this document.
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
 
@@ -1274,7 +1271,7 @@ class AsyncDocumentsResource(_resource.Resource):
         document_id: str,
         *,
         body: DocumentReplace | DocumentSiteReplace | DocumentFileReplace | Unset = UNSET,
-        also: None | ReplaceDocumentAlsoType0 | Unset = UNSET,
+        also: DocumentAlso | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Document:
@@ -1297,8 +1294,8 @@ class AsyncDocumentsResource(_resource.Resource):
 
         Args:
             document_id (str):
-            also (None | ReplaceDocumentAlsoType0 | Unset): `copies` applies the change to every copy
-                of the document at other locations too. Omit it to change only this document.
+            also (DocumentAlso | None | Unset): `copies` applies the change to every copy of the
+                document at other locations too. Omit it to change only this document.
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
             body (DocumentReplace | DocumentSiteReplace):
@@ -1326,7 +1323,7 @@ class AsyncDocumentsResource(_resource.Resource):
         document_id: str,
         *,
         body: DocumentUpdate | DocumentUpdateDict,
-        also: None | Unset | UpdateDocumentAlsoType0 = UNSET,
+        also: DocumentAlso | None | Unset = UNSET,
         talki_version: str | Unset = UNSET,
         idempotency_key: str | Unset = UNSET,
     ) -> Document:
@@ -1344,8 +1341,8 @@ class AsyncDocumentsResource(_resource.Resource):
 
         Args:
             document_id (str):
-            also (None | Unset | UpdateDocumentAlsoType0): `copies` applies the change to every copy
-                of the document at other locations too. Omit it to change only this document.
+            also (DocumentAlso | None | Unset): `copies` applies the change to every copy of the
+                document at other locations too. Omit it to change only this document.
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
             body (DocumentUpdate | DocumentUpdateDict): A partial edit of a document: its title, or whether the assistant

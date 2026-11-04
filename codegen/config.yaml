@@ -13,5 +13,21 @@ content_type_overrides:
   application/vnd.openxmlformats-officedocument.spreadsheetml.sheet: application/octet-stream
   audio/wav: application/octet-stream
 
+# `also` is the same single value on four operations; without this each gets a
+# public enum named after its operation and position in the union.
+class_overrides:
+  DeleteDocumentAlsoType0:
+    class_name: DocumentAlso
+    module_name: document_also
+  DeleteDocumentPageAlsoType0:
+    class_name: DocumentAlso
+    module_name: document_also
+  ReplaceDocumentAlsoType0:
+    class_name: DocumentAlso
+    module_name: document_also
+  UpdateDocumentAlsoType0:
+    class_name: DocumentAlso
+    module_name: document_also
+
 # scripts/generate.py formats the output itself, with this repo's ruff settings.
 post_hooks: []

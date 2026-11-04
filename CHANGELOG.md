@@ -58,9 +58,9 @@ What changes for existing code:
   `AttributeError`. Use `CallerRuleKind.VIP`, or a dict body, which is sent as
   written.
 - `also=` on `talki.documents.update()`, `replace()`, `delete()` and
-  `delete_page()` is typed by an enum per method (`UpdateDocumentAlsoType0.COPIES`
-  and so on, in `talki.models`), not `Literal["copies"]`. `also="copies"` sends
-  the same request, but a type checker refuses it. `replace_file()` takes both.
+  `delete_page()` is typed by the enum `talki.models.DocumentAlso`, not
+  `Literal["copies"]`. `also="copies"` sends the same request, but a type checker
+  refuses it. `replace_file()` takes both.
 - `talki.appointments.reschedule()` of a booking of one service with a
   `duration_minutes` must keep that length, or the length it has now. A move that
   changes it, one edge alone included, raises `InvalidRequestError`.

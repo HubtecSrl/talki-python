@@ -15,11 +15,11 @@ from talki import AsyncTalki, ConflictError, InvalidRequestError, Talki, _docume
 from talki.api import documents as generated
 from talki.models import (
     Document,
+    DocumentAlso,
     DocumentCreate,
     DocumentFileReplace,
     DocumentStatus,
     DocumentUpload,
-    ReplaceDocumentAlsoType0,
 )
 from talki.types import File
 
@@ -236,7 +236,7 @@ def test_a_file_is_replaced_in_place():
     assert parts(request) == [("file", "price-list-2027.pdf", "application/pdf", b"%PDF-2")]
 
 
-@pytest.mark.parametrize("also", ["copies", ReplaceDocumentAlsoType0.COPIES])
+@pytest.mark.parametrize("also", ["copies", DocumentAlso.COPIES])
 def test_replace_file_takes_also_as_the_string_or_the_enum(also):
     recorder = Recorder(accepted())
     with sync_for(recorder) as client:
