@@ -22,10 +22,13 @@ in it since. Some of it changes existing types: see the second list.
   `calls:read`. Not every ring is followed by a `Call`.
 - The OpenAPI document describes every event's payload under `webhooks`. This
   package still generates no types from it: `construct_event` returns a dict.
-- Descriptions corrected throughout, so the docstrings are too: what
-  `talki.sandbox.reset()` deletes (webhook endpoints included), what
-  `?location_id=` changes on `talki.account.update()`, and the refusal codes of
-  the appointment writes.
+- The `usage.threshold_reached` and `usage.extra_credits_low` events carry the
+  names `GET /v1/usage` uses, such as `used_seconds` and `included_seconds`. The
+  older `seconds_*` names and `extra_seconds_balance` still come, with the same
+  values, and are deprecated.
+- Docstrings corrected with the document's descriptions, among them what
+  `talki.sandbox.reset()` deletes (webhook endpoints included) and what
+  `location_id=` changes on `talki.account.update()`.
 
 What changes for existing code:
 
@@ -50,6 +53,10 @@ What changes for existing code:
   `CallerRuleUpdate`, `ClosureUpdate`, `DocumentUpdate`, `ServiceUpdate` and
   `UnresolvedRequestUpdate`. Given `None` anyway, `answers_as`, `kind`, `status`
   and `transfer_numbers` now raise in `to_dict()`, before anything is sent.
+- For the same reason `answers_as`, `kind` and `status` on those models take the
+  enum only: `CallerRuleUpdate(kind="vip")`, which used to send, now raises
+  `AttributeError`. Use `CallerRuleKind.VIP`, or a dict body, which is sent as
+  written.
 - `also=` on `talki.documents.update()`, `replace()`, `delete()` and
   `delete_page()` is typed by an enum per method (`UpdateDocumentAlsoType0.COPIES`
   and so on, in `talki.models`), not `Literal["copies"]`. `also="copies"` sends
@@ -64,8 +71,14 @@ What changes for existing code:
   `check_in_progress`. A refusal that holds until the state changes (a time taken,
   a list full) is still replayed for 24 hours: once its cause is gone, retry with
   a new key.
-- A change feed's cursor used on another feed raises `InvalidRequestError`
-  (`invalid_cursor`), where it could skip rows.
+- A sandbox scenario's `events`, on `talki.sandbox.list_scenarios()` and
+  `create_call()`, start with `call.ringing`, and are no longer all a call sends:
+  a caller who gives a name can send `pending_contact.created` too. Assert that
+  the listed events arrive, not that nothing else does.
+- A change feed's cursor issued now, used on another feed, raises
+  `InvalidRequestError` (`invalid_cursor`), where it could skip rows. A cursor
+  stored earlier still works until 2027-02-01, after which it raises the same and
+  the walk restarts. The first page read with it returns a new one to store.
 
 ## 0.4.0b1 — 2026-11-02
 
