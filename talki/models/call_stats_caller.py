@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 from collections.abc import Mapping
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -15,19 +15,21 @@ class CallStatsCaller:
     """One of the numbers that called most in the period.
 
     Attributes:
-        phone_number (str): The caller's number, E.164. A bare `+` stands for every caller who withheld their number.
+        phone_number (None | str): The caller's number, E.164. Null stands for every caller who withheld their number,
+            counted as one.
         calls (int): Calls from this number in the period.
         duration_seconds (int): Their total talk time.
         last_call_at (datetime.datetime): When the latest of them started, RFC 3339 UTC.
     """
 
-    phone_number: str
+    phone_number: None | str
     calls: int
     duration_seconds: int
     last_call_at: datetime.datetime
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        phone_number: None | str
         phone_number = self.phone_number
 
         calls = self.calls
@@ -52,7 +54,13 @@ class CallStatsCaller:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        phone_number = d.pop("phone_number")
+
+        def _parse_phone_number(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        phone_number = _parse_phone_number(d.pop("phone_number"))
 
         calls = d.pop("calls")
 

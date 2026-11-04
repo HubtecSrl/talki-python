@@ -17,7 +17,7 @@ class CallCaller:
         Attributes:
             contact_id (None | str): Talki contact this number resolves to, or null if the account has no contact for it.
                 Stable per (account, number).
-            phone_number (None | str): Caller's number in E.164, or null when the CallerID was withheld.
+            phone_number (None | str): Caller's number in E.164. Null when the CallerID was withheld.
             display_name (None | str): Contact name, only when the account owner entered it by hand or imported it from
                 their own address book. Null otherwise, including when the only name available was heard on the call.
     """

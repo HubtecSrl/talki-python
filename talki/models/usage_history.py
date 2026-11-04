@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar
 
@@ -23,12 +24,12 @@ class UsageHistory:
 
         Attributes:
             months (list[UsageMonth]): One entry per month asked for, oldest first.
-            retained_since (str): Calls older than this, RFC 3339 UTC, have been deleted by Talki's retention, so a month
-                before it reads less than was billed.
+            retained_since (datetime.datetime): Calls older than this, RFC 3339 UTC, have been deleted by Talki's retention,
+                so a month before it reads less than was billed.
     """
 
     months: list[UsageMonth]
-    retained_since: str
+    retained_since: datetime.datetime
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -37,7 +38,7 @@ class UsageHistory:
             months_item = months_item_data.to_dict()
             months.append(months_item)
 
-        retained_since = self.retained_since
+        retained_since = self.retained_since.isoformat()
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -62,7 +63,7 @@ class UsageHistory:
 
             months.append(months_item)
 
-        retained_since = d.pop("retained_since")
+        retained_since = datetime.datetime.fromisoformat(d.pop("retained_since"))
 
         usage_history = cls(
             months=months,

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar, cast
 
@@ -19,8 +20,8 @@ class RefusedCallSummary:
 
     Attributes:
         period_days (int): How many days the period covers: `days`, or the days from `from` to `to`.
-        period_start (str): Start of the period, RFC 3339 UTC, included.
-        period_end (str): End of the period, RFC 3339 UTC, excluded: now, or local midnight after `to`.
+        period_start (datetime.datetime): Start of the period, RFC 3339 UTC, included.
+        period_end (datetime.datetime): End of the period, RFC 3339 UTC, excluded: now, or local midnight after `to`.
         total (int): Refused calls in the period.
         by_reason (RefusedCallSummaryByReason): Refused calls in the period per `reason` (the values listed on
             `RefusedCall.reason`). Reasons with none are omitted.
@@ -31,8 +32,8 @@ class RefusedCallSummary:
     """
 
     period_days: int
-    period_start: str
-    period_end: str
+    period_start: datetime.datetime
+    period_end: datetime.datetime
     total: int
     by_reason: RefusedCallSummaryByReason
     recent: int
@@ -43,9 +44,9 @@ class RefusedCallSummary:
     def to_dict(self) -> dict[str, Any]:
         period_days = self.period_days
 
-        period_start = self.period_start
+        period_start = self.period_start.isoformat()
 
-        period_end = self.period_end
+        period_end = self.period_end.isoformat()
 
         total = self.total
 
@@ -81,9 +82,9 @@ class RefusedCallSummary:
         d = dict(src_dict)
         period_days = d.pop("period_days")
 
-        period_start = d.pop("period_start")
+        period_start = datetime.datetime.fromisoformat(d.pop("period_start"))
 
-        period_end = d.pop("period_end")
+        period_end = datetime.datetime.fromisoformat(d.pop("period_end"))
 
         total = d.pop("total")
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 from collections.abc import Mapping
 from typing import Any, TypeVar
 
@@ -15,8 +16,8 @@ class UsageMonth:
 
     Attributes:
         month (str): The month, `YYYY-MM`, in the account's `timezone`.
-        start (str): Local midnight on its 1st, RFC 3339 UTC.
-        end (str): Local midnight on the next month's 1st, RFC 3339 UTC, excluded.
+        start (datetime.datetime): Local midnight on its 1st, RFC 3339 UTC.
+        end (datetime.datetime): Local midnight on the next month's 1st, RFC 3339 UTC, excluded.
         used_seconds (int): Talk time billed for the calls answered in the month that are still in the call log: the sum
             of their `duration_seconds`. A deleted call is no longer counted, though its time stays billed. Zero for a month
             with no calls.
@@ -24,8 +25,8 @@ class UsageMonth:
     """
 
     month: str
-    start: str
-    end: str
+    start: datetime.datetime
+    end: datetime.datetime
     used_seconds: int
     calls: int
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -33,9 +34,9 @@ class UsageMonth:
     def to_dict(self) -> dict[str, Any]:
         month = self.month
 
-        start = self.start
+        start = self.start.isoformat()
 
-        end = self.end
+        end = self.end.isoformat()
 
         used_seconds = self.used_seconds
 
@@ -60,9 +61,9 @@ class UsageMonth:
         d = dict(src_dict)
         month = d.pop("month")
 
-        start = d.pop("start")
+        start = datetime.datetime.fromisoformat(d.pop("start"))
 
-        end = d.pop("end")
+        end = datetime.datetime.fromisoformat(d.pop("end"))
 
         used_seconds = d.pop("used_seconds")
 

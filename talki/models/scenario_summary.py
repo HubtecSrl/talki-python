@@ -16,8 +16,9 @@ class ScenarioSummary:
     Attributes:
         key (str): The value to pass as `scenario`.
         description (str): What the caller did on this call.
-        events (list[str]): The webhook event types this scenario emits, exactly. An integration test can assert on
-            them.
+        events (list[str]): The webhook event types this scenario is about: each is sent, so an integration test can
+            assert that they arrive. Other events can come too: a caller who gives a name is proposed as a contact, as on a
+            real call, which sends `pending_contact.created` when the number has no contact or pending contact yet.
         duration_seconds (int):
     """
 

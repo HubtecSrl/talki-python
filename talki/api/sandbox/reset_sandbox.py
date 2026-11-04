@@ -119,9 +119,12 @@ def sync_detailed(
 ) -> Response[ErrorEnvelope | ResetResponse]:
     """Reset the sandbox
 
-     Delete this sandbox's history and rebuild it from a fixed seed. Credentials, installations and
-    services survive. Requires a developer sandbox; answers 404 on a real account. Limited to 6 requests
-    per minute per account (API key) or per installation (OAuth).
+     Delete this sandbox's history and rebuild it from a fixed seed. API keys, installations, services
+    and locations survive. Webhook endpoints do not: the account's endpoints and their deliveries are
+    deleted and replaced by the seed's one paused endpoint, and the account events still queued for an
+    app are dropped. Register your endpoints again after a reset. Requires a developer sandbox; answers
+    404 on a real account. Limited to 6 requests per minute per account (API key) or per installation
+    (OAuth).
 
     Args:
         talki_version (str | Unset):  Example: 2026-10-01.
@@ -155,9 +158,12 @@ def sync(
 ) -> ErrorEnvelope | ResetResponse | None:
     """Reset the sandbox
 
-     Delete this sandbox's history and rebuild it from a fixed seed. Credentials, installations and
-    services survive. Requires a developer sandbox; answers 404 on a real account. Limited to 6 requests
-    per minute per account (API key) or per installation (OAuth).
+     Delete this sandbox's history and rebuild it from a fixed seed. API keys, installations, services
+    and locations survive. Webhook endpoints do not: the account's endpoints and their deliveries are
+    deleted and replaced by the seed's one paused endpoint, and the account events still queued for an
+    app are dropped. Register your endpoints again after a reset. Requires a developer sandbox; answers
+    404 on a real account. Limited to 6 requests per minute per account (API key) or per installation
+    (OAuth).
 
     Args:
         talki_version (str | Unset):  Example: 2026-10-01.
@@ -186,9 +192,12 @@ async def asyncio_detailed(
 ) -> Response[ErrorEnvelope | ResetResponse]:
     """Reset the sandbox
 
-     Delete this sandbox's history and rebuild it from a fixed seed. Credentials, installations and
-    services survive. Requires a developer sandbox; answers 404 on a real account. Limited to 6 requests
-    per minute per account (API key) or per installation (OAuth).
+     Delete this sandbox's history and rebuild it from a fixed seed. API keys, installations, services
+    and locations survive. Webhook endpoints do not: the account's endpoints and their deliveries are
+    deleted and replaced by the seed's one paused endpoint, and the account events still queued for an
+    app are dropped. Register your endpoints again after a reset. Requires a developer sandbox; answers
+    404 on a real account. Limited to 6 requests per minute per account (API key) or per installation
+    (OAuth).
 
     Args:
         talki_version (str | Unset):  Example: 2026-10-01.
@@ -220,9 +229,12 @@ async def asyncio(
 ) -> ErrorEnvelope | ResetResponse | None:
     """Reset the sandbox
 
-     Delete this sandbox's history and rebuild it from a fixed seed. Credentials, installations and
-    services survive. Requires a developer sandbox; answers 404 on a real account. Limited to 6 requests
-    per minute per account (API key) or per installation (OAuth).
+     Delete this sandbox's history and rebuild it from a fixed seed. API keys, installations, services
+    and locations survive. Webhook endpoints do not: the account's endpoints and their deliveries are
+    deleted and replaced by the seed's one paused endpoint, and the account events still queued for an
+    app are dropped. Register your endpoints again after a reset. Requires a developer sandbox; answers
+    404 on a real account. Limited to 6 requests per minute per account (API key) or per installation
+    (OAuth).
 
     Args:
         talki_version (str | Unset):  Example: 2026-10-01.

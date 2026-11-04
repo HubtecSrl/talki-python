@@ -17,25 +17,20 @@ class UnresolvedRequestUpdate:
     """A new status for an unresolved request, the answer given to the caller, or both. Send at least one.
 
     Attributes:
-        status (None | UnresolvedRequestStatus | Unset): `resolved` — dealt with. `dismissed` — closed without action,
-            which clears `answer`. `open` — reopened, which clears `resolved_at` and keeps `answer`. Sending the status it
-            already has changes nothing.
+        status (UnresolvedRequestStatus | Unset): `open` — waiting on the business. `resolved` — dealt with. `dismissed`
+            — closed without action.
         answer (None | str | Unset): What the business told the caller, up to 2000 characters, trimmed. Only a request
             that is `resolved`, or that this same request resolves, takes one. `null` or a blank text clears it.
     """
 
-    status: None | UnresolvedRequestStatus | Unset = UNSET
+    status: UnresolvedRequestStatus | Unset = UNSET
     answer: None | str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        status: None | str | Unset
-        if isinstance(self.status, Unset):
-            status = UNSET
-        elif isinstance(self.status, UnresolvedRequestStatus):
+        status: str | Unset = UNSET
+        if not isinstance(self.status, Unset):
             status = self.status.value
-        else:
-            status = self.status
 
         answer: None | str | Unset
         if isinstance(self.answer, Unset):
@@ -56,23 +51,12 @@ class UnresolvedRequestUpdate:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-
-        def _parse_status(data: object) -> None | UnresolvedRequestStatus | Unset:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            try:
-                if not isinstance(data, str):
-                    raise TypeError()
-                status_type_0 = UnresolvedRequestStatus(data)
-
-                return status_type_0
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            return cast(None | UnresolvedRequestStatus | Unset, data)
-
-        status = _parse_status(d.pop("status", UNSET))
+        _status = d.pop("status", UNSET)
+        status: UnresolvedRequestStatus | Unset
+        if isinstance(_status, Unset):
+            status = UNSET
+        else:
+            status = UnresolvedRequestStatus(_status)
 
         def _parse_answer(data: object) -> None | str | Unset:
             if data is None:
@@ -112,5 +96,5 @@ class UnresolvedRequestUpdate:
 # left out is a field left out. A date, datetime or UUID can be its ISO string,
 # an enum its value.
 class UnresolvedRequestUpdateDict(TypedDict, total=False):
-    status: UnresolvedRequestStatus | Literal["open", "resolved", "dismissed"] | None
+    status: UnresolvedRequestStatus | Literal["open", "resolved", "dismissed"]
     answer: str | None

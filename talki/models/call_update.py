@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypedDict, TypeVar, cast
+from typing import Any, TypedDict, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -16,28 +16,20 @@ class CallUpdate:
     """Inbox state for one call. Send `read`, `archived` or both.
 
     Attributes:
-        read (bool | None | Unset): `true` marks the call read, keeping the first `read_at`. `false` marks it unread,
-            archived or not. Cannot be null.
-        archived (bool | None | Unset): `true` archives the call and marks it read, whatever `read` says. `false`
-            returns it to the inbox. Cannot be null.
+        read (bool | Unset): `true` marks the call read, keeping the first `read_at`. `false` marks it unread, archived
+            or not. Cannot be null.
+        archived (bool | Unset): `true` archives the call and marks it read, whatever `read` says. `false` returns it to
+            the inbox. Cannot be null.
     """
 
-    read: bool | None | Unset = UNSET
-    archived: bool | None | Unset = UNSET
+    read: bool | Unset = UNSET
+    archived: bool | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        read: bool | None | Unset
-        if isinstance(self.read, Unset):
-            read = UNSET
-        else:
-            read = self.read
+        read = self.read
 
-        archived: bool | None | Unset
-        if isinstance(self.archived, Unset):
-            archived = UNSET
-        else:
-            archived = self.archived
+        archived = self.archived
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -52,24 +44,9 @@ class CallUpdate:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
+        read = d.pop("read", UNSET)
 
-        def _parse_read(data: object) -> bool | None | Unset:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(bool | None | Unset, data)
-
-        read = _parse_read(d.pop("read", UNSET))
-
-        def _parse_archived(data: object) -> bool | None | Unset:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(bool | None | Unset, data)
-
-        archived = _parse_archived(d.pop("archived", UNSET))
+        archived = d.pop("archived", UNSET)
 
         call_update = cls(
             read=read,
@@ -100,5 +77,5 @@ class CallUpdate:
 # left out is a field left out. A date, datetime or UUID can be its ISO string,
 # an enum its value.
 class CallUpdateDict(TypedDict, total=False):
-    read: bool | None
-    archived: bool | None
+    read: bool
+    archived: bool

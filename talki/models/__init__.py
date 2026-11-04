@@ -43,6 +43,8 @@ from .closure_update import ClosureUpdate, ClosureUpdateDict
 from .contact import Contact
 from .contact_list import ContactList
 from .contact_upsert import ContactUpsert, ContactUpsertDict
+from .delete_document_also_type_0 import DeleteDocumentAlsoType0
+from .delete_document_page_also_type_0 import DeleteDocumentPageAlsoType0
 from .document import Document
 from .document_create import DocumentCreate, DocumentCreateDict
 from .document_create_source import DocumentCreateSource
@@ -87,6 +89,7 @@ from .refused_call import RefusedCall
 from .refused_call_list import RefusedCallList
 from .refused_call_summary import RefusedCallSummary
 from .refused_call_summary_by_reason import RefusedCallSummaryByReason
+from .replace_document_also_type_0 import ReplaceDocumentAlsoType0
 from .reset_response import ResetResponse
 from .resource import Resource
 from .resource_create import ResourceCreate, ResourceCreateDict
@@ -116,6 +119,7 @@ from .unresolved_request_status import UnresolvedRequestStatus
 from .unresolved_request_teach import UnresolvedRequestTeach, UnresolvedRequestTeachDict
 from .unresolved_request_teaching import UnresolvedRequestTeaching
 from .unresolved_request_update import UnresolvedRequestUpdate, UnresolvedRequestUpdateDict
+from .update_document_also_type_0 import UpdateDocumentAlsoType0
 from .usage import Usage
 from .usage_history import UsageHistory
 from .usage_month import UsageMonth
@@ -179,6 +183,8 @@ __all__ = (
     "ContactList",
     "ContactUpsert",
     "ContactUpsertDict",
+    "DeleteDocumentAlsoType0",
+    "DeleteDocumentPageAlsoType0",
     "Document",
     "DocumentCreate",
     "DocumentCreateDict",
@@ -231,6 +237,7 @@ __all__ = (
     "RefusedCallList",
     "RefusedCallSummary",
     "RefusedCallSummaryByReason",
+    "ReplaceDocumentAlsoType0",
     "ResetResponse",
     "Resource",
     "ResourceCreate",
@@ -269,6 +276,7 @@ __all__ = (
     "UnresolvedRequestTeaching",
     "UnresolvedRequestUpdate",
     "UnresolvedRequestUpdateDict",
+    "UpdateDocumentAlsoType0",
     "Usage",
     "UsageHistory",
     "UsageMonth",

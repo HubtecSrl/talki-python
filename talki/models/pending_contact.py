@@ -17,7 +17,8 @@ class PendingContact:
 
         Attributes:
             id (str): Identifier of the candidate.
-            phone_number (str): The caller's number, E.164. A bare `+` stands for every caller who withheld their number.
+            phone_number (None | str): The caller's number, E.164. Null when the caller withheld it: such a candidate cannot
+                be approved, only discarded.
             first_name (None | str): The given name heard, or null.
             last_name (None | str): The family name heard, or null.
             call_id (None | str): The call it was heard on, or null once that call has aged out.
@@ -25,7 +26,7 @@ class PendingContact:
     """
 
     id: str
-    phone_number: str
+    phone_number: None | str
     first_name: None | str
     last_name: None | str
     call_id: None | str
@@ -35,6 +36,7 @@ class PendingContact:
     def to_dict(self) -> dict[str, Any]:
         id = self.id
 
+        phone_number: None | str
         phone_number = self.phone_number
 
         first_name: None | str
@@ -68,7 +70,12 @@ class PendingContact:
         d = dict(src_dict)
         id = d.pop("id")
 
-        phone_number = d.pop("phone_number")
+        def _parse_phone_number(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        phone_number = _parse_phone_number(d.pop("phone_number"))
 
         def _parse_first_name(data: object) -> None | str:
             if data is None:

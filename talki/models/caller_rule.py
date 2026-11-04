@@ -15,7 +15,7 @@ T = TypeVar("T", bound="CallerRule")
 @_attrs_define
 class CallerRule:
     """A VIP or blocked number of one location. A number is on one list at most at a location, so adding it to the other
-    list moves it.
+    list moves it. A call from a VIP number to its location rings with `caller.vip` true on `call.ringing`.
 
         Attributes:
             id (str): Rule identifier.

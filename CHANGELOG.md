@@ -3,6 +3,70 @@
 This package follows [semantic versioning](https://semver.org). The API
 version each release targets by default is `talki.API_VERSION`.
 
+## 0.5.0b1 — 2026-11-04
+
+For API version `2026-10-01`, as 0.4.0b1, with what has been added and corrected
+in it since. Some of it changes existing types: see the second list.
+
+- `talki.contacts.list(phone=…)` and `tag_id=` find contacts by number or by tag.
+  Either makes the list a search, not the change feed: newest contact first,
+  `next_cursor` null on the last page, and a cursor works only in the mode that
+  issued it, so resume a sync from the unfiltered list.
+- `Appointment.notes`: the note on a booking, what `create` sent as `notes` or
+  what the assistant wrote on a call, null when there is none.
+- `call.ringing`: a webhook event sent while an inbound call rings, before the
+  assistant picks up, with `call_id`, `location_id`, `caller` (`contact_id`,
+  `phone_number`, `display_name`, `vip`) and `started_at` in its `data`.
+  `construct_event` returns it like any other event. An endpoint subscribed to
+  every event starts receiving it; an OAuth app gets it by subscribing, with
+  `calls:read`. Not every ring is followed by a `Call`.
+- The OpenAPI document describes every event's payload under `webhooks`. This
+  package still generates no types from it: `construct_event` returns a dict.
+- Descriptions corrected throughout, so the docstrings are too: what
+  `talki.sandbox.reset()` deletes (webhook endpoints included), what
+  `?location_id=` changes on `talki.account.update()`, and the refusal codes of
+  the appointment writes.
+
+What changes for existing code:
+
+- These are now a `datetime`, like every other timestamp, not a `str`:
+  `CallTransfer.at`, `period_start` and `period_end` of `CallStats` and
+  `RefusedCallSummary`, `Usage.period_start`, `UsageHistory.retained_since`,
+  `UsageMonth.start` and `end`. `to_dict()` writes them with `+00:00`, not `Z`.
+- A withheld caller's number is null, where the API could send `+` or
+  `+nonymous`. `PendingContact.phone_number` and `CallStatsCaller.phone_number`
+  are now `str | None`. Already typed so, and null now too:
+  `Call.caller.phone_number`, a refused call's `caller.phone_number`,
+  `UnresolvedRequest.caller_phone` and `AppointmentClient.phone_number`. A pending
+  contact with no number can only be discarded. `CallStats.top_callers` counts
+  every call with no number as one entry.
+- `Appointment` requires `notes`: an `Appointment(…)` built by hand needs it.
+- `CallTransfer.at` and `transferred_at` on `call.transferred` are in UTC, with
+  `Z`, where a real call gave the account's local offset. The instant is the
+  same. `CallTransfer.target_label` is the label as the owner wrote it; calls
+  stored earlier can differ in case, so compare it case-insensitively.
+- The update models no longer type `None` on the fields the API refuses it for,
+  with a `400`, as it did before: on `AccountUpdate`, `CallUpdate`,
+  `CallerRuleUpdate`, `ClosureUpdate`, `DocumentUpdate`, `ServiceUpdate` and
+  `UnresolvedRequestUpdate`. Given `None` anyway, `answers_as`, `kind`, `status`
+  and `transfer_numbers` now raise in `to_dict()`, before anything is sent.
+- `also=` on `talki.documents.update()`, `replace()`, `delete()` and
+  `delete_page()` is typed by an enum per method (`UpdateDocumentAlsoType0.COPIES`
+  and so on, in `talki.models`), not `Literal["copies"]`. `also="copies"` sends
+  the same request, but a type checker refuses it. `replace_file()` takes both.
+- `talki.appointments.reschedule()` of a booking of one service with a
+  `duration_minutes` must keep that length, or the length it has now. A move that
+  changes it, one edge alone included, raises `InvalidRequestError`.
+- Your own `idempotency_key=` on a retry: a response a retry can change is no
+  longer replayed when the request saved nothing, and the retry runs it again.
+  That covers a `400` asking for a different request (`invalid_parameter` and the
+  like), a `415`, and a `409` `request_conflict`, `document_not_ready` or
+  `check_in_progress`. A refusal that holds until the state changes (a time taken,
+  a list full) is still replayed for 24 hours: once its cause is gone, retry with
+  a new key.
+- A change feed's cursor used on another feed raises `InvalidRequestError`
+  (`invalid_cursor`), where it could skip rows.
+
 ## 0.4.0b1 — 2026-11-02
 
 For API version `2026-10-01`, as 0.3.0b1, with the operations added to it since.

@@ -25,7 +25,7 @@ class Usage:
         remaining_seconds (int | None): `allowance_seconds` less `used_seconds`, never negative. Calls are refused when
             it reaches 0. Null when `unlimited`. To show it in minutes, round down, so no minute is shown that cannot be
             spent.
-        period_start (None | str): When the current period began, RFC 3339 UTC.
+        period_start (datetime.datetime | None): When the current period began, RFC 3339 UTC.
         resets_at (datetime.datetime | None): When `used_seconds` returns to 0 and the plan's time is available again,
             RFC 3339 UTC. Null when nothing will renew it, such as a subscription that has ended.
     """
@@ -36,7 +36,7 @@ class Usage:
     extra_seconds: int
     allowance_seconds: int | None
     remaining_seconds: int | None
-    period_start: None | str
+    period_start: datetime.datetime | None
     resets_at: datetime.datetime | None
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -57,7 +57,10 @@ class Usage:
         remaining_seconds = self.remaining_seconds
 
         period_start: None | str
-        period_start = self.period_start
+        if isinstance(self.period_start, datetime.datetime):
+            period_start = self.period_start.isoformat()
+        else:
+            period_start = self.period_start
 
         resets_at: None | str
         if isinstance(self.resets_at, datetime.datetime):
@@ -112,10 +115,18 @@ class Usage:
 
         remaining_seconds = _parse_remaining_seconds(d.pop("remaining_seconds"))
 
-        def _parse_period_start(data: object) -> None | str:
+        def _parse_period_start(data: object) -> datetime.datetime | None:
             if data is None:
                 return data
-            return cast(None | str, data)
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                period_start_type_0 = datetime.datetime.fromisoformat(data)
+
+                return period_start_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(datetime.datetime | None, data)
 
         period_start = _parse_period_start(d.pop("period_start"))
 
