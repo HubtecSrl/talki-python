@@ -155,8 +155,10 @@ to each attempt. `max_retries=0` turns retries off.
 
 ## Logging
 
-The client logs to the `talki` logger (`talki._transport`, `talki.oauth`), and
-is silent until you turn it on:
+The client logs to the `talki` logger (`talki._transport`, `talki.oauth`).
+DEBUG and INFO stay silent until you lower its level. WARNING and ERROR (a
+token renewal gone wrong, below) reach Python's last-resort handler on stderr
+when your application configures no logging. To see everything:
 
 ```python
 import logging
