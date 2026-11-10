@@ -5,6 +5,7 @@ from functools import cached_property
 
 from ..client import AuthenticatedClient
 from .account import AccountResource, AsyncAccountResource
+from .agent_test import AgentTestResource, AsyncAgentTestResource
 from .appointments import AppointmentsResource, AsyncAppointmentsResource
 from .availability import AsyncAvailabilityResource, AvailabilityResource
 from .caller_rules import AsyncCallerRulesResource, CallerRulesResource
@@ -35,6 +36,11 @@ class Resources:
     def account(self) -> AccountResource:
         """The `account` operations."""
         return AccountResource(self.client)
+
+    @cached_property
+    def agent_test(self) -> AgentTestResource:
+        """The `agent_test` operations."""
+        return AgentTestResource(self.client)
 
     @cached_property
     def appointments(self) -> AppointmentsResource:
@@ -131,6 +137,11 @@ class AsyncResources:
     def account(self) -> AsyncAccountResource:
         """The `account` operations."""
         return AsyncAccountResource(self.client)
+
+    @cached_property
+    def agent_test(self) -> AsyncAgentTestResource:
+        """The `agent_test` operations."""
+        return AsyncAgentTestResource(self.client)
 
     @cached_property
     def appointments(self) -> AsyncAppointmentsResource:

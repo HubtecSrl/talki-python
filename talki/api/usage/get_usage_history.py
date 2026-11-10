@@ -14,6 +14,7 @@ def _get_kwargs(
     *,
     from_: None | str | Unset = UNSET,
     to: None | str | Unset = UNSET,
+    location_id: None | str | Unset = UNSET,
     talki_version: str | Unset = UNSET,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
@@ -35,6 +36,13 @@ def _get_kwargs(
     else:
         json_to = to
     params["to"] = json_to
+
+    json_location_id: None | str | Unset
+    if isinstance(location_id, Unset):
+        json_location_id = UNSET
+    else:
+        json_location_id = location_id
+    params["location_id"] = json_location_id
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -91,6 +99,11 @@ def _parse_response(
 
         return response_403
 
+    if response.status_code == 404:
+        response_404 = ErrorEnvelope.from_dict(response.json())
+
+        return response_404
+
     if response.status_code == 429:
         response_429 = ErrorEnvelope.from_dict(response.json())
 
@@ -123,18 +136,23 @@ def sync_detailed(
     client: AuthenticatedClient,
     from_: None | str | Unset = UNSET,
     to: None | str | Unset = UNSET,
+    location_id: None | str | Unset = UNSET,
     talki_version: str | Unset = UNSET,
 ) -> Response[ErrorEnvelope | UsageHistory]:
     """Retrieve usage history
 
      Return the talk time billed in each calendar month, up to 13 months, oldest first. A call counts,
-    whole, in the month it was answered in. Requires `account:read`. Limited to 600 requests per minute
-    per account (API key) or per installation (OAuth).
+    whole, in the month it was answered in. With `location_id`, only the calls of that location count.
+    Requires `account:read`. Limited to 600 requests per minute per account (API key) or per
+    installation (OAuth).
 
     Args:
         from_ (None | str | Unset): First month, `YYYY-MM`. Default: 12 months before `to`.
         to (None | str | Unset): Last month, included, `YYYY-MM`. Default: the current month,
             which is still counting. Not after the current month. At most 13 months from `from`.
+        location_id (None | str | Unset): Only the calls of this location (`Call.location_id`), an
+            id from `GET /v1/locations` (inactive ones included). Omit for every location. Each call
+            belongs to one location, so the locations' months add up to the account's.
         talki_version (str | Unset):  Example: 2026-10-01.
 
     Raises:
@@ -148,6 +166,7 @@ def sync_detailed(
     kwargs = _get_kwargs(
         from_=from_,
         to=to,
+        location_id=location_id,
         talki_version=talki_version,
     )
 
@@ -163,18 +182,23 @@ def sync(
     client: AuthenticatedClient,
     from_: None | str | Unset = UNSET,
     to: None | str | Unset = UNSET,
+    location_id: None | str | Unset = UNSET,
     talki_version: str | Unset = UNSET,
 ) -> ErrorEnvelope | UsageHistory | None:
     """Retrieve usage history
 
      Return the talk time billed in each calendar month, up to 13 months, oldest first. A call counts,
-    whole, in the month it was answered in. Requires `account:read`. Limited to 600 requests per minute
-    per account (API key) or per installation (OAuth).
+    whole, in the month it was answered in. With `location_id`, only the calls of that location count.
+    Requires `account:read`. Limited to 600 requests per minute per account (API key) or per
+    installation (OAuth).
 
     Args:
         from_ (None | str | Unset): First month, `YYYY-MM`. Default: 12 months before `to`.
         to (None | str | Unset): Last month, included, `YYYY-MM`. Default: the current month,
             which is still counting. Not after the current month. At most 13 months from `from`.
+        location_id (None | str | Unset): Only the calls of this location (`Call.location_id`), an
+            id from `GET /v1/locations` (inactive ones included). Omit for every location. Each call
+            belongs to one location, so the locations' months add up to the account's.
         talki_version (str | Unset):  Example: 2026-10-01.
 
     Raises:
@@ -189,6 +213,7 @@ def sync(
         client=client,
         from_=from_,
         to=to,
+        location_id=location_id,
         talki_version=talki_version,
     ).parsed
 
@@ -198,18 +223,23 @@ async def asyncio_detailed(
     client: AuthenticatedClient,
     from_: None | str | Unset = UNSET,
     to: None | str | Unset = UNSET,
+    location_id: None | str | Unset = UNSET,
     talki_version: str | Unset = UNSET,
 ) -> Response[ErrorEnvelope | UsageHistory]:
     """Retrieve usage history
 
      Return the talk time billed in each calendar month, up to 13 months, oldest first. A call counts,
-    whole, in the month it was answered in. Requires `account:read`. Limited to 600 requests per minute
-    per account (API key) or per installation (OAuth).
+    whole, in the month it was answered in. With `location_id`, only the calls of that location count.
+    Requires `account:read`. Limited to 600 requests per minute per account (API key) or per
+    installation (OAuth).
 
     Args:
         from_ (None | str | Unset): First month, `YYYY-MM`. Default: 12 months before `to`.
         to (None | str | Unset): Last month, included, `YYYY-MM`. Default: the current month,
             which is still counting. Not after the current month. At most 13 months from `from`.
+        location_id (None | str | Unset): Only the calls of this location (`Call.location_id`), an
+            id from `GET /v1/locations` (inactive ones included). Omit for every location. Each call
+            belongs to one location, so the locations' months add up to the account's.
         talki_version (str | Unset):  Example: 2026-10-01.
 
     Raises:
@@ -223,6 +253,7 @@ async def asyncio_detailed(
     kwargs = _get_kwargs(
         from_=from_,
         to=to,
+        location_id=location_id,
         talki_version=talki_version,
     )
 
@@ -236,18 +267,23 @@ async def asyncio(
     client: AuthenticatedClient,
     from_: None | str | Unset = UNSET,
     to: None | str | Unset = UNSET,
+    location_id: None | str | Unset = UNSET,
     talki_version: str | Unset = UNSET,
 ) -> ErrorEnvelope | UsageHistory | None:
     """Retrieve usage history
 
      Return the talk time billed in each calendar month, up to 13 months, oldest first. A call counts,
-    whole, in the month it was answered in. Requires `account:read`. Limited to 600 requests per minute
-    per account (API key) or per installation (OAuth).
+    whole, in the month it was answered in. With `location_id`, only the calls of that location count.
+    Requires `account:read`. Limited to 600 requests per minute per account (API key) or per
+    installation (OAuth).
 
     Args:
         from_ (None | str | Unset): First month, `YYYY-MM`. Default: 12 months before `to`.
         to (None | str | Unset): Last month, included, `YYYY-MM`. Default: the current month,
             which is still counting. Not after the current month. At most 13 months from `from`.
+        location_id (None | str | Unset): Only the calls of this location (`Call.location_id`), an
+            id from `GET /v1/locations` (inactive ones included). Omit for every location. Each call
+            belongs to one location, so the locations' months add up to the account's.
         talki_version (str | Unset):  Example: 2026-10-01.
 
     Raises:
@@ -263,6 +299,7 @@ async def asyncio(
             client=client,
             from_=from_,
             to=to,
+            location_id=location_id,
             talki_version=talki_version,
         )
     ).parsed

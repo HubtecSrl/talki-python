@@ -24,6 +24,7 @@ from talki.types import UNSET, File
 # caller's code: change it with a changelog line, as a breaking change.
 METHODS = {
     "account": ["complete_onboarding", "get", "get_forwarding_check", "start_forwarding_check", "update"],
+    "agent_test": ["end", "send"],
     "appointments": ["cancel", "create", "get", "list", "reschedule", "restore"],
     "availability": ["get"],
     "caller_rules": ["create", "delete", "list", "list_blocked_call_attempts", "update"],

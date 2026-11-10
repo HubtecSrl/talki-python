@@ -59,9 +59,9 @@ class AccountUpdate:
             store_transcripts (bool | Unset): Cannot be null. `false` deletes the stored transcripts of this location's
                 calls in the same request, and they cannot be recovered, so a test-mode credential sending it is refused with
                 `livemode_required`.
-            call_auto_archive_days (AccountUpdateCallAutoArchiveDaysType0 | None | Unset): `7`, `30` or `90`, or `null` to
-                stop archiving calls on their own. The account's own setting: refused with `location_id` naming a location other
-                than the main one.
+            call_auto_archive_days (AccountUpdateCallAutoArchiveDaysType0 | None | Unset): `7`, `30`, `90` or `180`, or
+                `null` to stop archiving calls on their own. The account's own setting: refused with `location_id` naming a
+                location other than the main one.
             forwarding_number (None | str | Unset): Replaces the location's forwarding number: a mobile or landline that can
                 be rung, E.164 or national (read as Italian). Send `null` or an empty string to clear it. Refused if it equals a
                 transfer target of any location, or the line of another location, unless the same request replaces this
@@ -389,5 +389,5 @@ class AccountUpdateDict(TypedDict, total=False):
     notify_on_every_call: bool
     notify_on_incoming_call: bool
     store_transcripts: bool
-    call_auto_archive_days: AccountUpdateCallAutoArchiveDaysType0 | Literal[7, 30, 90] | None
+    call_auto_archive_days: AccountUpdateCallAutoArchiveDaysType0 | Literal[7, 30, 90, 180] | None
     forwarding_number: str | None

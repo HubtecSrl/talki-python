@@ -29,13 +29,13 @@ class RefusedCall:
             holds, while the business's line still forwards to it.
         reason (str): Why the call was refused: `user_concurrency` (the plan's simultaneous calls in use); `minutes`
             (talk time used up); `entitlement` (no active subscription); `trial_suspended` (the free trial was suspended);
-            `deletion_pending` (the account is scheduled for deletion); `no_user` (the number no longer belongs to the
-            account); `platform_concurrency` (Talki at capacity). New reasons may be added: show an unknown one as a generic
-            refusal.
+            `suspended` (the service was suspended by the partner that manages the account); `deletion_pending` (the account
+            is scheduled for deletion); `no_user` (the number no longer belongs to the account); `platform_concurrency`
+            (Talki at capacity). New reasons may be added: show an unknown one as a generic refusal.
         action (None | str): What the business can do about it: `cancel_deletion` (for `deletion_pending`);
-            `check_forwarding` (for `no_user`); `reactivate_subscription` (for `entitlement`, `trial_suspended`);
-            `upgrade_plan` (for `user_concurrency`, `minutes`). Null when there is nothing it can do. New actions may be
-            added.
+            `check_forwarding` (for `no_user`); `reactivate_subscription` (for `entitlement`, `trial_suspended`,
+            `suspended`); `upgrade_plan` (for `user_concurrency`, `minutes`). Null when there is nothing it can do. New
+            actions may be added.
         attempted_at (datetime.datetime): When the call came in, RFC 3339 UTC.
     """
 

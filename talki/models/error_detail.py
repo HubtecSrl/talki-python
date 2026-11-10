@@ -27,16 +27,16 @@ class ErrorDetail:
             `unresolved_request_not_resolved`, `faq_full`, `document_not_ready`, `unsupported_file_type`,
             `service_has_upcoming_bookings`, `resource_is_default`, `resource_required_by_service`,
             `capacity_below_committed`, `capacity_below_service_requirement`, `resource_too_small`, `tag_limit_reached`,
-            `caller_rule_limit_reached`, `transcript_not_available`, `trial_suspended`, `phone_number_missing`,
-            `forwarding_number_missing`, `forwarding_number_invalid`, `check_in_progress`, `check_quota_exceeded`,
-            `checks_busy`, `check_call_failed`, `unknown_scenario`, `sandbox_not_ready`, `too_many_keys`, `key_not_active`,
-            `key_already_rolled`, `invalid_registration`, `client_disabled`, `client_changed`, `delivery_in_progress`,
-            `events_url_unset`, `events_paused`, `event_unsubscribed`, `account_refused`, `installation_inactive`,
-            `invalid_client`, `invalid_request`, `unauthorized_client`, `access_denied`, `invalid_scope`,
-            `slot_unavailable`, `capacity_exhausted`, `service_exclusion`, `closed_day`, `in_the_past`, `outside_hours`,
-            `service_inactive`, `location_inactive`, `service_deleted`, `no_services_requested`, `party_too_large`,
-            `stay_too_short`, `stay_too_long`, `stay_dates_invalid`. New codes may be added; treat an unknown one by its
-            HTTP status.
+            `caller_rule_limit_reached`, `transcript_not_available`, `trial_suspended`, `account_suspended`,
+            `phone_number_missing`, `forwarding_number_missing`, `forwarding_number_invalid`, `check_in_progress`,
+            `check_quota_exceeded`, `checks_busy`, `check_call_failed`, `agent_test_session_full`, `agent_test_unavailable`,
+            `unknown_scenario`, `sandbox_not_ready`, `too_many_keys`, `key_not_active`, `key_already_rolled`,
+            `invalid_registration`, `client_disabled`, `client_changed`, `delivery_in_progress`, `events_url_unset`,
+            `events_paused`, `event_unsubscribed`, `account_refused`, `installation_inactive`, `invalid_client`,
+            `invalid_request`, `unauthorized_client`, `access_denied`, `invalid_scope`, `slot_unavailable`,
+            `capacity_exhausted`, `service_exclusion`, `closed_day`, `in_the_past`, `outside_hours`, `service_inactive`,
+            `location_inactive`, `service_deleted`, `no_services_requested`, `party_too_large`, `stay_too_short`,
+            `stay_too_long`, `stay_dates_invalid`. New codes may be added; treat an unknown one by its HTTP status.
         message (str):
         request_id (str):
     """

@@ -17,7 +17,8 @@ class TransferNumberInput:
         label (str): Who answers at this number, such as "Reception". Unique within the list, ignoring case: the
             assistant picks a target by its label.
         phone (str): The number. E.164, or a national number, which is read in the country of the account's
-            `phone_number`. Stored as E.164.
+            `phone_number`. Stored as E.164. A premium-rate or shared-cost number is refused, unless the list being replaced
+            already holds it.
     """
 
     label: str

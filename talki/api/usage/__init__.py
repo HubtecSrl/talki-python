@@ -43,6 +43,7 @@ class UsageResourceWithRawResponse(_resource.Resource):
         *,
         from_: None | str | Unset = UNSET,
         to: None | str | Unset = UNSET,
+        location_id: None | str | Unset = UNSET,
         talki_version: str | Unset = UNSET,
     ) -> _resource.RawResponse[UsageHistory]:
         """`talki.usage.get_history`, returning the whole answer."""
@@ -51,6 +52,7 @@ class UsageResourceWithRawResponse(_resource.Resource):
                 client=self._client,
                 from_=from_,
                 to=to,
+                location_id=location_id,
                 talki_version=talki_version,
             )
         )
@@ -73,9 +75,11 @@ class UsageResource(_resource.Resource):
     ) -> Usage:
         """Retrieve usage
 
-         Return the talk time used in the current period, what is left, and when it resets. Requires
-        `account:read`. Limited to 600 requests per minute per account (API key) or per installation
-        (OAuth).
+         Return the talk time used in the current period, what is left, and when it resets, for the whole
+        account: the meter is one for every location. For one location's talk time, read the current month
+        of `GET /v1/usage/history` with its `location_id`; that month can differ from this meter, as
+        `UsageHistory` explains. Requires `account:read`. Limited to 600 requests per minute per account
+        (API key) or per installation (OAuth).
 
         Args:
             talki_version (str | Unset):  Example: 2026-10-01.
@@ -98,18 +102,23 @@ class UsageResource(_resource.Resource):
         *,
         from_: None | str | Unset = UNSET,
         to: None | str | Unset = UNSET,
+        location_id: None | str | Unset = UNSET,
         talki_version: str | Unset = UNSET,
     ) -> UsageHistory:
         """Retrieve usage history
 
          Return the talk time billed in each calendar month, up to 13 months, oldest first. A call counts,
-        whole, in the month it was answered in. Requires `account:read`. Limited to 600 requests per minute
-        per account (API key) or per installation (OAuth).
+        whole, in the month it was answered in. With `location_id`, only the calls of that location count.
+        Requires `account:read`. Limited to 600 requests per minute per account (API key) or per
+        installation (OAuth).
 
         Args:
             from_ (None | str | Unset): First month, `YYYY-MM`. Default: 12 months before `to`.
             to (None | str | Unset): Last month, included, `YYYY-MM`. Default: the current month,
                 which is still counting. Not after the current month. At most 13 months from `from`.
+            location_id (None | str | Unset): Only the calls of this location (`Call.location_id`), an
+                id from `GET /v1/locations` (inactive ones included). Omit for every location. Each call
+                belongs to one location, so the locations' months add up to the account's.
             talki_version (str | Unset):  Example: 2026-10-01.
 
         Raises:
@@ -123,6 +132,7 @@ class UsageResource(_resource.Resource):
             self.with_raw_response.get_history(
                 from_=from_,
                 to=to,
+                location_id=location_id,
                 talki_version=talki_version,
             )
         ).parse()
@@ -151,6 +161,7 @@ class AsyncUsageResourceWithRawResponse(_resource.Resource):
         *,
         from_: None | str | Unset = UNSET,
         to: None | str | Unset = UNSET,
+        location_id: None | str | Unset = UNSET,
         talki_version: str | Unset = UNSET,
     ) -> _resource.RawResponse[UsageHistory]:
         """`talki.usage.get_history`, returning the whole answer."""
@@ -159,6 +170,7 @@ class AsyncUsageResourceWithRawResponse(_resource.Resource):
                 client=self._client,
                 from_=from_,
                 to=to,
+                location_id=location_id,
                 talki_version=talki_version,
             )
         )
@@ -181,9 +193,11 @@ class AsyncUsageResource(_resource.Resource):
     ) -> Usage:
         """Retrieve usage
 
-         Return the talk time used in the current period, what is left, and when it resets. Requires
-        `account:read`. Limited to 600 requests per minute per account (API key) or per installation
-        (OAuth).
+         Return the talk time used in the current period, what is left, and when it resets, for the whole
+        account: the meter is one for every location. For one location's talk time, read the current month
+        of `GET /v1/usage/history` with its `location_id`; that month can differ from this meter, as
+        `UsageHistory` explains. Requires `account:read`. Limited to 600 requests per minute per account
+        (API key) or per installation (OAuth).
 
         Args:
             talki_version (str | Unset):  Example: 2026-10-01.
@@ -206,18 +220,23 @@ class AsyncUsageResource(_resource.Resource):
         *,
         from_: None | str | Unset = UNSET,
         to: None | str | Unset = UNSET,
+        location_id: None | str | Unset = UNSET,
         talki_version: str | Unset = UNSET,
     ) -> UsageHistory:
         """Retrieve usage history
 
          Return the talk time billed in each calendar month, up to 13 months, oldest first. A call counts,
-        whole, in the month it was answered in. Requires `account:read`. Limited to 600 requests per minute
-        per account (API key) or per installation (OAuth).
+        whole, in the month it was answered in. With `location_id`, only the calls of that location count.
+        Requires `account:read`. Limited to 600 requests per minute per account (API key) or per
+        installation (OAuth).
 
         Args:
             from_ (None | str | Unset): First month, `YYYY-MM`. Default: 12 months before `to`.
             to (None | str | Unset): Last month, included, `YYYY-MM`. Default: the current month,
                 which is still counting. Not after the current month. At most 13 months from `from`.
+            location_id (None | str | Unset): Only the calls of this location (`Call.location_id`), an
+                id from `GET /v1/locations` (inactive ones included). Omit for every location. Each call
+                belongs to one location, so the locations' months add up to the account's.
             talki_version (str | Unset):  Example: 2026-10-01.
 
         Raises:
@@ -231,6 +250,7 @@ class AsyncUsageResource(_resource.Resource):
             await self.with_raw_response.get_history(
                 from_=from_,
                 to=to,
+                location_id=location_id,
                 talki_version=talki_version,
             )
         ).parse()

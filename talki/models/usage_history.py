@@ -20,7 +20,8 @@ class UsageHistory:
     month is not a billing period, and the meter of `GET /v1/usage` adds a call once it has ended, so the current month
     can differ from it, and a call running past midnight into a new month counts here in the earlier one. A month reads
     less than was billed when some of its calls were deleted, through `DELETE /v1/calls/{call_id}` or in the apps, or
-    are before `retained_since`.
+    are before `retained_since`. With `location_id`, only that location's calls count; the locations' months add up to
+    the account's.
 
         Attributes:
             months (list[UsageMonth]): One entry per month asked for, oldest first.

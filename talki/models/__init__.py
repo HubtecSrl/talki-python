@@ -6,6 +6,8 @@ from .account_languages import AccountLanguages
 from .account_line import AccountLine
 from .account_update import AccountUpdate, AccountUpdateDict
 from .account_update_call_auto_archive_days_type_0 import AccountUpdateCallAutoArchiveDaysType0
+from .agent_test_message import AgentTestMessage, AgentTestMessageDict
+from .agent_test_reply import AgentTestReply
 from .answers_as import AnswersAs
 from .appointment import Appointment
 from .appointment_client import AppointmentClient
@@ -135,6 +137,9 @@ __all__ = (
     "AccountUpdate",
     "AccountUpdateCallAutoArchiveDaysType0",
     "AccountUpdateDict",
+    "AgentTestMessage",
+    "AgentTestMessageDict",
+    "AgentTestReply",
     "AnswersAs",
     "Appointment",
     "AppointmentClient",
