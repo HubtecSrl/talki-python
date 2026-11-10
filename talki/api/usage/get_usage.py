@@ -102,9 +102,11 @@ def sync_detailed(
 ) -> Response[ErrorEnvelope | Usage]:
     """Retrieve usage
 
-     Return the talk time used in the current period, what is left, and when it resets. Requires
-    `account:read`. Limited to 600 requests per minute per account (API key) or per installation
-    (OAuth).
+     Return the talk time used in the current period, what is left, and when it resets, for the whole
+    account: the meter is one for every location. For one location's talk time, read the current month
+    of `GET /v1/usage/history` with its `location_id`; that month can differ from this meter, as
+    `UsageHistory` explains. Requires `account:read`. Limited to 600 requests per minute per account
+    (API key) or per installation (OAuth).
 
     Args:
         talki_version (str | Unset):  Example: 2026-10-01.
@@ -135,9 +137,11 @@ def sync(
 ) -> ErrorEnvelope | Usage | None:
     """Retrieve usage
 
-     Return the talk time used in the current period, what is left, and when it resets. Requires
-    `account:read`. Limited to 600 requests per minute per account (API key) or per installation
-    (OAuth).
+     Return the talk time used in the current period, what is left, and when it resets, for the whole
+    account: the meter is one for every location. For one location's talk time, read the current month
+    of `GET /v1/usage/history` with its `location_id`; that month can differ from this meter, as
+    `UsageHistory` explains. Requires `account:read`. Limited to 600 requests per minute per account
+    (API key) or per installation (OAuth).
 
     Args:
         talki_version (str | Unset):  Example: 2026-10-01.
@@ -163,9 +167,11 @@ async def asyncio_detailed(
 ) -> Response[ErrorEnvelope | Usage]:
     """Retrieve usage
 
-     Return the talk time used in the current period, what is left, and when it resets. Requires
-    `account:read`. Limited to 600 requests per minute per account (API key) or per installation
-    (OAuth).
+     Return the talk time used in the current period, what is left, and when it resets, for the whole
+    account: the meter is one for every location. For one location's talk time, read the current month
+    of `GET /v1/usage/history` with its `location_id`; that month can differ from this meter, as
+    `UsageHistory` explains. Requires `account:read`. Limited to 600 requests per minute per account
+    (API key) or per installation (OAuth).
 
     Args:
         talki_version (str | Unset):  Example: 2026-10-01.
@@ -194,9 +200,11 @@ async def asyncio(
 ) -> ErrorEnvelope | Usage | None:
     """Retrieve usage
 
-     Return the talk time used in the current period, what is left, and when it resets. Requires
-    `account:read`. Limited to 600 requests per minute per account (API key) or per installation
-    (OAuth).
+     Return the talk time used in the current period, what is left, and when it resets, for the whole
+    account: the meter is one for every location. For one location's talk time, read the current month
+    of `GET /v1/usage/history` with its `location_id`; that month can differ from this meter, as
+    `UsageHistory` explains. Requires `account:read`. Limited to 600 requests per minute per account
+    (API key) or per installation (OAuth).
 
     Args:
         talki_version (str | Unset):  Example: 2026-10-01.

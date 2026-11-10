@@ -8,6 +8,6 @@ import platform
 
 import httpx
 
-__version__ = "0.5.0b1"
+__version__ = "0.6.0b1"
 
 USER_AGENT = f"talki-python/{__version__} python/{platform.python_version()} httpx/{httpx.__version__}"

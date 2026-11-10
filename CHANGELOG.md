@@ -3,6 +3,51 @@
 This package follows [semantic versioning](https://semver.org). The API
 version each release targets by default is `talki.API_VERSION`.
 
+## 0.6.0b1 — 2026-11-10
+
+For API version `2026-10-01`, as 0.5.0b1, with what has been added to it since.
+One change to existing types: see the second list.
+
+- `talki.agent_test`: chat in text with the account's assistant, to check how it
+  answers before a caller does. `send(body={"message": …})` returns an
+  `AgentTestReply` with the `reply`, the `session_id` to send with the next
+  message, `turn` and `max_turns`, `expires_at`, `daily_remaining` and
+  `tools_called`. Nothing is saved in Talki: a booking the assistant makes is not
+  made. Your app's own partner tools do run, sent with `test_drive: true`, writes
+  included. `location_id` picks the location whose assistant answers.
+  `end(session_id)` drops a session before it expires. Both need `account:write`
+  and `knowledge:read`. Past the daily allowance of test messages the API answers
+  `429` with a `Retry-After` until midnight. This package waits only for a
+  `Retry-After` of 60 seconds or less, as for the limit per minute, so it raises
+  `RateLimitError`, whose `retry_after` says how long. While testing through the
+  API is switched off, `send` raises `ServerError` (`agent_test_unavailable`).
+- `talki.usage.get_history(location_id=…)`: the months of one location's calls.
+  The locations' months add up to the account's. A `location_id` of no location
+  of the account raises `InvalidRequestError` (`resource_not_found`, `404`).
+  `talki.usage.get()` stays one meter for the whole account.
+- `call_auto_archive_days` can be `180`: `AccountCallAutoArchiveDaysType0` and
+  `AccountUpdateCallAutoArchiveDaysType0` have `VALUE_180`. Earlier versions
+  of this package read an account set to `180` as a plain `int`.
+- `RefusedCall.reason`, and the keys of `RefusedCallSummary.by_reason`, can be
+  `suspended`: the partner that manages the account suspended the service. Its
+  `action` is `reactivate_subscription`.
+- `ErrorDetail.code` lists three new codes: `account_suspended`,
+  `agent_test_session_full` and `agent_test_unavailable`.
+- `Usage.included_seconds` can be the monthly minutes set by the partner that
+  manages the account, when they are lower than the plan's or the plan has no
+  limit. `Usage.unlimited` is then false. The same figure is in
+  `included_seconds` and `minutes_included` of the `usage.threshold_reached`
+  event, and `minutes_included` of `usage.extra_credits_low`.
+- Docstrings corrected with the document's descriptions, among them that a
+  premium-rate or shared-cost number is refused as a transfer target
+  (`TransferNumberInput.phone`), unless the list being replaced already holds it.
+
+What changes for existing code:
+
+- `AccountCallAutoArchiveDaysType0` and `AccountUpdateCallAutoArchiveDaysType0`
+  have a new member, `VALUE_180`. A `match` a type checker holds to every member
+  (with `assert_never`) needs a case for it.
+
 ## 0.5.0b1 — 2026-11-04
 
 For API version `2026-10-01`, as 0.4.0b1, with what has been added and corrected

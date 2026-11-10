@@ -93,9 +93,10 @@ class Account:
             line (AccountLine): How calls reach Talki: the location's own line forwards to its Talki number. Read only. A
                 check still ringing, or one that found no forwarding, is read from `GET /v1/forwarding_check`.
             call_auto_archive_days (AccountCallAutoArchiveDaysType0 | None): How many days after it started a call that has
-                been read is archived on its own: `7`, `30` or `90`, as in the Talki apps. Null when calls are never archived on
-                their own. An unread call is never archived this way. Archiving runs once a night, sends `call.updated` for each
-                call, and can be undone like an archive by hand. The account's own setting: the same at every location.
+                been read is archived on its own: `7`, `30`, `90` or `180`, as in the Talki apps. Null when calls are never
+                archived on their own. An unread call is never archived this way. Archiving runs once a night, sends
+                `call.updated` for each call, and can be undone like an archive by hand. The account's own setting: the same at
+                every location.
             multi_sede (bool): True when the account works from several locations, or may add them: show locations (`GET
                 /v1/locations`) to the owner only when true. False for an account that has only ever had its main location and
                 cannot add another; it still has that one location, every record still carries its `location_id`, and nothing

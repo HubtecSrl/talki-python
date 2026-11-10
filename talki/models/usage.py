@@ -12,22 +12,26 @@ T = TypeVar("T", bound="Usage")
 
 @_attrs_define
 class Usage:
-    """Talk time used in the current period and what is left, in seconds. To show minutes, round `remaining_seconds` down.
+    """Talk time used in the current period and what is left, in seconds, for the whole account. To show minutes, round
+    `remaining_seconds` down. For one location's share, read the current month of `GET /v1/usage/history` with its
+    `location_id`, which can differ from this meter.
 
-    Attributes:
-        unlimited (bool): True when the plan sets no limit on talk time. The allowance fields are then null.
-        used_seconds (int): Talk time used in the current period.
-        included_seconds (int | None): Talk time the plan includes per period. Null when `unlimited`.
-        extra_seconds (int): Bought extra talk time left right now. It is spent only once `included_seconds` is used up,
-            and what is left carries over to the next period while the subscription is active.
-        allowance_seconds (int | None): Everything the current period may spend: the time the plan includes plus every
-            bought second not spent in an earlier period. Null when `unlimited`.
-        remaining_seconds (int | None): `allowance_seconds` less `used_seconds`, never negative. Calls are refused when
-            it reaches 0. Null when `unlimited`. To show it in minutes, round down, so no minute is shown that cannot be
-            spent.
-        period_start (datetime.datetime | None): When the current period began, RFC 3339 UTC.
-        resets_at (datetime.datetime | None): When `used_seconds` returns to 0 and the plan's time is available again,
-            RFC 3339 UTC. Null when nothing will renew it, such as a subscription that has ended.
+        Attributes:
+            unlimited (bool): True when nothing limits talk time: the plan sets no limit and the partner that manages the
+                account has set no monthly minutes. The allowance fields are then null.
+            used_seconds (int): Talk time used in the current period.
+            included_seconds (int | None): Talk time included per period: the plan's, or the monthly minutes the partner
+                that manages the account set for it, when those are lower or the plan has no limit. Null when `unlimited`.
+            extra_seconds (int): Bought extra talk time left right now. It is spent only once `included_seconds` is used up,
+                and what is left carries over to the next period while the subscription is active.
+            allowance_seconds (int | None): Everything the current period may spend: `included_seconds` plus every bought
+                second not spent in an earlier period. Null when `unlimited`.
+            remaining_seconds (int | None): `allowance_seconds` less `used_seconds`, never negative. Calls are refused when
+                it reaches 0. Null when `unlimited`. To show it in minutes, round down, so no minute is shown that cannot be
+                spent.
+            period_start (datetime.datetime | None): When the current period began, RFC 3339 UTC.
+            resets_at (datetime.datetime | None): When `used_seconds` returns to 0 and the included time is available again,
+                RFC 3339 UTC. Null when nothing will renew it, such as a subscription that has ended.
     """
 
     unlimited: bool
