@@ -86,7 +86,7 @@ class AgentTestResource(_resource.Resource):
         per minute per account (API key) or per installation (OAuth).
 
         Args:
-            session_id (str):
+            session_id (str): The `session_id` a `POST /v1/agent_test` reply returned.
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
 
@@ -219,7 +219,7 @@ class AsyncAgentTestResource(_resource.Resource):
         per minute per account (API key) or per installation (OAuth).
 
         Args:
-            session_id (str):
+            session_id (str): The `session_id` a `POST /v1/agent_test` reply returned.
             talki_version (str | Unset):  Example: 2026-10-01.
             idempotency_key (str | Unset):
 
