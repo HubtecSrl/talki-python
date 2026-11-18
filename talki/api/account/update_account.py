@@ -166,8 +166,8 @@ def sync_detailed(
         body (AccountUpdate): The settings you can change. Every field is optional and an omitted
             one is left unchanged, but send at least one. A `null` or empty text clears it; a voice, a
             switch or the transfer list cannot be null. With `?location_id=`, the settings change at
-            that location only. `call_auto_archive_days` is the account's: it is refused with a
-            `location_id` other than the main location's.
+            that location only. `call_auto_archive_days` and `call_auto_delete_days` are the
+            account's: they are refused with a `location_id` other than the main location's.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -219,8 +219,8 @@ def sync(
         body (AccountUpdate): The settings you can change. Every field is optional and an omitted
             one is left unchanged, but send at least one. A `null` or empty text clears it; a voice, a
             switch or the transfer list cannot be null. With `?location_id=`, the settings change at
-            that location only. `call_auto_archive_days` is the account's: it is refused with a
-            `location_id` other than the main location's.
+            that location only. `call_auto_archive_days` and `call_auto_delete_days` are the
+            account's: they are refused with a `location_id` other than the main location's.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -267,8 +267,8 @@ async def asyncio_detailed(
         body (AccountUpdate): The settings you can change. Every field is optional and an omitted
             one is left unchanged, but send at least one. A `null` or empty text clears it; a voice, a
             switch or the transfer list cannot be null. With `?location_id=`, the settings change at
-            that location only. `call_auto_archive_days` is the account's: it is refused with a
-            `location_id` other than the main location's.
+            that location only. `call_auto_archive_days` and `call_auto_delete_days` are the
+            account's: they are refused with a `location_id` other than the main location's.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -318,8 +318,8 @@ async def asyncio(
         body (AccountUpdate): The settings you can change. Every field is optional and an omitted
             one is left unchanged, but send at least one. A `null` or empty text clears it; a voice, a
             switch or the transfer list cannot be null. With `?location_id=`, the settings change at
-            that location only. `call_auto_archive_days` is the account's: it is refused with a
-            `location_id` other than the main location's.
+            that location only. `call_auto_archive_days` and `call_auto_delete_days` are the
+            account's: they are refused with a `location_id` other than the main location's.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

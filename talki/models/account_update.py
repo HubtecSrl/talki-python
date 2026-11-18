@@ -7,6 +7,7 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.account_update_call_auto_archive_days_type_0 import AccountUpdateCallAutoArchiveDaysType0
+from ..models.account_update_call_auto_delete_days_type_0 import AccountUpdateCallAutoDeleteDaysType0
 from ..models.answers_as import AnswersAs
 from ..types import UNSET, Unset
 
@@ -27,8 +28,8 @@ T = TypeVar("T", bound="AccountUpdate")
 class AccountUpdate:
     """The settings you can change. Every field is optional and an omitted one is left unchanged, but send at least one. A
     `null` or empty text clears it; a voice, a switch or the transfer list cannot be null. With `?location_id=`, the
-    settings change at that location only. `call_auto_archive_days` is the account's: it is refused with a `location_id`
-    other than the main location's.
+    settings change at that location only. `call_auto_archive_days` and `call_auto_delete_days` are the account's: they
+    are refused with a `location_id` other than the main location's.
 
         Attributes:
             business_name (None | str | Unset): Replaces the business name. Send `null` or an empty string to clear it.
@@ -62,6 +63,11 @@ class AccountUpdate:
             call_auto_archive_days (AccountUpdateCallAutoArchiveDaysType0 | None | Unset): `7`, `30`, `90` or `180`, or
                 `null` to stop archiving calls on their own. The account's own setting: refused with `location_id` naming a
                 location other than the main one.
+            call_auto_delete_days (AccountUpdateCallAutoDeleteDaysType0 | None | Unset): `30`, `60`, `90` or `180`, or
+                `null` to stop deleting calls on their own. Calls older than the window, which cannot be recovered, are deleted
+                the next night, so a number needs the `calls:delete` scope as well and is refused in test mode with
+                `livemode_required`; `null` needs neither. The account's own setting: refused with `location_id` naming a
+                location other than the main one.
             forwarding_number (None | str | Unset): Replaces the location's forwarding number: a mobile or landline that can
                 be rung, E.164 or national (read as Italian). Send `null` or an empty string to clear it. Refused if it equals a
                 transfer target of any location, or the line of another location, unless the same request replaces this
@@ -87,6 +93,7 @@ class AccountUpdate:
     notify_on_incoming_call: bool | Unset = UNSET
     store_transcripts: bool | Unset = UNSET
     call_auto_archive_days: AccountUpdateCallAutoArchiveDaysType0 | None | Unset = UNSET
+    call_auto_delete_days: AccountUpdateCallAutoDeleteDaysType0 | None | Unset = UNSET
     forwarding_number: None | str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -162,6 +169,14 @@ class AccountUpdate:
         else:
             call_auto_archive_days = self.call_auto_archive_days
 
+        call_auto_delete_days: int | None | Unset
+        if isinstance(self.call_auto_delete_days, Unset):
+            call_auto_delete_days = UNSET
+        elif isinstance(self.call_auto_delete_days, AccountUpdateCallAutoDeleteDaysType0):
+            call_auto_delete_days = self.call_auto_delete_days.value
+        else:
+            call_auto_delete_days = self.call_auto_delete_days
+
         forwarding_number: None | str | Unset
         if isinstance(self.forwarding_number, Unset):
             forwarding_number = UNSET
@@ -205,6 +220,8 @@ class AccountUpdate:
             field_dict["store_transcripts"] = store_transcripts
         if call_auto_archive_days is not UNSET:
             field_dict["call_auto_archive_days"] = call_auto_archive_days
+        if call_auto_delete_days is not UNSET:
+            field_dict["call_auto_delete_days"] = call_auto_delete_days
         if forwarding_number is not UNSET:
             field_dict["forwarding_number"] = forwarding_number
 
@@ -319,6 +336,23 @@ class AccountUpdate:
 
         call_auto_archive_days = _parse_call_auto_archive_days(d.pop("call_auto_archive_days", UNSET))
 
+        def _parse_call_auto_delete_days(data: object) -> AccountUpdateCallAutoDeleteDaysType0 | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, int):
+                    raise TypeError()
+                call_auto_delete_days_type_0 = AccountUpdateCallAutoDeleteDaysType0(data)
+
+                return call_auto_delete_days_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(AccountUpdateCallAutoDeleteDaysType0 | None | Unset, data)
+
+        call_auto_delete_days = _parse_call_auto_delete_days(d.pop("call_auto_delete_days", UNSET))
+
         def _parse_forwarding_number(data: object) -> None | str | Unset:
             if data is None:
                 return data
@@ -346,6 +380,7 @@ class AccountUpdate:
             notify_on_incoming_call=notify_on_incoming_call,
             store_transcripts=store_transcripts,
             call_auto_archive_days=call_auto_archive_days,
+            call_auto_delete_days=call_auto_delete_days,
             forwarding_number=forwarding_number,
         )
 
@@ -390,4 +425,5 @@ class AccountUpdateDict(TypedDict, total=False):
     notify_on_incoming_call: bool
     store_transcripts: bool
     call_auto_archive_days: AccountUpdateCallAutoArchiveDaysType0 | Literal[7, 30, 90, 180] | None
+    call_auto_delete_days: AccountUpdateCallAutoDeleteDaysType0 | Literal[30, 60, 90, 180] | None
     forwarding_number: str | None

@@ -3,6 +3,18 @@
 This package follows [semantic versioning](https://semver.org). The API
 version each release targets by default is `talki.API_VERSION`.
 
+## 0.7.0b1 — unreleased
+
+For API version `2026-10-01`, as 0.6.0b1, with one field added to it since.
+
+- `call_auto_delete_days` on `Account` and `AccountUpdate`: how many days after
+  it started a call is deleted for good, read or not (`30`, `60`, `90` or
+  `180`), or `None` to keep calls until the 365-day retention limit. Deletion
+  runs once a night, as `talki.calls.delete` would, and sends `call.deleted`
+  for each call. Setting a number needs the `calls:delete` scope as well as
+  `account:write`, and is refused in test mode (`livemode_required`). The
+  account's own setting: the same at every location.
+
 ## 0.6.0b1 — 2026-11-10
 
 For API version `2026-10-01`, as 0.5.0b1, with what has been added to it since.

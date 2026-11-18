@@ -2,10 +2,12 @@
 
 from .account import Account
 from .account_call_auto_archive_days_type_0 import AccountCallAutoArchiveDaysType0
+from .account_call_auto_delete_days_type_0 import AccountCallAutoDeleteDaysType0
 from .account_languages import AccountLanguages
 from .account_line import AccountLine
 from .account_update import AccountUpdate, AccountUpdateDict
 from .account_update_call_auto_archive_days_type_0 import AccountUpdateCallAutoArchiveDaysType0
+from .account_update_call_auto_delete_days_type_0 import AccountUpdateCallAutoDeleteDaysType0
 from .agent_test_message import AgentTestMessage, AgentTestMessageDict
 from .agent_test_reply import AgentTestReply
 from .answers_as import AnswersAs
@@ -132,10 +134,12 @@ from .working_hours_update import WorkingHoursUpdate, WorkingHoursUpdateDict
 __all__ = (
     "Account",
     "AccountCallAutoArchiveDaysType0",
+    "AccountCallAutoDeleteDaysType0",
     "AccountLanguages",
     "AccountLine",
     "AccountUpdate",
     "AccountUpdateCallAutoArchiveDaysType0",
+    "AccountUpdateCallAutoDeleteDaysType0",
     "AccountUpdateDict",
     "AgentTestMessage",
     "AgentTestMessageDict",
