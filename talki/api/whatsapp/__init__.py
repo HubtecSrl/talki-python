@@ -321,7 +321,9 @@ class WhatsappResource(_resource.Resource):
 
         Args:
             talki_version (str | Unset):  Example: 2026-10-01.
-            idempotency_key (str | Unset):
+            idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
+                unless the client adds one, as `Talki` and `AsyncTalki` do unless built with
+                `auto_idempotency=False`.
             body (WhatsAppContactRuleCreate | WhatsAppContactRuleCreateDict): A rule for a number.
 
         Raises:
@@ -924,7 +926,9 @@ class AsyncWhatsappResource(_resource.Resource):
 
         Args:
             talki_version (str | Unset):  Example: 2026-10-01.
-            idempotency_key (str | Unset):
+            idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
+                unless the client adds one, as `Talki` and `AsyncTalki` do unless built with
+                `auto_idempotency=False`.
             body (WhatsAppContactRuleCreate | WhatsAppContactRuleCreateDict): A rule for a number.
 
         Raises:
