@@ -3,6 +3,12 @@
 This package follows [semantic versioning](https://semver.org). The API
 version each release targets by default is `talki.API_VERSION`.
 
+## Unreleased
+
+- `whatsapp.create_contact_rule()`: its docstring says the `Idempotency-Key`
+  is required, as the API has always enforced (the spec now marks it so). The
+  client already sends one unless built with `auto_idempotency=False`.
+
 ## 0.7.0b1 — 2026-11-20
 
 For API version `2026-10-01`, as 0.6.0b1, with what has been added to it since.

@@ -128,7 +128,8 @@ def sync_detailed(
 
     Args:
         talki_version (str | Unset):  Example: 2026-10-01.
-        idempotency_key (str | Unset):
+        idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
+            unless the client adds one, as `talki.Talki` does.
         body (WhatsAppContactRuleCreate): A rule for a number.
 
     Raises:
@@ -168,7 +169,8 @@ def sync(
 
     Args:
         talki_version (str | Unset):  Example: 2026-10-01.
-        idempotency_key (str | Unset):
+        idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
+            unless the client adds one, as `talki.Talki` does.
         body (WhatsAppContactRuleCreate): A rule for a number.
 
     Raises:
@@ -203,7 +205,8 @@ async def asyncio_detailed(
 
     Args:
         talki_version (str | Unset):  Example: 2026-10-01.
-        idempotency_key (str | Unset):
+        idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
+            unless the client adds one, as `talki.Talki` does.
         body (WhatsAppContactRuleCreate): A rule for a number.
 
     Raises:
@@ -241,7 +244,8 @@ async def asyncio(
 
     Args:
         talki_version (str | Unset):  Example: 2026-10-01.
-        idempotency_key (str | Unset):
+        idempotency_key (str | Unset): Required by this operation. Omitted, the request is refused
+            unless the client adds one, as `talki.Talki` does.
         body (WhatsAppContactRuleCreate): A rule for a number.
 
     Raises:
