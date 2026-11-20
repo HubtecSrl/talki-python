@@ -67,6 +67,19 @@ METHODS = {
     "unresolved_requests": ["get", "list", "teach", "update"],
     "usage": ["get", "get_history"],
     "voices": ["get_preview", "list"],
+    "whatsapp": [
+        "answer_conversation",
+        "create_contact_rule",
+        "delete_contact_rule",
+        "delete_conversations",
+        "get",
+        "get_conversation",
+        "get_conversation_messages",
+        "list_contact_rules",
+        "list_conversations",
+        "update",
+        "update_contact_rule",
+    ],
     "working_hours": ["get", "replace"],
 }
 

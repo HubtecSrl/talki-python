@@ -19,10 +19,16 @@ class UnresolvedRequest:
 
         Attributes:
             id (str): Opaque Talki identifier for this request.
-            location_id (str): The location the question was about: that of the call it was raised on (`Call.location_id`).
-                Never null, and it never changes.
+            location_id (str): The location the question was about: that of the call it was raised on (`Call.location_id`),
+                or the main location for a WhatsApp chat. Never null, and it never changes.
+            source (str): Where the question was asked: `call`, on a call the assistant answered, or `whatsapp`, in a
+                WhatsApp chat it answered on the business's number. It never changes. Other values may be added: treat one you
+                do not know as a request to handle all the same.
             call_id (None | str): The call it was raised on, readable through `GET /v1/calls/{id}` with `calls:read`. Null
-                once that call has aged out of retention.
+                for a request from WhatsApp, and once the call has aged out of retention.
+            whatsapp_conversation_id (None | str): The WhatsApp conversation it was raised in, readable through `GET
+                /v1/whatsapp/conversations/{id}` with `whatsapp:read`. Null for a request from a call, and once the conversation
+                is deleted: the request stays.
             caller_phone (None | str): E.164 number to call back, as presented. Null when the caller withheld it.
             question (str): What the caller wanted to know, as the assistant recorded it. One line written by the assistant,
                 not a transcript and never a quote.
@@ -39,7 +45,9 @@ class UnresolvedRequest:
 
     id: str
     location_id: str
+    source: str
     call_id: None | str
+    whatsapp_conversation_id: None | str
     caller_phone: None | str
     question: str
     status: UnresolvedRequestStatus
@@ -53,8 +61,13 @@ class UnresolvedRequest:
 
         location_id = self.location_id
 
+        source = self.source
+
         call_id: None | str
         call_id = self.call_id
+
+        whatsapp_conversation_id: None | str
+        whatsapp_conversation_id = self.whatsapp_conversation_id
 
         caller_phone: None | str
         caller_phone = self.caller_phone
@@ -80,7 +93,9 @@ class UnresolvedRequest:
             {
                 "id": id,
                 "location_id": location_id,
+                "source": source,
                 "call_id": call_id,
+                "whatsapp_conversation_id": whatsapp_conversation_id,
                 "caller_phone": caller_phone,
                 "question": question,
                 "status": status,
@@ -99,12 +114,21 @@ class UnresolvedRequest:
 
         location_id = d.pop("location_id")
 
+        source = d.pop("source")
+
         def _parse_call_id(data: object) -> None | str:
             if data is None:
                 return data
             return cast(None | str, data)
 
         call_id = _parse_call_id(d.pop("call_id"))
+
+        def _parse_whatsapp_conversation_id(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        whatsapp_conversation_id = _parse_whatsapp_conversation_id(d.pop("whatsapp_conversation_id"))
 
         def _parse_caller_phone(data: object) -> None | str:
             if data is None:
@@ -144,7 +168,9 @@ class UnresolvedRequest:
         unresolved_request = cls(
             id=id,
             location_id=location_id,
+            source=source,
             call_id=call_id,
+            whatsapp_conversation_id=whatsapp_conversation_id,
             caller_phone=caller_phone,
             question=question,
             status=status,

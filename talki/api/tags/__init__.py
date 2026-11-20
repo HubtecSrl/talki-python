@@ -159,7 +159,8 @@ class TagsResource(_resource.Resource):
 
          Create a tag. An account holds at most 50. Requires `Idempotency-Key`. Requires `contacts:write`.
         Limited to 120 requests per minute per account (API key) or per installation (OAuth), and to 20
-        creations per minute shared by the services, resources, tags and caller rules you create.
+        creations per minute shared by the services, resources, tags, caller rules and WhatsApp contact
+        rules you create.
 
         Args:
             talki_version (str | Unset):  Example: 2026-10-01.
@@ -480,7 +481,8 @@ class AsyncTagsResource(_resource.Resource):
 
          Create a tag. An account holds at most 50. Requires `Idempotency-Key`. Requires `contacts:write`.
         Limited to 120 requests per minute per account (API key) or per installation (OAuth), and to 20
-        creations per minute shared by the services, resources, tags and caller rules you create.
+        creations per minute shared by the services, resources, tags, caller rules and WhatsApp contact
+        rules you create.
 
         Args:
             talki_version (str | Unset):  Example: 2026-10-01.

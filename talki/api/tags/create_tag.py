@@ -119,7 +119,8 @@ def sync_detailed(
 
      Create a tag. An account holds at most 50. Requires `Idempotency-Key`. Requires `contacts:write`.
     Limited to 120 requests per minute per account (API key) or per installation (OAuth), and to 20
-    creations per minute shared by the services, resources, tags and caller rules you create.
+    creations per minute shared by the services, resources, tags, caller rules and WhatsApp contact
+    rules you create.
 
     Args:
         talki_version (str | Unset):  Example: 2026-10-01.
@@ -159,7 +160,8 @@ def sync(
 
      Create a tag. An account holds at most 50. Requires `Idempotency-Key`. Requires `contacts:write`.
     Limited to 120 requests per minute per account (API key) or per installation (OAuth), and to 20
-    creations per minute shared by the services, resources, tags and caller rules you create.
+    creations per minute shared by the services, resources, tags, caller rules and WhatsApp contact
+    rules you create.
 
     Args:
         talki_version (str | Unset):  Example: 2026-10-01.
@@ -194,7 +196,8 @@ async def asyncio_detailed(
 
      Create a tag. An account holds at most 50. Requires `Idempotency-Key`. Requires `contacts:write`.
     Limited to 120 requests per minute per account (API key) or per installation (OAuth), and to 20
-    creations per minute shared by the services, resources, tags and caller rules you create.
+    creations per minute shared by the services, resources, tags, caller rules and WhatsApp contact
+    rules you create.
 
     Args:
         talki_version (str | Unset):  Example: 2026-10-01.
@@ -232,7 +235,8 @@ async def asyncio(
 
      Create a tag. An account holds at most 50. Requires `Idempotency-Key`. Requires `contacts:write`.
     Limited to 120 requests per minute per account (API key) or per installation (OAuth), and to 20
-    creations per minute shared by the services, resources, tags and caller rules you create.
+    creations per minute shared by the services, resources, tags, caller rules and WhatsApp contact
+    rules you create.
 
     Args:
         talki_version (str | Unset):  Example: 2026-10-01.

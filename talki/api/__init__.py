@@ -22,6 +22,7 @@ from .tags import AsyncTagsResource, TagsResource
 from .unresolved_requests import AsyncUnresolvedRequestsResource, UnresolvedRequestsResource
 from .usage import AsyncUsageResource, UsageResource
 from .voices import AsyncVoicesResource, VoicesResource
+from .whatsapp import AsyncWhatsappResource, WhatsappResource
 from .working_hours import AsyncWorkingHoursResource, WorkingHoursResource
 
 __all__ = ["AsyncResources", "Resources"]
@@ -123,6 +124,11 @@ class Resources:
         return VoicesResource(self.client)
 
     @cached_property
+    def whatsapp(self) -> WhatsappResource:
+        """The `whatsapp` operations."""
+        return WhatsappResource(self.client)
+
+    @cached_property
     def working_hours(self) -> WorkingHoursResource:
         """The `working_hours` operations."""
         return WorkingHoursResource(self.client)
@@ -222,6 +228,11 @@ class AsyncResources:
     def voices(self) -> AsyncVoicesResource:
         """The `voices` operations."""
         return AsyncVoicesResource(self.client)
+
+    @cached_property
+    def whatsapp(self) -> AsyncWhatsappResource:
+        """The `whatsapp` operations."""
+        return AsyncWhatsappResource(self.client)
 
     @cached_property
     def working_hours(self) -> AsyncWorkingHoursResource:
