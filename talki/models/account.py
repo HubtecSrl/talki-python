@@ -7,6 +7,7 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.account_call_auto_archive_days_type_0 import AccountCallAutoArchiveDaysType0
+from ..models.account_call_auto_delete_days_type_0 import AccountCallAutoDeleteDaysType0
 from ..models.answers_as import AnswersAs
 
 if TYPE_CHECKING:
@@ -24,11 +25,11 @@ class Account:
     texts, the voice, the opening and greeting, the switches, the transfer numbers, and the line that forwards to Talki.
     `GET /v1/account` needs only `account:read`, which makes it the call to validate a new credential. The settings are
     those of one location: the main one, or the one `?location_id=` names, the switches included. Only the account's own
-    fields (`id`, `timezone`, `livemode`, `test`, `multi_sede`, `onboarding_completed` and `call_auto_archive_days`)
-    read the same at every location. The response's `ETag` covers every writable field at that location; send it back as
-    `If-Match` on `PATCH /v1/account` with the same `location_id`. `account.updated` reports a change to the main
-    location's settings or to `call_auto_archive_days`, `location.settings_updated` one to another location's settings,
-    its switches included.
+    fields (`id`, `timezone`, `livemode`, `test`, `multi_sede`, `onboarding_completed`, `call_auto_archive_days` and
+    `call_auto_delete_days`) read the same at every location. The response's `ETag` covers every writable field at that
+    location; send it back as `If-Match` on `PATCH /v1/account` with the same `location_id`. `account.updated` reports a
+    change to the main location's settings or to `call_auto_archive_days` or `call_auto_delete_days`,
+    `location.settings_updated` one to another location's settings, its switches included.
 
         Attributes:
             id (str): Opaque Talki account identifier.
@@ -97,6 +98,11 @@ class Account:
                 archived on their own. An unread call is never archived this way. Archiving runs once a night, sends
                 `call.updated` for each call, and can be undone like an archive by hand. The account's own setting: the same at
                 every location.
+            call_auto_delete_days (AccountCallAutoDeleteDaysType0 | None): How many days after it started a call is deleted
+                for good, read or not: `30`, `60`, `90` or `180`, as in the Talki apps. Null when calls are kept until the
+                365-day retention limit. Deletion runs once a night and is the same as `DELETE /v1/calls/{id}`: the transcript,
+                the questions the call left and the contacts it proposed go with it, its appointments stay, and each call sends
+                `call.deleted`. Not applied during a free trial. The account's own setting: the same at every location.
             multi_sede (bool): True when the account works from several locations, or may add them: show locations (`GET
                 /v1/locations`) to the owner only when true. False for an account that has only ever had its main location and
                 cannot add another; it still has that one location, every record still carries its `location_id`, and nothing
@@ -131,6 +137,7 @@ class Account:
     forwarding_number: None | str
     line: AccountLine
     call_auto_archive_days: AccountCallAutoArchiveDaysType0 | None
+    call_auto_delete_days: AccountCallAutoDeleteDaysType0 | None
     multi_sede: bool
     onboarding_completed: bool
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -203,6 +210,12 @@ class Account:
         else:
             call_auto_archive_days = self.call_auto_archive_days
 
+        call_auto_delete_days: int | None
+        if isinstance(self.call_auto_delete_days, AccountCallAutoDeleteDaysType0):
+            call_auto_delete_days = self.call_auto_delete_days.value
+        else:
+            call_auto_delete_days = self.call_auto_delete_days
+
         multi_sede = self.multi_sede
 
         onboarding_completed = self.onboarding_completed
@@ -237,6 +250,7 @@ class Account:
                 "forwarding_number": forwarding_number,
                 "line": line,
                 "call_auto_archive_days": call_auto_archive_days,
+                "call_auto_delete_days": call_auto_delete_days,
                 "multi_sede": multi_sede,
                 "onboarding_completed": onboarding_completed,
             }
@@ -361,6 +375,21 @@ class Account:
 
         call_auto_archive_days = _parse_call_auto_archive_days(d.pop("call_auto_archive_days"))
 
+        def _parse_call_auto_delete_days(data: object) -> AccountCallAutoDeleteDaysType0 | None:
+            if data is None:
+                return data
+            try:
+                if not isinstance(data, int):
+                    raise TypeError()
+                call_auto_delete_days_type_0 = AccountCallAutoDeleteDaysType0(data)
+
+                return call_auto_delete_days_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(AccountCallAutoDeleteDaysType0 | None, data)
+
+        call_auto_delete_days = _parse_call_auto_delete_days(d.pop("call_auto_delete_days"))
+
         multi_sede = d.pop("multi_sede")
 
         onboarding_completed = d.pop("onboarding_completed")
@@ -392,6 +421,7 @@ class Account:
             forwarding_number=forwarding_number,
             line=line,
             call_auto_archive_days=call_auto_archive_days,
+            call_auto_delete_days=call_auto_delete_days,
             multi_sede=multi_sede,
             onboarding_completed=onboarding_completed,
         )

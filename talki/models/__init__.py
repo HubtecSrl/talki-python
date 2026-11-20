@@ -2,10 +2,12 @@
 
 from .account import Account
 from .account_call_auto_archive_days_type_0 import AccountCallAutoArchiveDaysType0
+from .account_call_auto_delete_days_type_0 import AccountCallAutoDeleteDaysType0
 from .account_languages import AccountLanguages
 from .account_line import AccountLine
 from .account_update import AccountUpdate, AccountUpdateDict
 from .account_update_call_auto_archive_days_type_0 import AccountUpdateCallAutoArchiveDaysType0
+from .account_update_call_auto_delete_days_type_0 import AccountUpdateCallAutoDeleteDaysType0
 from .agent_test_message import AgentTestMessage, AgentTestMessageDict
 from .agent_test_reply import AgentTestReply
 from .answers_as import AnswersAs
@@ -125,6 +127,25 @@ from .usage_month import UsageMonth
 from .voice import Voice
 from .voice_gender import VoiceGender
 from .voice_list import VoiceList
+from .whats_app import WhatsApp
+from .whats_app_chat_message import WhatsAppChatMessage
+from .whats_app_connection import WhatsAppConnection
+from .whats_app_contact import WhatsAppContact
+from .whats_app_contact_rule import WhatsAppContactRule
+from .whats_app_contact_rule_create import WhatsAppContactRuleCreate, WhatsAppContactRuleCreateDict
+from .whats_app_contact_rule_list import WhatsAppContactRuleList
+from .whats_app_contact_rule_update import WhatsAppContactRuleUpdate, WhatsAppContactRuleUpdateDict
+from .whats_app_conversation import WhatsAppConversation
+from .whats_app_conversation_answer import WhatsAppConversationAnswer, WhatsAppConversationAnswerDict
+from .whats_app_conversation_answer_answer import WhatsAppConversationAnswerAnswer
+from .whats_app_conversation_list import WhatsAppConversationList
+from .whats_app_conversation_messages import WhatsAppConversationMessages
+from .whats_app_mode import WhatsAppMode
+from .whats_app_question import WhatsAppQuestion
+from .whats_app_rule import WhatsAppRule
+from .whats_app_schedule_range import WhatsAppScheduleRange, WhatsAppScheduleRangeDict
+from .whats_app_update import WhatsAppUpdate, WhatsAppUpdateDict
+from .whats_app_usage import WhatsAppUsage
 from .working_hours import WorkingHours
 from .working_hours_slot import WorkingHoursSlot, WorkingHoursSlotDict
 from .working_hours_update import WorkingHoursUpdate, WorkingHoursUpdateDict
@@ -132,10 +153,12 @@ from .working_hours_update import WorkingHoursUpdate, WorkingHoursUpdateDict
 __all__ = (
     "Account",
     "AccountCallAutoArchiveDaysType0",
+    "AccountCallAutoDeleteDaysType0",
     "AccountLanguages",
     "AccountLine",
     "AccountUpdate",
     "AccountUpdateCallAutoArchiveDaysType0",
+    "AccountUpdateCallAutoDeleteDaysType0",
     "AccountUpdateDict",
     "AgentTestMessage",
     "AgentTestMessageDict",
@@ -282,6 +305,30 @@ __all__ = (
     "Voice",
     "VoiceGender",
     "VoiceList",
+    "WhatsApp",
+    "WhatsAppChatMessage",
+    "WhatsAppConnection",
+    "WhatsAppContact",
+    "WhatsAppContactRule",
+    "WhatsAppContactRuleCreate",
+    "WhatsAppContactRuleCreateDict",
+    "WhatsAppContactRuleList",
+    "WhatsAppContactRuleUpdate",
+    "WhatsAppContactRuleUpdateDict",
+    "WhatsAppConversation",
+    "WhatsAppConversationAnswer",
+    "WhatsAppConversationAnswerAnswer",
+    "WhatsAppConversationAnswerDict",
+    "WhatsAppConversationList",
+    "WhatsAppConversationMessages",
+    "WhatsAppMode",
+    "WhatsAppQuestion",
+    "WhatsAppRule",
+    "WhatsAppScheduleRange",
+    "WhatsAppScheduleRangeDict",
+    "WhatsAppUpdate",
+    "WhatsAppUpdateDict",
+    "WhatsAppUsage",
     "WorkingHours",
     "WorkingHoursSlot",
     "WorkingHoursSlotDict",

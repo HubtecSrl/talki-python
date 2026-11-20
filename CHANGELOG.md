@@ -3,6 +3,98 @@
 This package follows [semantic versioning](https://semver.org). The API
 version each release targets by default is `talki.API_VERSION`.
 
+## 0.7.0b1 — 2026-11-20
+
+For API version `2026-10-01`, as 0.6.0b1, with what has been added to it since.
+One change to existing types: see the second list.
+
+- `talki.whatsapp`: the business's WhatsApp chats, which Talki can answer on
+  the business's own WhatsApp Business number. The owner connects the number in
+  the Talki app; the API cannot.
+- `talki.whatsapp.get()` returns the connected number and how Talki answers its
+  chats: `mode` (`off`, Talki reads and stores nothing; `always`; or
+  `scheduled`, only inside `schedule`, ranges in Rome time), `available` and
+  `blocked_reason`, this period's `usage` against the plan's cap, and the
+  owner's `pending_questions`. `after_hours_schedule` is every time the main
+  location's weekly hours leave closed, ready to send as `schedule`.
+  `update(body=…)` changes the mode, the schedule, or both. Turning the answers
+  on from `off` raises `PermissionDeniedError` (`plan_feature_unavailable`)
+  without a plan that includes WhatsApp chats, and `ConflictError` without a
+  connected number (`whatsapp_not_connected`) or while Talki does not answer
+  WhatsApp chats for any account yet (`whatsapp_chats_unavailable`). `get`
+  needs `whatsapp:read`, `update` needs `whatsapp:write`.
+- `talki.whatsapp.list_conversations()` pages through the conversations Talki
+  took part in or kept out of, newest first; `needs_answer=True` lists those
+  waiting for the owner's «è un cliente?». `get_conversation(id)` returns one:
+  the contact, its `outcome`, a short `summary` once it closes (when Talki
+  replied or handed the chat to the owner), the `question` and the
+  `appointment_ids` booked in it. Both need `whatsapp:read`.
+- `talki.whatsapp.get_conversation_messages(id)`: a conversation's messages,
+  oldest first. It needs `transcripts:read`, which `whatsapp:read` does not
+  grant. Messages are kept 30 days: after that `messages_expired` is true, the
+  messages are deleted and the conversation stays.
+- `talki.whatsapp.answer_conversation(id, body={"answer": …})` answers «è un
+  cliente?» for the owner, on any conversation, asked or not: `customer` (Talki
+  answers the contact, now if WhatsApp's 24-hour window is open), `ignore`
+  (never), or `owner` (the owner replies). `customer` and `ignore` set a contact
+  rule: past the account's 500 rules it raises `ConflictError`
+  (`whatsapp_contact_rule_limit_reached`). Needs `whatsapp:write`. On a plan
+  without WhatsApp chats, `answer_conversation`, `create_contact_rule` and
+  `update_contact_rule` raise `PermissionDeniedError`
+  (`plan_feature_unavailable`), as `update` does.
+- `talki.whatsapp.list_contact_rules()`, `create_contact_rule`,
+  `update_contact_rule` and `delete_contact_rule`: the numbers Talki never
+  answers (`ignore`) or answers as customers without judging first
+  (`customer`), at most 500. A number holds one rule: adding a second raises
+  `ConflictError` (`whatsapp_contact_rule_exists`), so change it with
+  `update_contact_rule`. A rule you create counts towards the 20 creations per
+  minute shared with services, resources, tags and caller rules. Listing needs
+  `whatsapp:read`, the others `whatsapp:write`.
+- `talki.whatsapp.delete_conversations()` deletes every stored conversation and
+  its messages. The contact rules, the appointments booked in a chat and the
+  unresolved requests it left stay. It needs the opt-in `whatsapp:delete` scope
+  and live mode (`livemode_required` in test mode), and raises `ConflictError`
+  (`whatsapp_answers_on`) while Talki answers the chats: set `mode` to `off`
+  first.
+- `UnresolvedRequest.source` (`call` or `whatsapp`) and
+  `UnresolvedRequest.whatsapp_conversation_id`: a request can come from a
+  WhatsApp chat Talki answered. Its `call_id` is then null and its `location_id`
+  is the main location. `whatsapp_conversation_id` turns null once
+  `delete_conversations` deletes the chat; the request stays. `source` is a
+  `str`: treat a value you do not know as a request to handle all the same. The
+  `unresolved_request.updated` event carries both.
+- Three webhook events. `whatsapp.conversation_ended`: a conversation closed,
+  about 30 minutes after its last message, with its outcome (and its summary
+  when Talki replied or handed it to the owner); sent again if it reopens and
+  closes once more. A conversation closed otherwise (two chats of the contact
+  merged, or found still open when the contact wrote again much later) sends
+  none: `list_conversations()` lists it all the same.
+  `whatsapp.question_asked`: Talki kept silent with an unknown contact and asks
+  the owner «è un cliente?», once per contact. Both carry the `WhatsAppConversation`. `whatsapp.message_sent`:
+  after a call, the assistant sent the caller a WhatsApp message from the
+  business's number, with their consent, and WhatsApp accepted it; it carries
+  the `Call` and the message's type and language, not its text.
+  `construct_event` returns them like any other event. An OAuth app gets the
+  first two by subscribing, with `whatsapp:read`, and `whatsapp.message_sent`
+  with `calls:read`.
+- `ErrorDetail.code` lists five new codes: `whatsapp_not_connected`,
+  `whatsapp_chats_unavailable`, `whatsapp_answers_on`,
+  `whatsapp_contact_rule_exists` and `whatsapp_contact_rule_limit_reached`.
+- `call_auto_delete_days` on `Account` and `AccountUpdate`: how many days after
+  it started a call is deleted for good, read or not (`30`, `60`, `90` or
+  `180`), or `None` to keep calls until the 365-day retention limit. Deletion
+  runs once a night, as `talki.calls.delete` would, and sends `call.deleted`
+  for each call. Setting a number needs the `calls:delete` scope as well as
+  `account:write`, and is refused in test mode (`livemode_required`). The
+  account's own setting: the same at every location.
+
+What changes for existing code:
+
+- `UnresolvedRequest` requires `source` and `whatsapp_conversation_id`: an
+  `UnresolvedRequest(…)` built by hand needs them. Its `call_id`, already typed
+  `str | None`, is now null for every request from WhatsApp too, not only once
+  the call has aged out of retention.
+
 ## 0.6.0b1 — 2026-11-10
 
 For API version `2026-10-01`, as 0.5.0b1, with what has been added to it since.

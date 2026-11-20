@@ -162,8 +162,8 @@ class ServicesResource(_resource.Resource):
         main location without it. Send at most one of `initial_capacity` or `resource_ids` (resources of the
         same location); with neither, it draws on that location's default resource. Requires `Idempotency-
         Key`. Requires `services:write`. Limited to 120 requests per minute per account (API key) or per
-        installation (OAuth), and to 20 creations per minute shared by the services, resources, tags and
-        caller rules you create.
+        installation (OAuth), and to 20 creations per minute shared by the services, resources, tags, caller
+        rules and WhatsApp contact rules you create.
 
         Args:
             location_id (None | str | Unset): The location to create the service at, an id from `GET
@@ -485,8 +485,8 @@ class AsyncServicesResource(_resource.Resource):
         main location without it. Send at most one of `initial_capacity` or `resource_ids` (resources of the
         same location); with neither, it draws on that location's default resource. Requires `Idempotency-
         Key`. Requires `services:write`. Limited to 120 requests per minute per account (API key) or per
-        installation (OAuth), and to 20 creations per minute shared by the services, resources, tags and
-        caller rules you create.
+        installation (OAuth), and to 20 creations per minute shared by the services, resources, tags, caller
+        rules and WhatsApp contact rules you create.
 
         Args:
             location_id (None | str | Unset): The location to create the service at, an id from `GET

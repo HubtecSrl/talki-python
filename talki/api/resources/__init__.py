@@ -158,8 +158,8 @@ class ResourcesResource(_resource.Resource):
          Create a `shared` resource at the location `location_id` names, the main location without it,
         optionally drawn on by existing services of that location. Requires `Idempotency-Key`. Requires
         `resources:write`. Limited to 120 requests per minute per account (API key) or per installation
-        (OAuth), and to 20 creations per minute shared by the services, resources, tags and caller rules you
-        create.
+        (OAuth), and to 20 creations per minute shared by the services, resources, tags, caller rules and
+        WhatsApp contact rules you create.
 
         Args:
             location_id (None | str | Unset): The location to create the resource at, an id from `GET
@@ -471,8 +471,8 @@ class AsyncResourcesResource(_resource.Resource):
          Create a `shared` resource at the location `location_id` names, the main location without it,
         optionally drawn on by existing services of that location. Requires `Idempotency-Key`. Requires
         `resources:write`. Limited to 120 requests per minute per account (API key) or per installation
-        (OAuth), and to 20 creations per minute shared by the services, resources, tags and caller rules you
-        create.
+        (OAuth), and to 20 creations per minute shared by the services, resources, tags, caller rules and
+        WhatsApp contact rules you create.
 
         Args:
             location_id (None | str | Unset): The location to create the resource at, an id from `GET
