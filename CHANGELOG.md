@@ -3,7 +3,7 @@
 This package follows [semantic versioning](https://semver.org). The API
 version each release targets by default is `talki.API_VERSION`.
 
-## Unreleased
+## 0.8.0b1 — 2026-11-25
 
 - `talki.agent_tools`: choose which of your app's tools the assistant may call
   on an account's calls, for the whole account or one location. `get()` returns
