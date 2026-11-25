@@ -10,6 +10,10 @@ from .account_update_call_auto_archive_days_type_0 import AccountUpdateCallAutoA
 from .account_update_call_auto_delete_days_type_0 import AccountUpdateCallAutoDeleteDaysType0
 from .agent_test_message import AgentTestMessage, AgentTestMessageDict
 from .agent_test_reply import AgentTestReply
+from .agent_tool import AgentTool
+from .agent_tool_kind import AgentToolKind
+from .agent_tools import AgentTools
+from .agent_tools_update import AgentToolsUpdate, AgentToolsUpdateDict
 from .answers_as import AnswersAs
 from .appointment import Appointment
 from .appointment_client import AppointmentClient
@@ -163,6 +167,11 @@ __all__ = (
     "AgentTestMessage",
     "AgentTestMessageDict",
     "AgentTestReply",
+    "AgentTool",
+    "AgentToolKind",
+    "AgentTools",
+    "AgentToolsUpdate",
+    "AgentToolsUpdateDict",
     "AnswersAs",
     "Appointment",
     "AppointmentClient",

@@ -34,11 +34,11 @@ class ErrorDetail:
             `agent_test_session_full`, `agent_test_unavailable`, `unknown_scenario`, `sandbox_not_ready`, `too_many_keys`,
             `key_not_active`, `key_already_rolled`, `invalid_registration`, `client_disabled`, `client_changed`,
             `delivery_in_progress`, `events_url_unset`, `events_paused`, `event_unsubscribed`, `account_refused`,
-            `installation_inactive`, `invalid_client`, `invalid_request`, `unauthorized_client`, `access_denied`,
-            `invalid_scope`, `slot_unavailable`, `capacity_exhausted`, `service_exclusion`, `closed_day`, `in_the_past`,
-            `outside_hours`, `service_inactive`, `location_inactive`, `service_deleted`, `no_services_requested`,
-            `party_too_large`, `stay_too_short`, `stay_too_long`, `stay_dates_invalid`. New codes may be added; treat an
-            unknown one by its HTTP status.
+            `installation_inactive`, `agent_tools_not_enabled`, `tool_limit`, `invalid_client`, `invalid_request`,
+            `unauthorized_client`, `access_denied`, `invalid_scope`, `slot_unavailable`, `capacity_exhausted`,
+            `service_exclusion`, `closed_day`, `in_the_past`, `outside_hours`, `service_inactive`, `location_inactive`,
+            `service_deleted`, `no_services_requested`, `party_too_large`, `stay_too_short`, `stay_too_long`,
+            `stay_dates_invalid`. New codes may be added; treat an unknown one by its HTTP status.
         message (str):
         request_id (str):
     """

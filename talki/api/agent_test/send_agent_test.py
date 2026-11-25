@@ -132,12 +132,12 @@ def sync_detailed(
     """Send a test message
 
      Send one message to the account's assistant, as a caller would say it, and return its answer: what a
-    call to the location would hear, from the same settings, documents, services, calendar and partner
+    call to the location would hear, from the same settings, documents, services, calendar and agent
     tools, written as text. Nothing is saved: a booking the assistant makes is not made, and no call,
     appointment or unresolved request is recorded. The first message starts a session; send its
     `session_id` with the next ones. Talki keeps the history for 30 minutes after the last turn, and a
     session holds at most 20 turns (then `agent_test_session_full`). A session belongs to the credential
-    that started it. Your app's own partner tools run, sent with `test_drive: true`, writes included; no
+    that started it. Your app's own agent tools run, sent with `test_drive: true`, writes included; no
     other app's do. The assistant here runs on a text model, not the one that answers calls, so a reply
     can be worded differently from what a caller would hear. Refused while the managing partner has
     suspended the account (`account_suspended`). An account may send 25 test messages a day, shared with
@@ -185,12 +185,12 @@ def sync(
     """Send a test message
 
      Send one message to the account's assistant, as a caller would say it, and return its answer: what a
-    call to the location would hear, from the same settings, documents, services, calendar and partner
+    call to the location would hear, from the same settings, documents, services, calendar and agent
     tools, written as text. Nothing is saved: a booking the assistant makes is not made, and no call,
     appointment or unresolved request is recorded. The first message starts a session; send its
     `session_id` with the next ones. Talki keeps the history for 30 minutes after the last turn, and a
     session holds at most 20 turns (then `agent_test_session_full`). A session belongs to the credential
-    that started it. Your app's own partner tools run, sent with `test_drive: true`, writes included; no
+    that started it. Your app's own agent tools run, sent with `test_drive: true`, writes included; no
     other app's do. The assistant here runs on a text model, not the one that answers calls, so a reply
     can be worded differently from what a caller would hear. Refused while the managing partner has
     suspended the account (`account_suspended`). An account may send 25 test messages a day, shared with
@@ -233,12 +233,12 @@ async def asyncio_detailed(
     """Send a test message
 
      Send one message to the account's assistant, as a caller would say it, and return its answer: what a
-    call to the location would hear, from the same settings, documents, services, calendar and partner
+    call to the location would hear, from the same settings, documents, services, calendar and agent
     tools, written as text. Nothing is saved: a booking the assistant makes is not made, and no call,
     appointment or unresolved request is recorded. The first message starts a session; send its
     `session_id` with the next ones. Talki keeps the history for 30 minutes after the last turn, and a
     session holds at most 20 turns (then `agent_test_session_full`). A session belongs to the credential
-    that started it. Your app's own partner tools run, sent with `test_drive: true`, writes included; no
+    that started it. Your app's own agent tools run, sent with `test_drive: true`, writes included; no
     other app's do. The assistant here runs on a text model, not the one that answers calls, so a reply
     can be worded differently from what a caller would hear. Refused while the managing partner has
     suspended the account (`account_suspended`). An account may send 25 test messages a day, shared with
@@ -284,12 +284,12 @@ async def asyncio(
     """Send a test message
 
      Send one message to the account's assistant, as a caller would say it, and return its answer: what a
-    call to the location would hear, from the same settings, documents, services, calendar and partner
+    call to the location would hear, from the same settings, documents, services, calendar and agent
     tools, written as text. Nothing is saved: a booking the assistant makes is not made, and no call,
     appointment or unresolved request is recorded. The first message starts a session; send its
     `session_id` with the next ones. Talki keeps the history for 30 minutes after the last turn, and a
     session holds at most 20 turns (then `agent_test_session_full`). A session belongs to the credential
-    that started it. Your app's own partner tools run, sent with `test_drive: true`, writes included; no
+    that started it. Your app's own agent tools run, sent with `test_drive: true`, writes included; no
     other app's do. The assistant here runs on a text model, not the one that answers calls, so a reply
     can be worded differently from what a caller would hear. Refused while the managing partner has
     suspended the account (`account_suspended`). An account may send 25 test messages a day, shared with

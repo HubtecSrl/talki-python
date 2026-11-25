@@ -5,6 +5,28 @@ version each release targets by default is `talki.API_VERSION`.
 
 ## Unreleased
 
+- `talki.agent_tools`: choose which of your app's tools the assistant may call
+  on an account's calls, for the whole account or one location. `get()` returns
+  an `AgentTools`: every tool of your app with an approved revision (`tools`,
+  each an `AgentTool` with its `kind`, `revision`, `logs_requests` and whether
+  it is `enabled`), the names switched on (`enabled`), `owner_off` (while true,
+  the account owner has switched your app's tools off and none reaches a call)
+  and `limit_per_call`. `update(body={"enabled": [...]})` replaces the list: `[]`
+  switches every tool off. With `location_id=`, both act on that location's own
+  list; `get` says whether it still follows the account's (`inherited`), and
+  `update(body={"enabled": None}, location_id=…)` makes it follow the
+  account's again. Every tool starts off.
+- Agent tools take only an OAuth app's access token (`Talki(access_token=…)` or
+  `Talki(tokens=…)`) on an installation granted `agent_tools:write`; an API key
+  is refused with `PermissionDeniedError` (`insufficient_scope`), as is an app
+  Talki has not enabled for agent tools (`agent_tools_not_enabled`). A change
+  that would raise a location's count of agent tools above `limit_per_call`,
+  counting every app the account granted `agent_tools:write`, raises
+  `ConflictError` (`tool_limit`).
+- `ErrorDetail.code` lists two new codes: `agent_tools_not_enabled` and
+  `tool_limit`.
+- `talki.agent_test.send()`: its docstring calls your app's tools, which run in
+  a test message, "agent tools" (formerly "partner tools"), as the API now does.
 - `whatsapp.create_contact_rule()`: its docstring says the `Idempotency-Key`
   is required, as the API has always enforced (the spec now marks it so). The
   client already sends one unless built with `auto_idempotency=False`.
