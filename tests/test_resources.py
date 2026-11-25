@@ -25,6 +25,7 @@ from talki.types import UNSET, File
 METHODS = {
     "account": ["complete_onboarding", "get", "get_forwarding_check", "start_forwarding_check", "update"],
     "agent_test": ["end", "send"],
+    "agent_tools": ["get", "update"],
     "appointments": ["cancel", "create", "get", "list", "reschedule", "restore"],
     "availability": ["get"],
     "caller_rules": ["create", "delete", "list", "list_blocked_call_attempts", "update"],
@@ -606,6 +607,28 @@ def test_an_optional_body_is_left_out_or_sent_as_a_dict():
         client.pending_contacts.approve(pending, body={"first_name": "Ada"})
     assert server.requests[0].read() == b""
     assert json.loads(server.requests[1].read()) == {"first_name": "Ada"}
+
+
+def test_agent_tools_go_out_with_an_access_token_and_an_explicit_null():
+    location = "00000000-0000-0000-0000-0000000000dd"
+    answer = {
+        "object": "agent_tools",
+        "location_id": location,
+        "inherited": True,
+        "enabled": [],
+        "owner_off": False,
+        "limit_per_call": 20,
+        "tools": [],
+    }
+    server = Server({("/v1/agent_tools", None): httpx.Response(200, json=answer)})
+    transport = httpx.MockTransport(server)
+    with Talki(access_token="talki_at_x", transport=transport, max_retries=0) as client:
+        tools = client.agent_tools.update(body={"enabled": None}, location_id=location)
+    request = server.requests[0]
+    assert (request.method, request.url.params["location_id"]) == ("PATCH", location)
+    assert request.headers["Authorization"] == "Bearer talki_at_x"
+    assert json.loads(request.read()) == {"enabled": None}
+    assert tools.inherited and tools.location_id == location
 
 
 def test_every_body_model_has_a_dict_with_its_keys():
